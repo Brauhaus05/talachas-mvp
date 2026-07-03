@@ -9,14 +9,9 @@ import { Button } from "@/components/ui/button";
 import { StatTile } from "@/components/ui/stat-tile";
 import { IconTile } from "@/components/ui/icon-tile";
 import { ReviewCard } from "@/components/talacheros/review-card";
-import { getTalachero } from "@/lib/mock/talacheros";
+import { getTalacheroById } from "@/lib/data/talacheros";
 import { getService } from "@/lib/mock/services";
 import { formatMxn } from "@/lib/format";
-import { TALACHEROS } from "@/lib/mock/talacheros";
-
-export function generateStaticParams() {
-  return TALACHEROS.map((t) => ({ id: t.id }));
-}
 
 export default async function TalacheroProfilePage({
   params,
@@ -25,7 +20,7 @@ export default async function TalacheroProfilePage({
 }) {
   const { locale, id } = await params;
   setRequestLocale(locale);
-  const talachero = getTalachero(id);
+  const talachero = await getTalacheroById(id);
   if (!talachero) notFound();
 
   const t = await getTranslations();
@@ -81,7 +76,7 @@ export default async function TalacheroProfilePage({
               <span className="text-text-primary text-4xl font-semibold">
                 {formatMxn(talachero.hourlyRateMxn, currentLocale)}
               </span>
-              <span className="text-text-muted text-xs uppercase tracking-wider">
+              <span className="text-text-muted text-xs tracking-wider uppercase">
                 {t("common.per_hour").replace("/", "")}
               </span>
             </div>
@@ -120,10 +115,7 @@ export default async function TalacheroProfilePage({
                 const svc = getService(slug);
                 if (!svc) return null;
                 return (
-                  <div
-                    key={slug}
-                    className="flex items-center gap-4 p-5"
-                  >
+                  <div key={slug} className="flex items-center gap-4 p-5">
                     <IconTile icon={svc.icon} />
                     <div className="flex flex-1 flex-col">
                       <p className="text-text-primary text-sm font-semibold">
@@ -151,9 +143,7 @@ export default async function TalacheroProfilePage({
               {t("profile.section_about")}
             </h2>
             <div className="border-border bg-surface-raised rounded-2xl border p-6">
-              <p className="text-text-secondary text-sm leading-relaxed">
-                {bio}
-              </p>
+              <p className="text-text-secondary text-sm leading-relaxed">{bio}</p>
             </div>
           </section>
 
@@ -178,7 +168,7 @@ export default async function TalacheroProfilePage({
         {/* Sticky booking rail */}
         <aside className="hidden lg:block">
           <div className="border-border bg-surface-raised sticky top-28 flex flex-col gap-4 rounded-2xl border p-6">
-            <p className="text-text-muted text-xs uppercase tracking-widest">
+            <p className="text-text-muted text-xs tracking-widest uppercase">
               {t("common.starting_at")}
             </p>
             <p className="text-text-primary text-3xl font-semibold">

@@ -1,12 +1,8 @@
 import { notFound } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { BookingForm } from "./booking-form";
-import { getTalachero, TALACHEROS } from "@/lib/mock/talacheros";
+import { getTalacheroById } from "@/lib/data/talacheros";
 import { Avatar } from "@/components/ui/avatar";
-
-export function generateStaticParams() {
-  return TALACHEROS.map((t) => ({ talacheroId: t.id }));
-}
 
 export default async function BookingPage({
   params,
@@ -15,14 +11,14 @@ export default async function BookingPage({
 }) {
   const { locale, talacheroId } = await params;
   setRequestLocale(locale);
-  const talachero = getTalachero(talacheroId);
+  const talachero = await getTalacheroById(talacheroId);
   if (!talachero) notFound();
 
   const t = await getTranslations();
 
   return (
     <main className="mx-auto max-w-3xl px-10 py-12">
-      <ol className="text-text-muted mb-8 flex items-center gap-3 text-xs uppercase tracking-widest">
+      <ol className="text-text-muted mb-8 flex items-center gap-3 text-xs tracking-widest uppercase">
         <li className="text-text-primary font-semibold">
           1. {t("booking.step_details")}
         </li>
@@ -42,10 +38,7 @@ export default async function BookingPage({
         </div>
       </div>
 
-      <BookingForm
-        talacheroId={talachero.id}
-        allowedServices={talachero.services}
-      />
+      <BookingForm talacheroId={talachero.id} allowedServices={talachero.services} />
     </main>
   );
 }
