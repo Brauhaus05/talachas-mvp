@@ -92,6 +92,36 @@ export async function listTalacheros(): Promise<Talachero[]> {
   return ((data ?? []) as DirectoryRow[]).map((row) => toTalachero(row, []));
 }
 
+export interface MyTalacheroPayments {
+  id: string;
+  stripeAccountId: string | null;
+  chargesEnabled: boolean;
+  payoutsEnabled: boolean;
+}
+
+/** The signed-in talachero's own profile + Stripe onboarding state. */
+export async function getMyTalacheroProfile(): Promise<MyTalacheroPayments | null> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const { data } = await supabase
+    .from("talachero_profiles")
+    .select("id, stripe_account_id, charges_enabled, payouts_enabled")
+    .eq("user_id", user.id)
+    .maybeSingle();
+  if (!data) return null;
+
+  return {
+    id: data.id,
+    stripeAccountId: data.stripe_account_id,
+    chargesEnabled: data.charges_enabled,
+    payoutsEnabled: data.payouts_enabled,
+  };
+}
+
 export interface TalacheroSlot {
   id: string;
   /** ISO timestamp (UTC) of the slot start. */
