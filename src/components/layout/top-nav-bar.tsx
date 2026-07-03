@@ -1,10 +1,13 @@
 import { Search } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
+import { getAppUser, dashboardPathForRole } from "@/lib/auth";
+import { signOut } from "@/app/[locale]/auth/actions";
 import { LocaleSwitcher } from "./locale-switcher";
 
 export async function TopNavBar() {
   const t = await getTranslations();
+  const user = await getAppUser();
 
   return (
     <header className="border-border bg-background sticky top-0 z-40 border-b">
@@ -33,24 +36,46 @@ export async function TopNavBar() {
           >
             {t("nav.how_it_works")}
           </Link>
-          <Link
-            href="/talacheros"
-            className="text-text-secondary hover:text-text-primary hidden text-sm md:inline-block"
-          >
-            {t("nav.become_talachero")}
-          </Link>
-          <Link
-            href="/talacheros"
-            className="text-text-secondary hover:text-text-primary hidden text-sm md:inline-block"
-          >
-            {t("nav.login")}
-          </Link>
-          <Link
-            href="/talacheros"
-            className="bg-action-primary text-text-inverse hover:bg-action-primary-hover inline-flex h-9 items-center rounded-md px-4 text-sm font-medium transition-colors"
-          >
-            {t("nav.signup")}
-          </Link>
+
+          {user ? (
+            <>
+              <Link
+                href={dashboardPathForRole(user.role)}
+                className="text-text-secondary hover:text-text-primary hidden text-sm md:inline-block"
+              >
+                {t("dashboard.nav_dashboard")}
+              </Link>
+              <form action={signOut}>
+                <button
+                  type="submit"
+                  className="text-text-secondary hover:text-text-primary text-sm"
+                >
+                  {t("auth.sign_out")}
+                </button>
+              </form>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/auth/sign-up"
+                className="text-text-secondary hover:text-text-primary hidden text-sm md:inline-block"
+              >
+                {t("nav.become_talachero")}
+              </Link>
+              <Link
+                href="/auth/sign-in"
+                className="text-text-secondary hover:text-text-primary hidden text-sm md:inline-block"
+              >
+                {t("nav.login")}
+              </Link>
+              <Link
+                href="/auth/sign-up"
+                className="bg-action-primary text-text-inverse hover:bg-action-primary-hover inline-flex h-9 items-center rounded-md px-4 text-sm font-medium transition-colors"
+              >
+                {t("nav.signup")}
+              </Link>
+            </>
+          )}
           <LocaleSwitcher />
         </nav>
       </div>

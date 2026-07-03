@@ -10,18 +10,48 @@ Next.js 16 + React 19 + Tailwind v4 + Turbopack. Grayscale-only design tokens in
 **Phase 1 ✅ Clickable demo (5 Figma screens + mock data)** — commit `843107f`
 All routes ship both locales. 66 static pages, checkout is dynamic (reads searchParams).
 
-| Route | What |
-|---|---|
-| `/{es,en}` | Hero + Servicios Populares bento |
-| `/{es,en}/talacheros` | Filter sidebar + card grid, client-side filtering/sort |
-| `/{es,en}/talacheros/[id]` | Profile: hero, services, About, reviews, sticky booking rail |
-| `/{es,en}/book/[talacheroId]` | react-hook-form + zod, 6 fields |
+| Route                                 | What                                                                  |
+| ------------------------------------- | --------------------------------------------------------------------- |
+| `/{es,en}`                            | Hero + Servicios Populares bento                                      |
+| `/{es,en}/talacheros`                 | Filter sidebar + card grid, client-side filtering/sort                |
+| `/{es,en}/talacheros/[id]`            | Profile: hero, services, About, reviews, sticky booking rail          |
+| `/{es,en}/book/[talacheroId]`         | react-hook-form + zod, 6 fields                                       |
 | `/{es,en}/book/[talacheroId]/summary` | Order summary, tip selector, 15% platform fee, Confirm → success view |
 
-Working tree is clean. `main` is up to date. No uncommitted work.
+Phase 0 + Phase 1 are committed on `main`. Phase 2 work (this session) is **uncommitted** in the working tree.
 
-**Phase 2 (next) — Data model + Auth**  ~2–3 days
-Schema per PRD §7 in Supabase (with PostGIS), Supabase Auth for both roles + RLS, minimal role-gated dashboards. See [plan.md](./plan.md) for the full checklist.
+**Phase 2 ✅ Data model + Auth** — (uncommitted as of this handoff)
+Full PRD §7 schema live in local Supabase, Supabase Auth for both roles, RLS, role-gated dashboards. All exit criteria verified end-to-end (see below).
+
+**Phase 3 (next) — Search, profile, booking (real data)** ~3–5 days
+Replace `src/lib/mock/` with Supabase queries behind the existing Figma screens. See [plan.md](./plan.md) §Phase 3.
+
+---
+
+## Phase 2 — what shipped
+
+**Migrations** (`supabase/migrations/`, applied cleanly via `supabase db reset`):
+
+1. `…140001_extensions_enums_reference` — postgis + btree_gist; 5 enums; `cities` (CDMX seeded: MXN / es-MX / America/Mexico_City) + `service_categories` (8 rows, slugs match `mock/services.ts`).
+2. `…140002_users_profiles` — `users` (extends `auth.users`), `handle_new_user` signup trigger (reads role from metadata, creates a `talachero_profiles` shell for talacheros), `talachero_profiles` (**coverage = `center_point geography(Point)` + `radius_meters`**, radius-for-MVP decision), `talachero_services` join table.
+3. `…140003_bookings_chat_reviews` — `availability_slots` (**GiST exclusion constraint blocks overlaps** → no double-booking), `bookings`, `transactions` (append-only ledger), `chat_threads`/`chat_messages`, `reviews` (unique per booking+author).
+4. `…140004_rls_policies` — RLS on all 11 tables. Helpers `is_admin()` / `owns_talachero()` / `is_booking_participant()` are `SECURITY DEFINER` to avoid policy recursion. Role self-escalation blocked via column-level `REVOKE UPDATE` on `users.role`; ledger `UPDATE/DELETE` revoked.
+
+**App wiring**
+
+- `src/lib/supabase/{client,server,middleware,config,types}.ts` — `@supabase/ssr`. `types.ts` is hand-authored; regenerate with `supabase gen types typescript --local`.
+- `src/proxy.ts` — chains next-intl routing **and** Supabase session refresh in one pass (attach cookies to the intl response), plus an optimistic `/dashboard/*` guard.
+- `src/lib/auth.ts` — `getAppUser()` (authoritative role check) + `dashboardPathForRole()`.
+- Auth UI: `[locale]/auth/{sign-in,sign-up,callback}` with server actions in `auth/actions.ts`. Sign-up has the role picker (Necesito ayuda / Quiero ofrecer servicios). Email+password (OTP deferred).
+- Dashboards: `[locale]/dashboard` (client), `/dashboard/talachero`, `/dashboard/admin` — layout gates auth, each page gates role.
+- `TopNavBar` is now auth-aware (Mi panel / Cerrar sesión vs login/signup).
+
+**Verified** (`typecheck`, `lint`, `build` all clean):
+
+- Trigger: client→role client (no profile); talachero→role talachero + pending profile shell. ✅
+- **RLS smoke test**: booking owned by client A → owner sees 1, talachero party sees 1, **stranger client B sees 0, anon sees 0**. ✅
+- Role self-promotion to admin → HTTP 403. Ledger DELETE → 403. Slot overlap insert → constraint violation. ✅
+- Browser: talachero signs in → `/dashboard/talachero`; client signs in → `/dashboard`; talachero hitting `/dashboard/admin` → bounced to `/dashboard/talachero`. ✅
 
 ---
 
@@ -48,33 +78,28 @@ From plan.md §"Open questions" — none block Phase 2 but they should be answer
 
 ---
 
-## Phase 2 kickoff plan (start here tomorrow)
+## Local dev setup (run this to bring the stack up)
 
-Prereqs: a Supabase project. If none exists:
 ```
-# create at supabase.com/dashboard, then in the repo:
-pnpm add -D supabase
-pnpm exec supabase init
-pnpm exec supabase link --project-ref <ref>
+open -a Docker                    # daemon must be running
+pnpm exec supabase start          # local stack
+pnpm exec supabase db reset       # apply migrations + seed reference data
+# copy API URL + Publishable/Secret keys from `supabase status` into .env.local
+pnpm dev                          # :3000
 ```
 
-Order of work (each is a discrete PR-able chunk):
+- **Ports are remapped +1000** (`supabase/config.toml`: api 55321, db 55322, studio 55323, …) so this stack coexists with another local Supabase project that already owns the default 543xx ports. `.env.local` points at `:55321`.
+- This CLI issues **new-format keys** (`sb_publishable_…` / `sb_secret_…`), not legacy anon/service_role JWTs. `NEXT_PUBLIC_SUPABASE_ANON_KEY` holds the publishable key; `@supabase/ssr` accepts it as a drop-in.
+- `.env.local` is gitignored; `.env.example` is committed. **No cloud project is linked yet** — do `supabase link --project-ref <ref>` when ready to deploy.
 
-1. **Extensions + core enums** — `create extension postgis;`, define role enum, booking status enum, verification status enum.
-2. **Reference tables** — `cities` (seed CDMX with `currency=MXN`, `locale=es-MX`, `timezone=America/Mexico_City`), `service_categories` (seed 8 from `src/lib/mock/services.ts`).
-3. **Users + profiles** — `users` extending `auth.users`, trigger on signup, `talachero_profiles` with PostGIS `geography(Polygon)` for `coverage_area`.
-4. **Availability + bookings + transactions + reviews + chat** — full PRD §7 schema.
-5. **RLS policies** — client sees own bookings; talachero sees own; admin bypass; ledger table has UPDATE/DELETE revoked.
-6. **Auth UI** — `/auth/sign-in`, `/auth/sign-up`, `/auth/callback` under `[locale]`. Signup includes role picker ("Necesito ayuda" / "Quiero ofrecer servicios").
-7. **Role-gated dashboards** — `/dashboard` (client), `/dashboard/talachero`, `/dashboard/admin`. Empty shells that just prove routing + guards work.
-
-**Exit criteria for Phase 2:** two real users (one client, one talachero) can sign up and land on their correct dashboard. RLS smoke test: client hitting the anon key cannot read another user's bookings.
+Test users seeded during verification: `client@test.com`, `talachero@test.com`, `client2@test.com` — all password `password123`.
 
 ---
 
 ## Codebase quick reference
 
 **Paths worth knowing:**
+
 - `src/app/[locale]/` — all routes; locale is required on every path
 - `src/i18n/{routing,navigation,request}.ts` — next-intl wiring (do not hardcode locale)
 - `src/proxy.ts` — Next 16 renamed middleware → proxy; locale routing lives here
@@ -87,6 +112,7 @@ Order of work (each is a discrete PR-able chunk):
 **i18n discipline:** every visible string goes through `t()`. Both locales must have the key.
 
 **Commands:**
+
 ```
 pnpm dev              # Turbopack dev on :3000, redirects / → /es
 pnpm build            # production build
@@ -100,16 +126,22 @@ pnpm format           # Prettier write
 ## Gotchas encountered this session
 
 - **`zod.coerce.number()` + react-hook-form 7 collide** — the schema's input type becomes `unknown` and the resolver generic fails. Use `z.number()` + `register("hours", { valueAsNumber: true })` instead. (Fixed in `src/app/[locale]/book/[talacheroId]/booking-form.tsx`.)
-- **Route type params shape** — next-intl `<Link href={{ pathname, params }}>` didn't satisfy the typed-routes constraint. String templates work fine: `` href={`/talacheros/${id}`} ``.
+- **Route type params shape** — next-intl `<Link href={{ pathname, params }}>` didn't satisfy the typed-routes constraint. String templates work fine: ``href={`/talacheros/${id}`}``.
 - **Middleware → proxy in Next 16** — the old `middleware.ts` file convention still works but emits a deprecation warning. We use `proxy.ts`.
 - **create-next-app refuses non-empty dirs** — had to park `prd.md` / `plan.md` in `/tmp` during bootstrap.
 - **Tailwind v4 CSS-first config** — no `tailwind.config.ts`; all tokens live in `@theme` blocks inside `globals.css`. Utilities are auto-generated from `--color-*` variables, which is why token names like `text-text-primary` are correct (double "text" is intentional).
+- **`redirect()` + typed routes (Phase 2)** — next-intl's `redirect` from `@/i18n/navigation` did **not** narrow control flow as `never` in server actions/components (caused "possibly null" + "lacks return"). Use `redirect` from `next/navigation` instead; because `typedRoutes` is on, a dynamic template string needs `` redirect(`/${locale}/dashboard` as Route) `` (`import type { Route } from "next"`).
+- **Supabase session + next-intl in one proxy pass** — `src/proxy.ts` runs next-intl `createMiddleware` to get a `NextResponse`, then `updateSession(request, response)` **attaches Supabase auth cookies to that same response**. Don't create a second response or cookies get dropped. `updateSession`'s `setAll` also gets a 2nd `headers` arg (no-store) that must be applied.
+- **Auth-aware nav made pages dynamic** — `TopNavBar` calls `getAppUser()` (reads cookies), so the previously-static locale pages now render on demand (all `ƒ` in build output). Acceptable for MVP; revisit if we want the marketing pages static again.
+- **RLS recursion** — a policy on `users` that queries `users` recurses. Fix: `SECURITY DEFINER` helper functions (`is_admin()` etc.) with a pinned `search_path`; they run as owner and bypass RLS.
+- **Role can't be RLS-pinned by column** — to stop `users.role` self-escalation, we `REVOKE UPDATE` on the table and re-`GRANT UPDATE (email, phone, …)` on the safe columns only. Service role bypasses this for admin ops.
 
 ---
 
-## What to say to Claude tomorrow
+## What to say to Claude next session
 
 Suggested opener:
-> Continuing the Talachas MVP. Phase 0 and Phase 1 are done and committed (see HANDOFF.md). Start Phase 2 — Supabase schema + auth per plan.md. First: confirm we have a Supabase project (or create one) and answer the coverage-area/commission/slot-granularity questions before scaffolding.
 
-Tomorrow's Claude should read `HANDOFF.md`, `plan.md` §Phase 2, and `prd.md` §6.2 + §7 before writing any migrations.
+> Continuing the Talachas MVP. Phases 0–2 are done (see HANDOFF.md). Bring up the local stack (Docker + `supabase start` + `db reset`), then start Phase 3 — back the Figma screens (`/talacheros`, profile, booking) with real Supabase queries per plan.md §Phase 3. Resolve the remaining open questions (commission %, cancellation windows, chat provider) as they come up.
+
+Next session should read `HANDOFF.md`, `plan.md` §Phase 3, and `prd.md` §6.3 (concurrency) before touching the booking mutation. Note: Phase 2 is **uncommitted** — decide whether to commit it first.
