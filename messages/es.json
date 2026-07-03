@@ -1,0 +1,25 @@
+{
+  "meta": {
+    "brand": "Talachas",
+    "tagline": "Tu plataforma de confianza para tareas del hogar."
+  },
+  "nav": {
+    "search_placeholder": "Encuentra ayuda...",
+    "how_it_works": "Cómo funciona",
+    "become_talachero": "Conviértete en Talachero",
+    "login": "Iniciar sesión",
+    "signup": "Registrarse"
+  },
+  "home": {
+    "hero_title": "Tus tareas hechas por manos expertas.",
+    "hero_subtitle": "Conecta con Talacheros locales, verificados y listos para ayudarte con cualquier proyecto en el hogar. Eficiencia y confianza a tu puerta.",
+    "hero_input_placeholder": "Ej. Armar un escritorio, Pintar recámara...",
+    "hero_cta": "Buscar Talachero",
+    "trust_line": "+2,500 Talacheros verificados en tu ciudad"
+  },
+  "services": {
+    "section_title": "Servicios Populares",
+    "section_subtitle": "Explora las categorías más solicitadas por nuestra comunidad.",
+    "view_all": "Ver todos"
+  }
+}

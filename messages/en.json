@@ -1,0 +1,25 @@
+{
+  "meta": {
+    "brand": "Talachas",
+    "tagline": "Your trusted platform for home tasks."
+  },
+  "nav": {
+    "search_placeholder": "Find help...",
+    "how_it_works": "How it works",
+    "become_talachero": "Become a Talachero",
+    "login": "Log in",
+    "signup": "Sign up"
+  },
+  "home": {
+    "hero_title": "Your tasks, done by expert hands.",
+    "hero_subtitle": "Connect with local, verified Talacheros ready to help with any home project. Efficiency and trust at your door.",
+    "hero_input_placeholder": "e.g. Assemble a desk, Paint bedroom...",
+    "hero_cta": "Find a Talachero",
+    "trust_line": "+2,500 verified Talacheros in your city"
+  },
+  "services": {
+    "section_title": "Popular Services",
+    "section_subtitle": "Explore the categories most requested by our community.",
+    "view_all": "View all"
+  }
+}
