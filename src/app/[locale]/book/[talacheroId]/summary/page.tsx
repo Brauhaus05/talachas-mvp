@@ -1,12 +1,8 @@
 import { notFound } from "next/navigation";
 import { setRequestLocale, getLocale } from "next-intl/server";
-import { getTalachero, TALACHEROS } from "@/lib/mock/talacheros";
+import { getTalacheroById } from "@/lib/data/talacheros";
 import type { ServiceSlug } from "@/lib/mock/services";
 import { CheckoutView, type CheckoutData } from "./checkout-view";
-
-export function generateStaticParams() {
-  return TALACHEROS.map((t) => ({ talacheroId: t.id }));
-}
 
 const PLATFORM_FEE_PCT = 0.15;
 
@@ -22,15 +18,20 @@ export default async function CheckoutPage({
   setRequestLocale(locale);
   const currentLocale = await getLocale();
 
-  const talachero = getTalachero(talacheroId);
+  const talachero = await getTalacheroById(talacheroId);
   if (!talachero) notFound();
 
-  const service = (typeof sp.service === "string" ? sp.service : talachero.primaryService) as ServiceSlug;
+  const service = (
+    typeof sp.service === "string" ? sp.service : talachero.primaryService
+  ) as ServiceSlug;
   const description = typeof sp.description === "string" ? sp.description : "";
   const address = typeof sp.address === "string" ? sp.address : "";
   const date = typeof sp.date === "string" ? sp.date : "";
   const time = typeof sp.time === "string" ? sp.time : "";
-  const hours = Math.max(1, Math.min(8, Number(typeof sp.hours === "string" ? sp.hours : 2) || 2));
+  const hours = Math.max(
+    1,
+    Math.min(8, Number(typeof sp.hours === "string" ? sp.hours : 2) || 2)
+  );
 
   const subtotal = talachero.hourlyRateMxn * hours;
   const platformFee = Math.round(subtotal * PLATFORM_FEE_PCT);
