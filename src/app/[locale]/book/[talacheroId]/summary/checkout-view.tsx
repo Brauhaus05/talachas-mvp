@@ -1,17 +1,26 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useActionState, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { CheckCircle2, MapPin, Calendar, Clock, CreditCard } from "lucide-react";
-import { Link } from "@/i18n/navigation";
+import {
+  CheckCircle2,
+  MapPin,
+  Calendar,
+  Clock,
+  CreditCard,
+  AlertCircle,
+} from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { formatMxn } from "@/lib/format";
 import type { ServiceSlug } from "@/lib/mock/services";
+import { confirmBooking, type ConfirmState } from "./actions";
 
 export interface CheckoutData {
+  talacheroId: string;
   talacheroName: string;
   talacheroInitials: string;
+  slotId: string;
   service: ServiceSlug;
   description: string;
   address: string;
@@ -26,43 +35,18 @@ export interface CheckoutData {
 }
 
 const TIP_PRESETS = [0, 50, 100, 200];
+const initialState: ConfirmState = { status: "idle" };
 
 export function CheckoutView({ data }: { data: CheckoutData }) {
   const t = useTranslations();
   const [tip, setTip] = useState(0);
-  const [confirmed, setConfirmed] = useState(false);
+  const [state, formAction, isPending] = useActionState(confirmBooking, initialState);
 
-  const grandTotal = useMemo(
-    () => data.totalMxn + tip,
-    [data.totalMxn, tip]
-  );
-
-  if (confirmed) {
-    return (
-      <main className="mx-auto max-w-xl px-10 py-24">
-        <div className="border-border bg-surface-raised flex flex-col items-center gap-4 rounded-3xl border p-10 text-center">
-          <div className="bg-action-primary text-text-inverse flex h-16 w-16 items-center justify-center rounded-full">
-            <CheckCircle2 className="h-8 w-8" aria-hidden />
-          </div>
-          <h1 className="text-text-primary text-3xl font-semibold tracking-tight">
-            {t("checkout.success_title")}
-          </h1>
-          <p className="text-text-secondary text-sm">
-            {t("checkout.success_body", { name: data.talacheroName })}
-          </p>
-          <Link href="/">
-            <Button size="lg" className="mt-4">
-              {t("checkout.success_next")}
-            </Button>
-          </Link>
-        </div>
-      </main>
-    );
-  }
+  const grandTotal = useMemo(() => data.totalMxn + tip, [data.totalMxn, tip]);
 
   return (
     <main className="mx-auto max-w-4xl px-10 py-12">
-      <ol className="text-text-muted mb-8 flex items-center gap-3 text-xs uppercase tracking-widest">
+      <ol className="text-text-muted mb-8 flex items-center gap-3 text-xs tracking-widest uppercase">
         <li>1. {t("booking.step_details")}</li>
         <span aria-hidden>→</span>
         <li className="text-text-primary font-semibold">
@@ -124,9 +108,7 @@ export function CheckoutView({ data }: { data: CheckoutData }) {
             value={formatMxn(data.platformFeeMxn, data.currencyLocale)}
           />
           <div className="flex flex-col gap-2">
-            <p className="text-text-secondary text-xs">
-              {t("checkout.line_tip")}
-            </p>
+            <p className="text-text-secondary text-xs">{t("checkout.line_tip")}</p>
             <div className="grid grid-cols-4 gap-2">
               {TIP_PRESETS.map((v) => (
                 <button
@@ -152,13 +134,28 @@ export function CheckoutView({ data }: { data: CheckoutData }) {
               emphasis
             />
           </div>
-          <Button
-            size="lg"
-            className="mt-2 w-full"
-            onClick={() => setConfirmed(true)}
-          >
-            {t("checkout.confirm_cta")}
-          </Button>
+
+          {state.status === "error" && (
+            <div
+              role="alert"
+              className="border-border-strong bg-surface-muted text-text-primary flex items-start gap-3 rounded-md border px-4 py-3 text-sm"
+            >
+              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
+              <span>{t(`checkout.error_${state.error}`)}</span>
+            </div>
+          )}
+
+          <form action={formAction} className="flex flex-col gap-2">
+            <input type="hidden" name="talacheroId" value={data.talacheroId} />
+            <input type="hidden" name="slotId" value={data.slotId} />
+            <input type="hidden" name="service" value={data.service} />
+            <input type="hidden" name="hours" value={data.hours} />
+            <input type="hidden" name="address" value={data.address} />
+            <input type="hidden" name="description" value={data.description} />
+            <Button type="submit" size="lg" disabled={isPending} className="mt-2 w-full">
+              {isPending ? t("common.loading") : t("checkout.confirm_cta")}
+            </Button>
+          </form>
           <p className="text-text-muted text-center text-xs leading-relaxed">
             {t("checkout.policy_note")}
           </p>
@@ -185,13 +182,9 @@ function SummaryRow({
         {icon}
       </span>
       <div className="flex flex-1 flex-col">
-        <p className="text-text-muted text-xs uppercase tracking-wider">
-          {label}
-        </p>
+        <p className="text-text-muted text-xs tracking-wider uppercase">{label}</p>
         <p className="text-text-primary text-sm font-medium">{value}</p>
-        {detail && (
-          <p className="text-text-secondary mt-1 text-xs">{detail}</p>
-        )}
+        {detail && <p className="text-text-secondary mt-1 text-xs">{detail}</p>}
       </div>
     </div>
   );

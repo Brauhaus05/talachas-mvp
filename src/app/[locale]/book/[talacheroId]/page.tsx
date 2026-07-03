@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { BookingForm } from "./booking-form";
-import { getTalacheroById } from "@/lib/data/talacheros";
+import { getTalacheroById, getTalacheroSlots } from "@/lib/data/talacheros";
 import { Avatar } from "@/components/ui/avatar";
 
 export default async function BookingPage({
@@ -14,6 +14,7 @@ export default async function BookingPage({
   const talachero = await getTalacheroById(talacheroId);
   if (!talachero) notFound();
 
+  const slots = await getTalacheroSlots(talachero.id);
   const t = await getTranslations();
 
   return (
@@ -38,7 +39,11 @@ export default async function BookingPage({
         </div>
       </div>
 
-      <BookingForm talacheroId={talachero.id} allowedServices={talachero.services} />
+      <BookingForm
+        talacheroId={talachero.id}
+        allowedServices={talachero.services}
+        slots={slots}
+      />
     </main>
   );
 }

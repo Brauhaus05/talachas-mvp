@@ -156,7 +156,10 @@
     "payment_add": "Agregar método",
     "continue_cta": "Continuar al resumen",
     "required": "Este campo es obligatorio",
-    "description_min": "Da al menos 20 caracteres para ayudar al Talachero."
+    "description_min": "Da al menos 20 caracteres para ayudar al Talachero.",
+    "field_slot": "Elige un horario",
+    "no_slots": "Este Talachero no tiene horarios disponibles por ahora.",
+    "select_slot": "Selecciona un horario para continuar."
   },
   "checkout": {
     "page_title": "Resumen de reserva",
@@ -174,7 +177,11 @@
     "policy_note": "Al confirmar aceptas la política de cancelación y los términos del servicio.",
     "success_title": "¡Reserva confirmada!",
     "success_body": "Hemos avisado a {name}. Recibirás una confirmación por correo y podrás chatear en cuanto acepte.",
-    "success_next": "Volver al inicio"
+    "success_next": "Volver al inicio",
+    "error_slot_unavailable": "Ese horario acaba de ocuparse. Elige otro.",
+    "error_slot_not_found": "Ese horario ya no está disponible.",
+    "error_not_authenticated": "Inicia sesión para confirmar tu reserva.",
+    "error_generic": "No pudimos crear la reserva. Intenta de nuevo."
   },
   "auth": {
     "sign_in_title": "Bienvenido de vuelta",
@@ -229,6 +236,21 @@
     "admin_users": "Usuarios",
     "admin_bookings": "Reservas",
     "admin_disputes": "Disputas",
-    "coming_soon": "Próximamente"
+    "coming_soon": "Próximamente",
+    "booking_success": "¡Reserva solicitada! Te avisaremos cuando el Talachero responda.",
+    "booking_with": "Con {name}",
+    "booking_from": "De {name}",
+    "booking_when": "Horario",
+    "booking_no_slot": "Sin horario",
+    "requests_title": "Solicitudes entrantes",
+    "requests_empty": "No tienes solicitudes por ahora.",
+    "action_accept": "Aceptar",
+    "action_reject": "Rechazar",
+    "action_cancel": "Cancelar reserva",
+    "status_requested": "Solicitada",
+    "status_confirmed": "Confirmada",
+    "status_in_progress": "En progreso",
+    "status_completed": "Completada",
+    "status_cancelled": "Cancelada"
   }
 }

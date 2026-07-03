@@ -156,7 +156,10 @@
     "payment_add": "Add method",
     "continue_cta": "Continue to summary",
     "required": "This field is required",
-    "description_min": "Give at least 20 characters so the Talachero can help."
+    "description_min": "Give at least 20 characters so the Talachero can help.",
+    "field_slot": "Choose a time",
+    "no_slots": "This Talachero has no available times right now.",
+    "select_slot": "Select a time to continue."
   },
   "checkout": {
     "page_title": "Booking summary",
@@ -174,7 +177,11 @@
     "policy_note": "By confirming, you accept the cancellation policy and terms of service.",
     "success_title": "Booking confirmed!",
     "success_body": "We've notified {name}. You'll get an email confirmation and can chat once they accept.",
-    "success_next": "Back to home"
+    "success_next": "Back to home",
+    "error_slot_unavailable": "That time just got booked. Please pick another.",
+    "error_slot_not_found": "That time is no longer available.",
+    "error_not_authenticated": "Sign in to confirm your booking.",
+    "error_generic": "We couldn't create the booking. Please try again."
   },
   "auth": {
     "sign_in_title": "Welcome back",
@@ -229,6 +236,21 @@
     "admin_users": "Users",
     "admin_bookings": "Bookings",
     "admin_disputes": "Disputes",
-    "coming_soon": "Coming soon"
+    "coming_soon": "Coming soon",
+    "booking_success": "Booking requested! We'll let you know when the Talachero responds.",
+    "booking_with": "With {name}",
+    "booking_from": "From {name}",
+    "booking_when": "Time",
+    "booking_no_slot": "No time",
+    "requests_title": "Incoming requests",
+    "requests_empty": "You have no requests right now.",
+    "action_accept": "Accept",
+    "action_reject": "Decline",
+    "action_cancel": "Cancel booking",
+    "status_requested": "Requested",
+    "status_confirmed": "Confirmed",
+    "status_in_progress": "In progress",
+    "status_completed": "Completed",
+    "status_cancelled": "Cancelled"
   }
 }
