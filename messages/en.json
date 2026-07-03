@@ -251,6 +251,15 @@
     "status_confirmed": "Confirmed",
     "status_in_progress": "In progress",
     "status_completed": "Completed",
-    "status_cancelled": "Cancelled"
+    "status_cancelled": "Cancelled",
+    "payments_title": "Payments",
+    "payments_intro": "Set up payments with Stripe to get paid securely.",
+    "payments_start": "Set up payments",
+    "payments_continue": "Continue setup",
+    "payments_refresh": "Refresh status",
+    "payments_pending": "In progress",
+    "payments_pending_desc": "Your payment setup is incomplete. Continue on Stripe, then refresh the status.",
+    "payments_active": "Active",
+    "payments_active_desc": "Your account is ready to receive payments and tips."
   }
 }

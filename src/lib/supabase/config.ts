@@ -28,3 +28,11 @@ export function getSupabaseAnonKey(): string {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   );
 }
+
+/**
+ * Service-role key — bypasses RLS. Server-only; never expose to the browser.
+ * Used for trusted writes driven by Stripe (onboarding + webhook).
+ */
+export function getServiceRoleKey(): string {
+  return required("SUPABASE_SERVICE_ROLE_KEY", process.env.SUPABASE_SERVICE_ROLE_KEY);
+}

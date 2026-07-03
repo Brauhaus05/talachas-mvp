@@ -6,6 +6,7 @@ import { getTalacheroBookings } from "@/lib/data/bookings";
 import { PlaceholderPanel } from "../dashboard-ui";
 import { BookingCard } from "../booking-card";
 import { acceptBooking, rejectBooking, cancelBooking } from "../actions";
+import { PaymentsPanel } from "./payments-panel";
 
 export default async function TalacheroDashboardPage({
   params,
@@ -38,6 +39,8 @@ export default async function TalacheroDashboardPage({
         </h1>
         <p className="text-text-secondary mt-1 text-sm">{t("talachero_subtitle")}</p>
       </div>
+
+      <PaymentsPanel />
 
       {/* Incoming requests */}
       <section className="flex flex-col gap-4">

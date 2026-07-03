@@ -251,6 +251,15 @@
     "status_confirmed": "Confirmada",
     "status_in_progress": "En progreso",
     "status_completed": "Completada",
-    "status_cancelled": "Cancelada"
+    "status_cancelled": "Cancelada",
+    "payments_title": "Pagos",
+    "payments_intro": "Configura tus pagos con Stripe para recibir tus ganancias de forma segura.",
+    "payments_start": "Configurar pagos",
+    "payments_continue": "Continuar configuración",
+    "payments_refresh": "Actualizar estado",
+    "payments_pending": "En proceso",
+    "payments_pending_desc": "Tu configuración de pagos está incompleta. Continúa en Stripe y luego actualiza el estado.",
+    "payments_active": "Activos",
+    "payments_active_desc": "Tu cuenta está lista para recibir pagos y propinas."
   }
 }
