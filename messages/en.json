@@ -1,7 +1,21 @@
 {
   "meta": {
     "brand": "Talachas",
-    "tagline": "Your trusted platform for home tasks."
+    "tagline": "Your trusted platform for solving home tasks with local experts."
+  },
+  "common": {
+    "back": "Back",
+    "next": "Next",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "loading": "Loading…",
+    "per_hour": "/hour",
+    "reviews_count": "{count, plural, one {# review} other {# reviews}}",
+    "jobs_completed": "{count, plural, one {# job} other {# jobs}}",
+    "years_experience": "{count, plural, one {# year of experience} other {# years of experience}}",
+    "starting_at": "From",
+    "and_more": "and more",
+    "language": "Language"
   },
   "nav": {
     "search_placeholder": "Find help...",
@@ -10,16 +24,156 @@
     "login": "Log in",
     "signup": "Sign up"
   },
+  "footer": {
+    "brand_description": "Your trusted platform for solving home tasks with local experts.",
+    "rights": "© {year} Talachas. All rights reserved.",
+    "col_services": "Services",
+    "col_company": "Company",
+    "col_support": "Support",
+    "services": {
+      "handyman": "Handyman",
+      "electrical": "Electrical",
+      "cleaning": "Cleaning",
+      "moving": "Moving"
+    },
+    "company": {
+      "about": "About us",
+      "careers": "Careers",
+      "contact": "Contact"
+    },
+    "support": {
+      "help": "Help Center",
+      "faq": "FAQ",
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service"
+    }
+  },
   "home": {
     "hero_title": "Your tasks, done by expert hands.",
     "hero_subtitle": "Connect with local, verified Talacheros ready to help with any home project. Efficiency and trust at your door.",
     "hero_input_placeholder": "e.g. Assemble a desk, Paint bedroom...",
     "hero_cta": "Find a Talachero",
-    "trust_line": "+2,500 verified Talacheros in your city"
+    "trust_line": "Over 2,500 verified Talacheros in your city",
+    "services_title": "Popular Services",
+    "services_subtitle": "Explore the categories most requested by our community.",
+    "services_view_all": "View all"
   },
   "services": {
-    "section_title": "Popular Services",
-    "section_subtitle": "Explore the categories most requested by our community.",
-    "view_all": "View all"
+    "handyman": {
+      "name": "Home Maintenance & Repair",
+      "short": "Handyman",
+      "tag": "Most requested",
+      "description": "From leaks to small electrical installations."
+    },
+    "furniture_assembly": {
+      "name": "Furniture Assembly",
+      "short": "Assembly",
+      "tag": "New",
+      "description": "Forget the complicated manuals."
+    },
+    "cleaning": {
+      "name": "Deep Cleaning",
+      "short": "Cleaning",
+      "tag": "Popular",
+      "description": "Spotless spaces, guaranteed."
+    },
+    "moving": {
+      "name": "Moving Help",
+      "short": "Moving",
+      "tag": "Reliable",
+      "description": "Loading and unloading, effortless."
+    },
+    "tv_mount": {
+      "name": "TV Mounting",
+      "short": "TV",
+      "tag": "Fast",
+      "description": "Secure, level installation on any wall."
+    },
+    "gardening": {
+      "name": "Gardening",
+      "short": "Garden",
+      "tag": "Seasonal",
+      "description": "Pruning, upkeep, and garden design."
+    },
+    "delivery": {
+      "name": "Deliveries & Errands",
+      "short": "Errands",
+      "tag": "Same-day",
+      "description": "Helpers available for your day's errands."
+    },
+    "painting": {
+      "name": "Painting",
+      "short": "Painting",
+      "tag": "Refresh",
+      "description": "Interior and exterior, professional finish."
+    }
+  },
+  "search": {
+    "page_title": "Talacheros in your area",
+    "city_label": "Mexico City",
+    "results_count": "{count, plural, one {# Talachero available} other {# Talacheros available}}",
+    "filters_title": "Filters",
+    "filter_service": "Service",
+    "filter_price": "Price range (MXN/h)",
+    "filter_rating": "Minimum rating",
+    "filter_availability": "Availability",
+    "availability_today": "Today",
+    "availability_week": "This week",
+    "availability_any": "Any date",
+    "sort_label": "Sort by",
+    "sort_recommended": "Recommended",
+    "sort_price_asc": "Price: low to high",
+    "sort_rating": "Highest rated",
+    "empty_state": "No Talacheros match those filters. Try adjusting your criteria.",
+    "view_profile": "View profile"
+  },
+  "profile": {
+    "verified_badge": "Verified",
+    "book_cta": "Book service",
+    "stat_jobs": "Jobs completed",
+    "stat_rating": "Average rating",
+    "stat_response": "Response time",
+    "response_value": "< 1 hour",
+    "section_services": "Services offered",
+    "section_about": "About",
+    "section_reviews": "Reviews",
+    "reviews_all": "See all reviews"
+  },
+  "booking": {
+    "page_title": "Request service",
+    "step_details": "Details",
+    "step_summary": "Summary",
+    "field_service": "Service type",
+    "field_service_placeholder": "Select a service",
+    "field_description": "Describe the task",
+    "field_description_placeholder": "e.g. Assemble a 4-drawer IKEA Malm dresser.",
+    "field_address": "Address",
+    "field_address_placeholder": "Street, number, neighborhood, borough",
+    "field_date": "Preferred date",
+    "field_time": "Time",
+    "field_payment": "Payment method",
+    "payment_card": "Card ending 4242",
+    "payment_add": "Add method",
+    "continue_cta": "Continue to summary",
+    "required": "This field is required",
+    "description_min": "Give at least 20 characters so the Talachero can help."
+  },
+  "checkout": {
+    "page_title": "Booking summary",
+    "with_talachero": "With {name}",
+    "summary_service": "Service",
+    "summary_date": "Date & time",
+    "summary_address": "Address",
+    "summary_estimate": "Estimated duration",
+    "hours": "{count, plural, one {# hour} other {# hours}}",
+    "line_subtotal": "Subtotal",
+    "line_platform_fee": "Platform fee",
+    "line_tip": "Tip (optional)",
+    "line_total": "Total",
+    "confirm_cta": "Confirm booking",
+    "policy_note": "By confirming, you accept the cancellation policy and terms of service.",
+    "success_title": "Booking confirmed!",
+    "success_body": "We've notified {name}. You'll get an email confirmation and can chat once they accept.",
+    "success_next": "Back to home"
   }
 }

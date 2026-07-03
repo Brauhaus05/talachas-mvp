@@ -4,6 +4,8 @@ import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
 import { Inter } from "next/font/google";
 import { routing } from "@/i18n/routing";
+import { TopNavBar } from "@/components/layout/top-nav-bar";
+import { Footer } from "@/components/layout/footer";
 import "../globals.css";
 
 const inter = Inter({
@@ -36,7 +38,11 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} className={`${inter.variable} h-full antialiased`}>
       <body className="bg-background text-text-primary flex min-h-full flex-col">
-        <NextIntlClientProvider>{children}</NextIntlClientProvider>
+        <NextIntlClientProvider>
+          <TopNavBar />
+          <div className="flex flex-1 flex-col">{children}</div>
+          <Footer />
+        </NextIntlClientProvider>
       </body>
     </html>
   );

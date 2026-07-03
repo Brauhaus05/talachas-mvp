@@ -1,7 +1,21 @@
 {
   "meta": {
     "brand": "Talachas",
-    "tagline": "Tu plataforma de confianza para tareas del hogar."
+    "tagline": "Tu plataforma de confianza para resolver tareas del hogar con expertos locales."
+  },
+  "common": {
+    "back": "Volver",
+    "next": "Siguiente",
+    "confirm": "Confirmar",
+    "cancel": "Cancelar",
+    "loading": "Cargando…",
+    "per_hour": "/hora",
+    "reviews_count": "{count, plural, one {# reseña} other {# reseñas}}",
+    "jobs_completed": "{count, plural, one {# trabajo} other {# trabajos}}",
+    "years_experience": "{count, plural, one {# año de experiencia} other {# años de experiencia}}",
+    "starting_at": "Desde",
+    "and_more": "y más",
+    "language": "Idioma"
   },
   "nav": {
     "search_placeholder": "Encuentra ayuda...",
@@ -10,16 +24,156 @@
     "login": "Iniciar sesión",
     "signup": "Registrarse"
   },
+  "footer": {
+    "brand_description": "Tu plataforma de confianza para resolver tareas del hogar con expertos locales.",
+    "rights": "© {year} Talachas. Todos los derechos reservados.",
+    "col_services": "Servicios",
+    "col_company": "Compañía",
+    "col_support": "Soporte",
+    "services": {
+      "handyman": "Mantenimiento",
+      "electrical": "Electricidad",
+      "cleaning": "Limpieza",
+      "moving": "Mudanzas"
+    },
+    "company": {
+      "about": "Sobre nosotros",
+      "careers": "Trabaja con nosotros",
+      "contact": "Contacto"
+    },
+    "support": {
+      "help": "Centro de ayuda",
+      "faq": "Preguntas frecuentes",
+      "privacy": "Privacidad",
+      "terms": "Términos de servicio"
+    }
+  },
   "home": {
     "hero_title": "Tus tareas hechas por manos expertas.",
     "hero_subtitle": "Conecta con Talacheros locales, verificados y listos para ayudarte con cualquier proyecto en el hogar. Eficiencia y confianza a tu puerta.",
     "hero_input_placeholder": "Ej. Armar un escritorio, Pintar recámara...",
     "hero_cta": "Buscar Talachero",
-    "trust_line": "+2,500 Talacheros verificados en tu ciudad"
+    "trust_line": "Más de 2,500 Talacheros verificados en tu ciudad",
+    "services_title": "Servicios Populares",
+    "services_subtitle": "Explora las categorías más solicitadas por nuestra comunidad.",
+    "services_view_all": "Ver todos"
   },
   "services": {
-    "section_title": "Servicios Populares",
-    "section_subtitle": "Explora las categorías más solicitadas por nuestra comunidad.",
-    "view_all": "Ver todos"
+    "handyman": {
+      "name": "Mantenimiento y Reparación del Hogar",
+      "short": "Mantenimiento",
+      "tag": "Más solicitado",
+      "description": "Desde goteras hasta instalaciones eléctricas menores."
+    },
+    "furniture_assembly": {
+      "name": "Armado de Muebles",
+      "short": "Armado",
+      "tag": "Nuevo",
+      "description": "Olvídate de los manuales complicados."
+    },
+    "cleaning": {
+      "name": "Limpieza Profunda",
+      "short": "Limpieza",
+      "tag": "Popular",
+      "description": "Espacios impecables, garantizado."
+    },
+    "moving": {
+      "name": "Ayuda para Mudanzas",
+      "short": "Mudanzas",
+      "tag": "Confiable",
+      "description": "Carga y descarga sin esfuerzo."
+    },
+    "tv_mount": {
+      "name": "Montaje de TV",
+      "short": "TV",
+      "tag": "Rápido",
+      "description": "Instalación segura y nivelada en cualquier pared."
+    },
+    "gardening": {
+      "name": "Jardinería",
+      "short": "Jardín",
+      "tag": "Estacional",
+      "description": "Poda, mantenimiento y diseño de jardines."
+    },
+    "delivery": {
+      "name": "Entregas y Mandados",
+      "short": "Entregas",
+      "tag": "Same-day",
+      "description": "Ayudantes disponibles para tus mandados del día."
+    },
+    "painting": {
+      "name": "Pintura",
+      "short": "Pintura",
+      "tag": "Renueva",
+      "description": "Interior y exterior, acabado profesional."
+    }
+  },
+  "search": {
+    "page_title": "Talacheros en tu zona",
+    "city_label": "Ciudad de México",
+    "results_count": "{count, plural, one {# Talachero disponible} other {# Talacheros disponibles}}",
+    "filters_title": "Filtros",
+    "filter_service": "Servicio",
+    "filter_price": "Rango de precio (MXN/h)",
+    "filter_rating": "Calificación mínima",
+    "filter_availability": "Disponibilidad",
+    "availability_today": "Hoy",
+    "availability_week": "Esta semana",
+    "availability_any": "Cualquier fecha",
+    "sort_label": "Ordenar por",
+    "sort_recommended": "Recomendados",
+    "sort_price_asc": "Precio: menor a mayor",
+    "sort_rating": "Mejor calificación",
+    "empty_state": "No encontramos Talacheros con esos filtros. Ajusta tus criterios.",
+    "view_profile": "Ver perfil"
+  },
+  "profile": {
+    "verified_badge": "Verificado",
+    "book_cta": "Reservar servicio",
+    "stat_jobs": "Trabajos completados",
+    "stat_rating": "Calificación promedio",
+    "stat_response": "Tiempo de respuesta",
+    "response_value": "< 1 hora",
+    "section_services": "Servicios ofrecidos",
+    "section_about": "Sobre mí",
+    "section_reviews": "Reseñas",
+    "reviews_all": "Ver todas las reseñas"
+  },
+  "booking": {
+    "page_title": "Solicitar servicio",
+    "step_details": "Detalles",
+    "step_summary": "Resumen",
+    "field_service": "Tipo de servicio",
+    "field_service_placeholder": "Selecciona un servicio",
+    "field_description": "Describe la tarea",
+    "field_description_placeholder": "Ej. Armar un mueble IKEA modelo Malm de 4 cajones.",
+    "field_address": "Dirección",
+    "field_address_placeholder": "Calle, número, colonia, alcaldía",
+    "field_date": "Fecha preferida",
+    "field_time": "Hora",
+    "field_payment": "Método de pago",
+    "payment_card": "Tarjeta terminación 4242",
+    "payment_add": "Agregar método",
+    "continue_cta": "Continuar al resumen",
+    "required": "Este campo es obligatorio",
+    "description_min": "Da al menos 20 caracteres para ayudar al Talachero."
+  },
+  "checkout": {
+    "page_title": "Resumen de reserva",
+    "with_talachero": "Con {name}",
+    "summary_service": "Servicio",
+    "summary_date": "Fecha y hora",
+    "summary_address": "Dirección",
+    "summary_estimate": "Duración estimada",
+    "hours": "{count, plural, one {# hora} other {# horas}}",
+    "line_subtotal": "Subtotal",
+    "line_platform_fee": "Comisión de plataforma",
+    "line_tip": "Propina (opcional)",
+    "line_total": "Total",
+    "confirm_cta": "Confirmar reserva",
+    "policy_note": "Al confirmar aceptas la política de cancelación y los términos del servicio.",
+    "success_title": "¡Reserva confirmada!",
+    "success_body": "Hemos avisado a {name}. Recibirás una confirmación por correo y podrás chatear en cuanto acepte.",
+    "success_next": "Volver al inicio"
   }
 }
