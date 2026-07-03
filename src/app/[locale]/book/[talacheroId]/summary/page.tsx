@@ -5,6 +5,7 @@ import type { ServiceSlug } from "@/lib/mock/services";
 import { CheckoutView, type CheckoutData } from "./checkout-view";
 
 const PLATFORM_FEE_PCT = 0.15;
+const TZ = "America/Mexico_City";
 
 export default async function CheckoutPage({
   params,
@@ -21,25 +22,40 @@ export default async function CheckoutPage({
   const talachero = await getTalacheroById(talacheroId);
   if (!talachero) notFound();
 
-  const service = (
-    typeof sp.service === "string" ? sp.service : talachero.primaryService
-  ) as ServiceSlug;
-  const description = typeof sp.description === "string" ? sp.description : "";
-  const address = typeof sp.address === "string" ? sp.address : "";
-  const date = typeof sp.date === "string" ? sp.date : "";
-  const time = typeof sp.time === "string" ? sp.time : "";
-  const hours = Math.max(
-    1,
-    Math.min(8, Number(typeof sp.hours === "string" ? sp.hours : 2) || 2)
-  );
+  const str = (v: string | string[] | undefined) => (typeof v === "string" ? v : "");
+
+  const service = (str(sp.service) || talachero.primaryService) as ServiceSlug;
+  const description = str(sp.description);
+  const address = str(sp.address);
+  const slotId = str(sp.slotId);
+  const slotStart = str(sp.slotStart);
+  const hours = Math.max(1, Math.min(8, Number(str(sp.hours)) || 2));
+
+  // A slot must have been chosen on the previous step.
+  if (!slotId || !slotStart) notFound();
+
+  const start = new Date(slotStart);
+  const date = new Intl.DateTimeFormat(currentLocale, {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    timeZone: TZ,
+  }).format(start);
+  const time = new Intl.DateTimeFormat(currentLocale, {
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: TZ,
+  }).format(start);
 
   const subtotal = talachero.hourlyRateMxn * hours;
   const platformFee = Math.round(subtotal * PLATFORM_FEE_PCT);
   const total = subtotal + platformFee;
 
   const data: CheckoutData = {
+    talacheroId: talachero.id,
     talacheroName: talachero.name,
     talacheroInitials: talachero.initials,
+    slotId,
     service,
     description,
     address,

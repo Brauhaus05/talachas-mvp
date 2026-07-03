@@ -92,6 +92,27 @@ export async function listTalacheros(): Promise<Talachero[]> {
   return ((data ?? []) as DirectoryRow[]).map((row) => toTalachero(row, []));
 }
 
+export interface TalacheroSlot {
+  id: string;
+  /** ISO timestamp (UTC) of the slot start. */
+  startTime: string;
+}
+
+/** Open, future availability slots for a talachero, ordered by start time. */
+export async function getTalacheroSlots(talacheroId: string): Promise<TalacheroSlot[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("availability_slots")
+    .select("id, start_time")
+    .eq("talachero_id", talacheroId)
+    .eq("status", "open")
+    .gte("start_time", new Date().toISOString())
+    .order("start_time")
+    .limit(80);
+  if (error) throw error;
+  return (data ?? []).map((s) => ({ id: s.id, startTime: s.start_time }));
+}
+
 export async function getTalacheroById(id: string): Promise<Talachero | null> {
   const supabase = await createClient();
   const [profile, reviews] = await Promise.all([
