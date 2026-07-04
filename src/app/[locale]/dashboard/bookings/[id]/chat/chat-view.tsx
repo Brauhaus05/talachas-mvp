@@ -71,15 +71,33 @@ export function ChatView({
     sendingRef.current = true;
     setPending(true);
     setError(false);
-    const { error: insertError } = await supabase
+    const { data, error: insertError } = await supabase
       .from("chat_messages")
-      .insert({ thread_id: threadId, sender_id: currentUserId, body });
+      .insert({ thread_id: threadId, sender_id: currentUserId, body })
+      .select("id, sender_id, body, created_at")
+      .single();
     sendingRef.current = false;
     setPending(false);
-    if (insertError) {
+    if (insertError || !data) {
       setError(true);
       return;
     }
+    // Append immediately rather than waiting for the realtime echo (the channel
+    // may not be SUBSCRIBED yet, e.g. sending right after page load). The
+    // subscription handler dedupes by id, so a later echo won't duplicate.
+    setMessages((prev) =>
+      prev.some((m) => m.id === data.id)
+        ? prev
+        : [
+            ...prev,
+            {
+              id: data.id,
+              senderId: data.sender_id,
+              body: data.body,
+              createdAt: data.created_at,
+            },
+          ]
+    );
     setInput("");
   }
 
