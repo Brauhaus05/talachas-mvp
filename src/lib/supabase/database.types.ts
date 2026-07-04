@@ -194,6 +194,39 @@ export type Database = {
           },
         ]
       }
+      chat_reads: {
+        Row: {
+          last_read_at: string
+          thread_id: string
+          user_id: string
+        }
+        Insert: {
+          last_read_at?: string
+          thread_id: string
+          user_id: string
+        }
+        Update: {
+          last_read_at?: string
+          thread_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_reads_thread_id_fkey"
+            columns: ["thread_id"]
+            isOneToOne: false
+            referencedRelation: "chat_threads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_reads_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chat_threads: {
         Row: {
           booking_id: string
@@ -631,6 +664,7 @@ export type Database = {
           talachero_name: string
         }[]
       }
+      get_or_create_thread: { Args: { p_booking_id: string }; Returns: string }
       get_talachero_bookings: {
         Args: never
         Returns: {
@@ -654,6 +688,14 @@ export type Database = {
           created_at: string
           id: string
           rating: number
+        }[]
+      }
+      get_unread_count: { Args: never; Returns: number }
+      get_unread_map: {
+        Args: never
+        Returns: {
+          booking_id: string
+          unread: number
         }[]
       }
       is_admin: { Args: never; Returns: boolean }

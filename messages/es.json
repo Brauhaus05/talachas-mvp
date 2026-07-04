@@ -270,6 +270,18 @@
     "pay_failed": "Pago fallido",
     "tip_prompt": "¿Quieres dejar propina?",
     "tip_success": "¡Gracias por tu propina!",
-    "paid_success": "¡Pago autorizado! Tu reserva está en camino."
+    "paid_success": "¡Pago autorizado! Tu reserva está en camino.",
+    "action_messages": "Mensajes",
+    "unread_aria": "{count} mensajes sin leer"
+  },
+  "chat": {
+    "title": "Mensajes",
+    "with": "Con {name}",
+    "placeholder": "Escribe un mensaje…",
+    "send": "Enviar",
+    "empty": "Aún no hay mensajes. Escribe el primero.",
+    "read_only": "Esta reserva está cancelada. El historial es de solo lectura.",
+    "back": "Volver al panel",
+    "send_error": "No se pudo enviar. Inténtalo de nuevo."
   }
 }

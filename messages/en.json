@@ -270,6 +270,18 @@
     "pay_failed": "Payment failed",
     "tip_prompt": "Leave a tip?",
     "tip_success": "Thanks for your tip!",
-    "paid_success": "Payment authorized! Your booking is on its way."
+    "paid_success": "Payment authorized! Your booking is on its way.",
+    "action_messages": "Messages",
+    "unread_aria": "{count} unread messages"
+  },
+  "chat": {
+    "title": "Messages",
+    "with": "With {name}",
+    "placeholder": "Type a message…",
+    "send": "Send",
+    "empty": "No messages yet. Send the first one.",
+    "read_only": "This booking is cancelled. History is read-only.",
+    "back": "Back to dashboard",
+    "send_error": "Couldn’t send. Try again."
   }
 }

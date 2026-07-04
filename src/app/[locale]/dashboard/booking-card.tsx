@@ -2,6 +2,8 @@ import { getTranslations } from "next-intl/server";
 import { Badge } from "@/components/ui/badge";
 import { formatMoney } from "@/lib/format";
 import type { BookingStatus } from "@/lib/supabase/types";
+import { Link } from "@/i18n/navigation";
+import type { Route } from "next";
 
 const TZ = "America/Mexico_City";
 
@@ -19,6 +21,8 @@ export async function BookingCard({
   price,
   locale,
   actions,
+  bookingId,
+  unread = 0,
 }: {
   serviceSlug: string;
   party: string;
@@ -28,6 +32,8 @@ export async function BookingCard({
   price: number | null;
   locale: string;
   actions?: React.ReactNode;
+  bookingId: string;
+  unread?: number;
 }) {
   const t = await getTranslations();
   const showPayment = paymentStatus && paymentStatus !== "none";
@@ -66,7 +72,16 @@ export async function BookingCard({
           </span>
         )}
       </div>
-      {actions && <div className="flex flex-wrap gap-2 pt-1">{actions}</div>}
+      <div className="flex flex-wrap items-center gap-2 pt-1">
+        <Link
+          href={`/dashboard/bookings/${bookingId}/chat` as Route}
+          className="border-border-strong text-text-primary hover:bg-surface-muted rounded-md border px-3 py-1.5 text-xs font-medium transition-colors"
+        >
+          {t("dashboard.action_messages")}
+          {unread > 0 ? ` (${unread})` : ""}
+        </Link>
+        {actions}
+      </div>
     </div>
   );
 }
