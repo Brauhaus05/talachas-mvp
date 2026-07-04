@@ -38,20 +38,30 @@ export async function getThreadMessages(
   }));
 }
 
-/** Total unread messages for the signed-in user (nav badge). */
+/** Total unread messages for the signed-in user (nav badge). Non-critical:
+ * degrades to 0 on error rather than breaking the layout it renders in. */
 export async function getUnreadCount(): Promise<number> {
-  const supabase = await createClient();
-  const { data, error } = await supabase.rpc("get_unread_count");
-  if (error) throw error;
-  return (data as number | null) ?? 0;
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc("get_unread_count");
+    if (error) throw error;
+    return (data as number | null) ?? 0;
+  } catch {
+    return 0;
+  }
 }
 
-/** Per-booking unread counts for the signed-in user (booking cards). */
+/** Per-booking unread counts for the signed-in user (booking cards).
+ * Non-critical: degrades to an empty map on error. */
 export async function getUnreadMap(): Promise<Map<string, number>> {
-  const supabase = await createClient();
-  const { data, error } = await supabase.rpc("get_unread_map");
-  if (error) throw error;
   const map = new Map<string, number>();
-  for (const row of data ?? []) map.set(row.booking_id, row.unread);
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase.rpc("get_unread_map");
+    if (error) throw error;
+    for (const row of data ?? []) map.set(row.booking_id, row.unread);
+  } catch {
+    // Unread counts are non-critical; degrade to none rather than break the page.
+  }
   return map;
 }

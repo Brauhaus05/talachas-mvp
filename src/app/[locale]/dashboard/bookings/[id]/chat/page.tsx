@@ -3,7 +3,7 @@ import type { Route } from "next";
 import { getTranslations } from "next-intl/server";
 import { ArrowLeft } from "lucide-react";
 import { Link } from "@/i18n/navigation";
-import { getAppUser } from "@/lib/auth";
+import { getAppUser, dashboardPathForRole } from "@/lib/auth";
 import { getMyBookings, getTalacheroBookings } from "@/lib/data/bookings";
 import { getOrCreateThread, getThreadMessages } from "@/lib/data/chat";
 import { ChatView } from "./chat-view";
@@ -50,7 +50,7 @@ export default async function BookingChatPage({
     <div className="flex flex-col gap-6">
       <div>
         <Link
-          href="/dashboard"
+          href={dashboardPathForRole(user.role) as Route}
           className="text-text-secondary hover:text-text-primary mb-4 inline-flex items-center gap-1 text-sm"
         >
           <ArrowLeft className="h-4 w-4" aria-hidden />
