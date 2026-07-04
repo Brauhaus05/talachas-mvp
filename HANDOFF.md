@@ -11,11 +11,12 @@
 | **2 — Data model + Auth** | ✅ merged (PR #1) |
 | **3 — Search / profile / booking (real data)** | ✅ merged (PR #2 + #3) — exit criterion met |
 | **4A — Stripe Connect onboarding** | ✅ merged (PR #4) — onboarding verified in Stripe test mode |
-| **4B — Payments (checkout / capture / refund / tips / ledger)** | ✅ merged (PR #6) + **verified end-to-end in Stripe test mode** (2026-07-04) — fixes in **PR #7 (open)** |
+| **4B — Payments (checkout / capture / refund / tips / ledger)** | ✅ merged (PR #6) + **verified end-to-end in Stripe test mode** (2026-07-04); verification fixes in **PR #7 (merged)** |
+| **5A — Chat + in-app unread badge** | ✅ merged (PR #10) — real-time 1:1 chat per booking (Supabase Realtime), **verified live in the browser** (2026-07-04) |
 
-`main` is at `4818c6e` (Phases 0–4B). **PR #7 (`fix/4b-payment-verification`) is open** — the 4B verification fixes (pricing display, refund reversal, env-driven Connect country), an expanded **`CLAUDE.md`** (architecture + workflow onboarding doc, commit `76decd1`), and this handoff; not yet merged. Working tree otherwise clean; the local Supabase stack + seed reproduce everything.
+`main` is at `0a590e7` (Phases 0–4B **+ 5A**). This session merged **PR #7** (4B verification fixes + expanded `CLAUDE.md` — start there for a fast architecture read), **PR #8** (completed-booking refund UI deferred to Phase 6 admin), **PR #9** (env-driven currency), and **PR #10** (Phase 5A chat + unread badge). Working tree clean. The local Supabase stack is **currently stopped** — `pnpm exec supabase start` to resume; the docker volume preserves seed data + Stripe onboarding + this session's chat/booking test data.
 
-**The core marketplace loop is now real end-to-end:** discover → book (concurrency-safe slot) → pay (Stripe escrow, manual capture) → accept → complete → capture + 15% split → tip → refund, with an immutable `transactions` ledger.
+**The core marketplace loop is now real end-to-end:** discover → book (concurrency-safe slot) → pay (Stripe escrow, manual capture) → **chat** → accept → complete → capture + 15% split → tip → refund, with an immutable `transactions` ledger.
 
 ---
 
@@ -69,16 +70,30 @@ End-to-end run in the browser confirmed the ledger/webhook machinery for **every
 - **🐛 (DEFERRED → Phase 6 admin) Refund is unreachable through the UI.** `cancelBooking`'s refund branch only fires when `payment_status='captured'`, but capture happens *only* at completion, and **completed bookings expose no cancel control** on either dashboard (client shows tips only; talachero cancel is limited to `confirmed`/`in_progress`); the `cancel_booking` RPC also rejects `completed`. So the refund path is only reachable via the Stripe CLI (as verified above). **Decision (2026-07-04): a completed-booking refund is a mediated dispute/goodwill action → build it as an admin-panel action in Phase 6, not a self-service dashboard control.** The money mechanics are done (reverse-transfer + fee reversal, below) and the `captured` branch in `dashboard/actions.ts` is kept as the reference implementation (commented; do not delete). Full design + Phase 6 requirements: `docs/superpowers/specs/2026-07-04-completed-booking-refund-design.md`. Pairs with the deferred **cancellation-policy** tiers (partial/tiered refunds).
 - **🐛 (FIXED) Refund didn't reverse the transfer or the fee.** `cancelBooking` called `stripe.refunds.create({ payment_intent })` with no `reverse_transfer` / `refund_application_fee`, so on a captured booking the client was refunded in full but the **talachero kept their payout** and the **platform ate the loss** (−$476). Fixed in `dashboard/actions.ts`: full refunds now set `reverse_transfer: true` + `refund_application_fee: true` (client whole, no party retains funds). **Partial/tiered refunds** per cancellation policy remain TODO (below) — today's fix assumes a full refund.
 
+---
+
+## Currency — env-driven (PR #9, 2026-07-04)
+
+A single **`NEXT_PUBLIC_CURRENCY`** (default `MXN`) now drives **both** the Stripe charge currency and the display formatter (`src/lib/format.ts` → `getCurrency()` + `formatMoney`, replacing the old `formatMxn`). Set to `CAD` in `.env.local` for local testing against the Canadian platform account (charging MXN to a CA-region connected account conflicts); pairs with `STRIPE_CONNECT_COUNTRY`. **Production leaves both unset → MXN / MX.** No migration — the `bookings.currency` column still stores `MXN` (a harmless stale artifact; it's no longer the charge source and isn't read for display). **Verified live in the browser** (2026-07-04): a CAD booking charged `CA$560` + `CA$84` app fee to Carlos's CA connected account (PaymentIntent `currency: cad`), all display/ledger in CAD.
+
+## Phase 5A — what shipped (chat + unread badge, PR #10)
+
+- **Real-time 1:1 chat per booking** via Supabase Realtime, reusing the existing `chat_threads` / `chat_messages`. New migration `20260704120001_phase5_chat.sql` adds **`chat_reads`** (per-participant read watermark), **`get_or_create_thread`** (chat_threads had no INSERT policy), a tightened `chat_messages` INSERT policy (**cancelled booking → read-only**, enforced in DB + UI), **`get_unread_count`** / **`get_unread_map`**, and adds `chat_messages` to the **`supabase_realtime`** publication.
+- **Per-booking chat page** `/dashboard/bookings/[id]/chat` (server route authorizes via the caller's own booking projection → **404 for non-participants**). Client `ChatView` subscribes to `postgres_changes`, sends via **direct RLS-guarded inserts** (optimistic append + id-dedup so the echo doesn't double), marks the thread read on open.
+- **Unread badge** is **server-computed on navigation**: total on the "Mi panel" nav link + per-booking `Mensajes (n)` on cards. `getUnreadCount`/`getUnreadMap` **degrade gracefully** (a badge/RPC failure never breaks the layout it renders in).
+- **Verified live in the browser** (2026-07-04): realtime send + receive, optimistic append (no dup), cancelled read-only, unread badge increments then clears on open, non-participant 404. typecheck / lint / build green.
+- Design + plan: `docs/superpowers/specs/2026-07-04-chat-unread-badge-design.md`, `docs/superpowers/plans/2026-07-04-phase5-chat.md`.
+
 ## What's next (remaining MVP — PRD's 11 in-scope items)
 
-Done (8/11): auth, profiles, KYC (Connect), search/filter, availability slots, booking + concurrency, payments/commission/tips.
+Done (9/11): auth, profiles, KYC (Connect), search/filter, availability slots, booking + concurrency, payments/commission/tips, **1:1 chat**.
 
 | Phase | Scope | Size |
 |---|---|---|
-| **5 — Chat + notifications** | 1:1 chat per booking (Supabase Realtime), email for key events (Resend), in-app unread badge | 2–3 d |
+| **5B — Email notifications** | Resend for key events (booking confirmed, reminder, payment processed, new review), decoupled from business flows per PRD §6.6. The other half of Phase 5; chat + unread badge (5A) already shipped. | 1–2 d |
 | **6 — Reviews loop + admin** | post-completion review prompt (schema exists; needs UI + rating-rollup trigger), admin panel (users/bookings/disputes/**refunds** — includes the deferred completed-booking refund control; mechanics ready in `dashboard/actions.ts`) | 2–3 d |
 
-**Recommended order:** verify 4B → Phase 5 → Phase 6, slotting the deferred talachero self-service tooling in before onboarding real (non-seed) talacheros.
+**Recommended order:** Phase 5B → Phase 6, slotting the deferred talachero self-service tooling in before onboarding real (non-seed) talacheros.
 
 ---
 
@@ -90,7 +105,8 @@ Done (8/11): auth, profiles, KYC (Connect), search/filter, availability slots, b
 - **Location UX**: neighborhood picker (colonia points + `ST_DWithin`) — **deferred**, lands when a location input appears in search
 - **Commission**: 15% via `PLATFORM_FEE_PCT` env
 - **Slot granularity**: 1 hour; a booking reserves one slot (`hours` is an informational price estimate)
-- **Chat provider (Phase 5)**: default Supabase Realtime
+- **Chat provider (Phase 5)**: Supabase Realtime — **shipped in 5A**
+- **Currency**: env-driven `NEXT_PUBLIC_CURRENCY` (default `MXN`); prod unset. See the Currency section above
 
 ## Still-open / deferred
 
@@ -119,7 +135,7 @@ pnpm dev                           # :3000
 
 **Commands:** `pnpm dev` · `pnpm build` · `pnpm typecheck` · `pnpm lint` · `pnpm format`
 
-**Design constraints:** grayscale only (tokens, never hex/rgb; state via icon+text). Every visible string through `t()`; both locales in sync (currently 217 keys each).
+**Design constraints:** grayscale only (tokens, never hex/rgb; state via icon+text). Every visible string through `t()`; keep `messages/es.json` and `messages/en.json` in sync (same key set — a quick `node -e` diff of the two catches drift).
 
 ---
 
@@ -138,13 +154,15 @@ pnpm dev                           # :3000
 - **`migration up`, not `db reset`, once a talachero is onboarded** — the seed doesn't set Stripe fields, so `db reset` wipes onboarding. Apply new migrations with `supabase migration up --local`; only reset when you deliberately want a clean seed. After a function's return columns change, `DROP` then `CREATE` (CREATE OR REPLACE can't alter OUT columns).
 - **Only `charges_enabled` talacheros are bookable-with-payment** — seed talacheros must onboard first; `confirmBooking` returns `talachero_not_payable` otherwise. Search still gates on `verification_status='verified'` (seed sets it), so the directory is unaffected.
 - **Prettier drift** — the committed Phase 1 files don't all match current prettier output; `pnpm format` reformats unrelated files. Format only the files you touched, or revert incidental reformats before committing.
+- **Supabase Realtime (chat)** — a table must be in the `supabase_realtime` publication AND the subscriber must pass the table's RLS `SELECT` to receive `postgres_changes` (so both booking participants get messages; outsiders get nothing). The browser client authenticates the stream via the SSR session. The **channel takes ~1s to reach `SUBSCRIBED`** after mount — a message sent in that window won't arrive via the echo, so `ChatView` **optimistically appends the sent row** (deduped by id) rather than relying on the echo alone.
+- **Server-computed unread badge** — `TopNavBar`/dashboards read `get_unread_count`/`get_unread_map` on render; **mark-read** (`chat_reads` upsert) happens client-side on chat open, so the badge clears on the *next* navigation, not instantly (by design — see 5A spec). These RPCs degrade to 0/empty on error so a failure never breaks the layout.
 
 ---
 
 ## What to say to Claude next session
 
-> Continuing Talachas. Phases 0–4B are merged and **4B was verified end-to-end in Stripe test mode** (see "Verification results" above). **PR #7 is open** with the fixes that came out of that run plus a new **`CLAUDE.md`** (start there for a fast architecture read) — review/merge it first. Then bring up the local stack and start **Phase 5 — chat + notifications** (1:1 chat per booking via Supabase Realtime; email via Resend; in-app unread badge). Read `plan.md` §Phase 5 and `prd.md` §6.6 first.
+> Continuing Talachas. Phases 0–4B **and 5A (chat + unread badge)** are merged; **4B and 5A were both verified live in the browser** in Stripe test mode (see the sections above). `main` is at `0a590e7`; `CLAUDE.md` is the fast architecture read. Next up: **Phase 5B — email notifications** (Resend) for key booking events (confirmed, reminder, payment processed, new review), decoupled per PRD §6.6 — the second half of Phase 5. Read `plan.md` §Phase 5 and `prd.md` §6.6, bring up the local stack (`pnpm exec supabase start` — data preserved), and brainstorm 5B before building.
 
-**Before onboarding any real talacheros**, resolve the two 4B follow-ups (both in "Still-open / deferred"): the **🚨 MX platform Stripe account** (production blocker) and the **refund UI** for completed bookings (pairs naturally with the deferred cancellation-policy tiers — the refund reversal is already wired). If you'd rather tackle those, or the deferred **talachero self-service tooling** / **neighborhood `ST_DWithin` search**, before Phase 5, say so.
+**Before onboarding any real talacheros**, resolve the **🚨 MX platform Stripe account** production blocker (below), and note the deferred Phase 6 items: the **admin completed-booking refund control** (mechanics wired; design in `docs/superpowers/specs/2026-07-04-completed-booking-refund-design.md`) and **talachero self-service tooling**. If you'd rather tackle those, or the deferred **neighborhood `ST_DWithin` search**, before 5B, say so.
 
-**Local test note:** `.env.local` currently has `STRIPE_CONNECT_COUNTRY=CA` (workaround so the Canadian test platform can pay connected accounts). Carlos (`carlos.mendoza@demo.talachas.mx`) is onboarded as a **CA** test account and has a completed→refunded booking from this session. `db reset` wipes that onboarding — use `migration up`.
+**Local test note:** `.env.local` has `STRIPE_CONNECT_COUNTRY=CA` **and `NEXT_PUBLIC_CURRENCY=CAD`** (workarounds so the Canadian test platform can charge + pay connected accounts). Carlos (`carlos.mendoza@demo.talachas.mx`) is onboarded as a **CA** test account. Session test data (in the docker volume): a CAD authorized booking + a demo chat thread between Mariana and Carlos. The Supabase stack is **stopped** — `pnpm exec supabase start` to resume. **Use `migration up`, never `db reset`** (a reset wipes Carlos's onboarding). For real MX production, unset both env overrides.
