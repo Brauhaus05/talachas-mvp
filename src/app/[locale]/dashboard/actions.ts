@@ -76,8 +76,14 @@ export async function cancelBooking(formData: FormData) {
       // Full refund of a completed booking: claw back the talachero's payout
       // (reverse_transfer) and return the platform commission
       // (refund_application_fee) so no party retains funds for a cancelled job.
-      // Tiered/partial refunds per cancellation policy are still TODO — see
-      // HANDOFF "cancellation-policy time windows (refund tiers)".
+      //
+      // NOTE: this branch is currently UNREACHABLE via cancelBooking — capture
+      // only happens at completion, and cancel_booking rejects 'completed'
+      // (raises invalid_state). It is intentionally kept as the reference
+      // implementation for the deferred Phase 6 ADMIN refund control (see
+      // docs/superpowers/specs/2026-07-04-completed-booking-refund-design.md).
+      // Do NOT delete as dead code. Tiered/partial refunds per cancellation
+      // policy are still TODO — see HANDOFF "cancellation-policy time windows".
       await safe(() =>
         stripe.refunds.create({
           payment_intent: pay.stripe_payment_intent_id!,
