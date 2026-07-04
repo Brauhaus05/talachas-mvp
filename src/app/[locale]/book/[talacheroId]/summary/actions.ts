@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { getStripe } from "@/lib/stripe/server";
 import { getAppUrl, getPlatformFeePct } from "@/lib/stripe/config";
+import { getCurrency } from "@/lib/format";
 
 export type ConfirmState = { status: "idle" } | { status: "error"; error: string };
 
@@ -91,7 +92,10 @@ export async function confirmBooking(
 
   const amountMinor = Math.round(Number(booking?.price ?? 0) * 100);
   const feeMinor = Math.round(amountMinor * getPlatformFeePct());
-  const currency = (booking?.currency ?? "MXN").toLowerCase();
+  // Charge in the configured currency (getCurrency, default MXN). Overridable
+  // via NEXT_PUBLIC_CURRENCY for local testing against a non-MX platform
+  // account, where charging MXN to a CA-region connected account conflicts.
+  const currency = getCurrency().toLowerCase();
   const appUrl = getAppUrl();
 
   const session = await getStripe().checkout.sessions.create({

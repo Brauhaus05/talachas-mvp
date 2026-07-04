@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { Badge } from "@/components/ui/badge";
-import { formatMxn } from "@/lib/format";
+import { formatMoney } from "@/lib/format";
 import type { BookingStatus } from "@/lib/supabase/types";
 
 const TZ = "America/Mexico_City";
@@ -62,7 +62,7 @@ export async function BookingCard({
         </span>
         {price != null && (
           <span className="text-text-primary font-medium">
-            {formatMxn(price, locale)}
+            {formatMoney(price, locale)}
           </span>
         )}
       </div>

@@ -11,7 +11,7 @@ import { IconTile } from "@/components/ui/icon-tile";
 import { ReviewCard } from "@/components/talacheros/review-card";
 import { getTalacheroById } from "@/lib/data/talacheros";
 import { getService } from "@/lib/mock/services";
-import { formatMxn } from "@/lib/format";
+import { formatMoney } from "@/lib/format";
 
 export default async function TalacheroProfilePage({
   params,
@@ -74,7 +74,7 @@ export default async function TalacheroProfilePage({
           <div className="flex flex-col items-start gap-4 md:items-end">
             <div className="flex flex-col md:items-end">
               <span className="text-text-primary text-4xl font-semibold">
-                {formatMxn(talachero.hourlyRateMxn, currentLocale)}
+                {formatMoney(talachero.hourlyRateMxn, currentLocale)}
               </span>
               <span className="text-text-muted text-xs tracking-wider uppercase">
                 {t("common.per_hour").replace("/", "")}
@@ -126,7 +126,7 @@ export default async function TalacheroProfilePage({
                       </p>
                     </div>
                     <p className="text-text-primary text-sm font-medium">
-                      {formatMxn(svc.startingRateMxn, currentLocale)}
+                      {formatMoney(svc.startingRateMxn, currentLocale)}
                       <span className="text-text-muted text-xs font-normal">
                         {t("common.per_hour")}
                       </span>
@@ -172,7 +172,7 @@ export default async function TalacheroProfilePage({
               {t("common.starting_at")}
             </p>
             <p className="text-text-primary text-3xl font-semibold">
-              {formatMxn(talachero.hourlyRateMxn, currentLocale)}
+              {formatMoney(talachero.hourlyRateMxn, currentLocale)}
               <span className="text-text-muted text-sm font-normal">
                 {t("common.per_hour")}
               </span>

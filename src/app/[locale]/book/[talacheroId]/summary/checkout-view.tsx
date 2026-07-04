@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { formatMxn } from "@/lib/format";
+import { formatMoney } from "@/lib/format";
 import type { ServiceSlug } from "@/lib/mock/services";
 import { confirmBooking, type ConfirmState } from "./actions";
 
@@ -97,12 +97,12 @@ export function CheckoutView({ data }: { data: CheckoutData }) {
         <aside className="border-border bg-surface-raised flex flex-col gap-4 rounded-2xl border p-6">
           <LineItem
             label={t("checkout.line_subtotal")}
-            value={formatMxn(data.subtotalMxn, data.currencyLocale)}
+            value={formatMoney(data.subtotalMxn, data.currencyLocale)}
           />
           <div className="border-border border-t pt-4">
             <LineItem
               label={t("checkout.line_total")}
-              value={formatMxn(data.totalMxn, data.currencyLocale)}
+              value={formatMoney(data.totalMxn, data.currencyLocale)}
               emphasis
             />
           </div>

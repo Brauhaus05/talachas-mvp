@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { getStripe } from "@/lib/stripe/server";
 import { getAppUrl } from "@/lib/stripe/config";
+import { getCurrency } from "@/lib/format";
 
 async function revalidateDashboards(locale: string) {
   revalidatePath(`/${locale}/dashboard`);
@@ -123,7 +124,7 @@ export async function tipBooking(formData: FormData) {
   // Verify the caller owns this (completed) booking via RLS-scoped read.
   const { data: booking } = await supabase
     .from("bookings")
-    .select("id, talachero_id, currency, status, client_id")
+    .select("id, talachero_id, status, client_id")
     .eq("id", id)
     .maybeSingle();
   if (!booking || booking.status !== "completed") {
@@ -148,7 +149,7 @@ export async function tipBooking(formData: FormData) {
       {
         quantity: 1,
         price_data: {
-          currency: booking.currency.toLowerCase(),
+          currency: getCurrency().toLowerCase(),
           unit_amount: Math.round(amount * 100),
           product_data: { name: "Talachas — propina" },
         },

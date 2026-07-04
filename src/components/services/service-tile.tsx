@@ -3,7 +3,7 @@ import { ArrowUpRight } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { IconTile } from "@/components/ui/icon-tile";
 import { Badge } from "@/components/ui/badge";
-import { formatMxn } from "@/lib/format";
+import { formatMoney } from "@/lib/format";
 import type { ServiceCategory } from "@/lib/mock/services";
 
 export async function ServiceTile({
@@ -52,7 +52,7 @@ export async function ServiceTile({
           {t(`services.${service.slug}.description`)}
         </p>
         <p className="text-text-muted mt-4 text-xs uppercase tracking-wider">
-          {t("common.starting_at")} {formatMxn(service.startingRateMxn, locale)}
+          {t("common.starting_at")} {formatMoney(service.startingRateMxn, locale)}
           {t("common.per_hour")}
         </p>
       </div>
