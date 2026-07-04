@@ -1,4 +1,4 @@
-# Session Handoff — 2026-07-03
+# Session Handoff — 2026-07-04
 
 > Read alongside [prd.md](./prd.md) and [plan.md](./plan.md). This captures what the code and git log **don't** — session decisions, verification state, and where to pick up.
 
@@ -11,9 +11,9 @@
 | **2 — Data model + Auth** | ✅ merged (PR #1) |
 | **3 — Search / profile / booking (real data)** | ✅ merged (PR #2 + #3) — exit criterion met |
 | **4A — Stripe Connect onboarding** | ✅ merged (PR #4) — onboarding verified in Stripe test mode |
-| **4B — Payments (checkout / capture / refund / tips / ledger)** | ✅ built (PR #6, CI green) — **pending owner's end-to-end payment verification** |
+| **4B — Payments (checkout / capture / refund / tips / ledger)** | ✅ merged (PR #6) + **verified end-to-end in Stripe test mode** (2026-07-04) — fixes in **PR #7 (open)** |
 
-`main` is at `44b1b32` (Phases 0–4A + handoff). **PR #6 (4B) is green and unmerged.** Working tree clean; the local Supabase stack + seed reproduce everything.
+`main` is at `4818c6e` (Phases 0–4B). **PR #7 (`fix/4b-payment-verification`) is open** — the 4B verification fixes (pricing display, refund reversal, env-driven Connect country) + this handoff; not yet merged. Working tree otherwise clean; the local Supabase stack + seed reproduce everything.
 
 **The core marketplace loop is now real end-to-end:** discover → book (concurrency-safe slot) → pay (Stripe escrow, manual capture) → accept → complete → capture + 15% split → tip → refund, with an immutable `transactions` ledger.
 
@@ -143,6 +143,8 @@ pnpm dev                           # :3000
 
 ## What to say to Claude next session
 
-> Continuing Talachas. Phases 0–4A are merged; **Phase 4B (payments) is PR #6 — green, unmerged**. I've run the 4B payment runbook end-to-end in Stripe test mode [report results]. Merge #6, bring up the local stack, and start **Phase 5 — chat + notifications** (1:1 chat per booking via Supabase Realtime; email via Resend; in-app unread badge). Read `plan.md` §Phase 5 and `prd.md` §6.6 first.
+> Continuing Talachas. Phases 0–4B are merged and **4B was verified end-to-end in Stripe test mode** (see "Verification results" above). **PR #7 is open** with the fixes that came out of that run — review/merge it first. Then bring up the local stack and start **Phase 5 — chat + notifications** (1:1 chat per booking via Supabase Realtime; email via Resend; in-app unread badge). Read `plan.md` §Phase 5 and `prd.md` §6.6 first.
 
-If the 4B payment verification surfaced issues, report those first. If you'd rather build the deferred **talachero self-service tooling** (onboarding form + availability editor) or **neighborhood/`ST_DWithin` search** before Phase 5, say so.
+**Before onboarding any real talacheros**, resolve the two 4B follow-ups (both in "Still-open / deferred"): the **🚨 MX platform Stripe account** (production blocker) and the **refund UI** for completed bookings (pairs naturally with the deferred cancellation-policy tiers — the refund reversal is already wired). If you'd rather tackle those, or the deferred **talachero self-service tooling** / **neighborhood `ST_DWithin` search**, before Phase 5, say so.
+
+**Local test note:** `.env.local` currently has `STRIPE_CONNECT_COUNTRY=CA` (workaround so the Canadian test platform can pay connected accounts). Carlos (`carlos.mendoza@demo.talachas.mx`) is onboarded as a **CA** test account and has a completed→refunded booking from this session. `db reset` wipes that onboarding — use `migration up`.
