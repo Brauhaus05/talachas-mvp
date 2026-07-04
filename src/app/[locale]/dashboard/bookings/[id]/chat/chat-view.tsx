@@ -23,6 +23,7 @@ export function ChatView({
   const [error, setError] = useState(false);
   const [pending, setPending] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const sendingRef = useRef(false);
 
   // Mark this thread read (own row, RLS-guarded upsert).
   async function markRead() {
@@ -66,12 +67,14 @@ export function ChatView({
   async function handleSend(e: React.FormEvent) {
     e.preventDefault();
     const body = input.trim();
-    if (!body || pending) return;
+    if (!body || sendingRef.current) return;
+    sendingRef.current = true;
     setPending(true);
     setError(false);
     const { error: insertError } = await supabase
       .from("chat_messages")
       .insert({ thread_id: threadId, sender_id: currentUserId, body });
+    sendingRef.current = false;
     setPending(false);
     if (insertError) {
       setError(true);
