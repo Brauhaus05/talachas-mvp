@@ -13,7 +13,7 @@
 | **4A — Stripe Connect onboarding** | ✅ merged (PR #4) — onboarding verified in Stripe test mode |
 | **4B — Payments (checkout / capture / refund / tips / ledger)** | ✅ merged (PR #6) + **verified end-to-end in Stripe test mode** (2026-07-04) — fixes in **PR #7 (open)** |
 
-`main` is at `4818c6e` (Phases 0–4B). **PR #7 (`fix/4b-payment-verification`) is open** — the 4B verification fixes (pricing display, refund reversal, env-driven Connect country) + this handoff; not yet merged. Working tree otherwise clean; the local Supabase stack + seed reproduce everything.
+`main` is at `4818c6e` (Phases 0–4B). **PR #7 (`fix/4b-payment-verification`) is open** — the 4B verification fixes (pricing display, refund reversal, env-driven Connect country), an expanded **`CLAUDE.md`** (architecture + workflow onboarding doc, commit `76decd1`), and this handoff; not yet merged. Working tree otherwise clean; the local Supabase stack + seed reproduce everything.
 
 **The core marketplace loop is now real end-to-end:** discover → book (concurrency-safe slot) → pay (Stripe escrow, manual capture) → accept → complete → capture + 15% split → tip → refund, with an immutable `transactions` ledger.
 
@@ -143,7 +143,7 @@ pnpm dev                           # :3000
 
 ## What to say to Claude next session
 
-> Continuing Talachas. Phases 0–4B are merged and **4B was verified end-to-end in Stripe test mode** (see "Verification results" above). **PR #7 is open** with the fixes that came out of that run — review/merge it first. Then bring up the local stack and start **Phase 5 — chat + notifications** (1:1 chat per booking via Supabase Realtime; email via Resend; in-app unread badge). Read `plan.md` §Phase 5 and `prd.md` §6.6 first.
+> Continuing Talachas. Phases 0–4B are merged and **4B was verified end-to-end in Stripe test mode** (see "Verification results" above). **PR #7 is open** with the fixes that came out of that run plus a new **`CLAUDE.md`** (start there for a fast architecture read) — review/merge it first. Then bring up the local stack and start **Phase 5 — chat + notifications** (1:1 chat per booking via Supabase Realtime; email via Resend; in-app unread badge). Read `plan.md` §Phase 5 and `prd.md` §6.6 first.
 
 **Before onboarding any real talacheros**, resolve the two 4B follow-ups (both in "Still-open / deferred"): the **🚨 MX platform Stripe account** (production blocker) and the **refund UI** for completed bookings (pairs naturally with the deferred cancellation-policy tiers — the refund reversal is already wired). If you'd rather tackle those, or the deferred **talachero self-service tooling** / **neighborhood `ST_DWithin` search**, before Phase 5, say so.
 
