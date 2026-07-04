@@ -53,11 +53,21 @@ Money model: **15% fee via `PLATFORM_FEE_PCT`, manual capture** (authorize at bo
 
 Prereq: `stripe listen --forward-to localhost:3000/api/stripe/webhook` running; `STRIPE_SECRET_KEY` + `STRIPE_WEBHOOK_SECRET` in `.env.local`. **Don't `db reset`** — it wipes the talachero's onboarding.
 
+> **⚠️ Connect region must match your platform account for local testing.** Destination charges + `application_fee_amount` only work when the connected account is in your platform account's region (US/UK/EEA/**CA**/CH — see the blocker below). Onboarding hardcoded `country: "MX"`, which fails against a non-MX platform test account with *"Funds can't be sent to accounts located in MX…"*. Now env-driven via **`STRIPE_CONNECT_COUNTRY`** (`src/lib/stripe/config.ts` → `getConnectCountry()`, default `MX`). Set it to your platform's country in `.env.local` (e.g. `CA`) to test, and clear any stale account first: `update talachero_profiles set stripe_account_id=null, charges_enabled=false, payouts_enabled=false where user_id=(select id from users where email='carlos.mendoza@demo.talachas.mx');`
+
 1. Onboard a talachero (4A): sign in as `carlos.mendoza@demo.talachas.mx` → **Configurar pagos** → finish onboarding → panel **Activos**.
 2. As `mariana.ruiz@demo.talachas.mx`, book Carlos → **Confirmar reserva** → pay on Stripe Checkout with test card `4242 4242 4242 4242`.
 3. Dashboard shows banner + booking **Pago autorizado**. As Carlos → **Aceptar** → **Marcar completada** (captures).
 4. Ledger check: `select type, amount, provider_ref from transactions order by created_at desc;` → expect a `charge` row.
 5. Refund: cancel a captured booking → booking **Reembolsado** + a `refund` ledger row. Tip: on a completed booking, tap a preset → Checkout → `tip` ledger row.
+
+### ✅ Verification results (2026-07-04, owner + Claude, Stripe test mode, `STRIPE_CONNECT_COUNTRY=CA`)
+
+End-to-end run in the browser confirmed the ledger/webhook machinery for **every** payment type: onboarding → **Activos**; book → **authorize** (manual-capture hold, no premature charge); accept → **capture** (`charge` row $560, `application_fee.created` $84, `transfer.created` → talachero nets $476); **tip** (`tip` rows); reject/cancel of an authorized booking **voids the hold** (`payment_intent.canceled`); and **refund** (`refund` row, booking → `refunded`, `charge.refunded`). Three real bugs surfaced:
+
+- **🐛 (FIXED) Pricing display + phantom tip.** The booking summary showed the client a **Total = subtotal + 15% fee** ($644) while Stripe correctly charged only the **subtotal** ($560, fee deducted from the talachero's payout). The commission comes out of the talachero's earnings (confirmed decision), so the client total is the subtotal. Also, the summary's tip selector was **never sent to `confirmBooking`** (not in the form) — a client could pick a tip and never be charged it. Fixed: `summary/page.tsx` (`total = subtotal`), `summary/checkout-view.tsx` (removed the dead tip selector + fee-on-top line, added a `checkout.fee_note`), new `fee_note` key in `es`/`en`.
+- **🐛 (OPEN) Refund is unreachable through the UI.** `cancelBooking`'s refund branch only fires when `payment_status='captured'`, but capture happens *only* at completion, and **completed bookings expose no cancel control** on either dashboard (client shows tips only; talachero cancel is limited to `confirmed`/`in_progress`). So the refund path is dead code for real users — verified above only by issuing the refund via the Stripe CLI. Needs a "cancel/refund a completed booking" control, best folded into the deferred **cancellation-policy** work below.
+- **🐛 (FIXED) Refund didn't reverse the transfer or the fee.** `cancelBooking` called `stripe.refunds.create({ payment_intent })` with no `reverse_transfer` / `refund_application_fee`, so on a captured booking the client was refunded in full but the **talachero kept their payout** and the **platform ate the loss** (−$476). Fixed in `dashboard/actions.ts`: full refunds now set `reverse_transfer: true` + `refund_application_fee: true` (client whole, no party retains funds). **Partial/tiered refunds** per cancellation policy remain TODO (below) — today's fix assumes a full refund.
 
 ## What's next (remaining MVP — PRD's 11 in-scope items)
 
@@ -84,6 +94,7 @@ Done (8/11): auth, profiles, KYC (Connect), search/filter, availability slots, b
 
 ## Still-open / deferred
 
+- **🚨 PRODUCTION BLOCKER — the platform Stripe account must be based in Mexico.** Talachas is a CDMX marketplace collecting a 15% commission (`application_fee_amount`) from MX talacheros via destination charges. Stripe only allows this when the **platform and connected accounts are in the same region**; a foreign platform **cannot** collect application fees from MX connected accounts, and [Stripe says this won't change](https://docs.stripe.com/connect/cross-border-payouts) (cross-border Connect is US/UK/EEA/CA/CH only — MX excluded). The current test platform (`acct_1CQr1k…`, "Brauhaus Studio") is **Canadian**, so real payments to MX talacheros are impossible on it. **Before onboarding any real (non-seed) talachero, provision a Mexico-based platform Stripe account** (MX legal entity + MX bank) and point `STRIPE_SECRET_KEY`/`STRIPE_WEBHOOK_SECRET` at it, with `STRIPE_CONNECT_COUNTRY` unset (defaults to `MX`). This is a business/legal decision, not a code change.
 - Talachero **onboarding form + availability editor** (profiles/slots are seed-only today; RLS + column grants already allow the owner to edit presentational fields)
 - **Neighborhood picker + `ST_DWithin`** search (directory functions are the seam)
 - Cancellation-policy **time windows** (refund tiers) — needed for 4B refunds

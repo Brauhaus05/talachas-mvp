@@ -7,7 +7,7 @@ import type { Route } from "next";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { getStripe } from "@/lib/stripe/server";
-import { getAppUrl } from "@/lib/stripe/config";
+import { getAppUrl, getConnectCountry } from "@/lib/stripe/config";
 
 /**
  * Starts (or resumes) Stripe Connect Express onboarding for the signed-in
@@ -39,7 +39,7 @@ export async function startOnboarding() {
   if (!accountId) {
     const account = await stripe.accounts.create({
       type: "express",
-      country: "MX",
+      country: getConnectCountry(),
       email: user.email ?? undefined,
       capabilities: {
         card_payments: { requested: true },

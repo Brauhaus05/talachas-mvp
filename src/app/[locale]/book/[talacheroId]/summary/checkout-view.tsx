@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useMemo, useState } from "react";
+import { useActionState } from "react";
 import { useTranslations } from "next-intl";
 import {
   CheckCircle2,
@@ -34,15 +34,11 @@ export interface CheckoutData {
   currencyLocale: string;
 }
 
-const TIP_PRESETS = [0, 50, 100, 200];
 const initialState: ConfirmState = { status: "idle" };
 
 export function CheckoutView({ data }: { data: CheckoutData }) {
   const t = useTranslations();
-  const [tip, setTip] = useState(0);
   const [state, formAction, isPending] = useActionState(confirmBooking, initialState);
-
-  const grandTotal = useMemo(() => data.totalMxn + tip, [data.totalMxn, tip]);
 
   return (
     <main className="mx-auto max-w-4xl px-10 py-12">
@@ -103,37 +99,16 @@ export function CheckoutView({ data }: { data: CheckoutData }) {
             label={t("checkout.line_subtotal")}
             value={formatMxn(data.subtotalMxn, data.currencyLocale)}
           />
-          <LineItem
-            label={t("checkout.line_platform_fee")}
-            value={formatMxn(data.platformFeeMxn, data.currencyLocale)}
-          />
-          <div className="flex flex-col gap-2">
-            <p className="text-text-secondary text-xs">{t("checkout.line_tip")}</p>
-            <div className="grid grid-cols-4 gap-2">
-              {TIP_PRESETS.map((v) => (
-                <button
-                  key={v}
-                  type="button"
-                  onClick={() => setTip(v)}
-                  className={
-                    "border-border rounded-md border px-2 py-1.5 text-xs font-medium transition-colors " +
-                    (tip === v
-                      ? "bg-action-primary text-text-inverse border-border-strong"
-                      : "bg-background text-text-secondary hover:bg-surface-muted")
-                  }
-                >
-                  {v === 0 ? "0" : `+${v}`}
-                </button>
-              ))}
-            </div>
-          </div>
           <div className="border-border border-t pt-4">
             <LineItem
               label={t("checkout.line_total")}
-              value={formatMxn(grandTotal, data.currencyLocale)}
+              value={formatMxn(data.totalMxn, data.currencyLocale)}
               emphasis
             />
           </div>
+          <p className="text-text-muted text-xs leading-relaxed">
+            {t("checkout.fee_note")}
+          </p>
 
           {state.status === "error" && (
             <div

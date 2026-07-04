@@ -173,6 +173,7 @@
     "line_platform_fee": "Platform fee",
     "line_tip": "Tip (optional)",
     "line_total": "Total",
+    "fee_note": "Includes the 15% platform fee, deducted from the talachero's payout.",
     "confirm_cta": "Confirm booking",
     "policy_note": "By confirming, you accept the cancellation policy and terms of service.",
     "success_title": "Booking confirmed!",

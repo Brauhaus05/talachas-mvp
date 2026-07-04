@@ -49,7 +49,9 @@ export default async function CheckoutPage({
 
   const subtotal = talachero.hourlyRateMxn * hours;
   const platformFee = Math.round(subtotal * PLATFORM_FEE_PCT);
-  const total = subtotal + platformFee;
+  // The client pays the service price; the 15% platform fee is deducted from
+  // the talachero's payout (Stripe application_fee_amount), not added on top.
+  const total = subtotal;
 
   const data: CheckoutData = {
     talacheroId: talachero.id,
