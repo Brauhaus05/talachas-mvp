@@ -5,6 +5,7 @@ import type { BookingStatus } from "@/lib/supabase/types";
 export interface ClientBooking {
   id: string;
   status: BookingStatus;
+  paymentStatus: string;
   price: number | null;
   currency: string;
   address: string | null;
@@ -18,6 +19,7 @@ export interface ClientBooking {
 export interface TalacheroBooking {
   id: string;
   status: BookingStatus;
+  paymentStatus: string;
   price: number | null;
   currency: string;
   address: string | null;
@@ -35,6 +37,7 @@ export async function getMyBookings(): Promise<ClientBooking[]> {
   return (data ?? []).map((r) => ({
     id: r.id,
     status: r.status,
+    paymentStatus: r.payment_status,
     price: r.price,
     currency: r.currency,
     address: r.address,
@@ -54,6 +57,7 @@ export async function getTalacheroBookings(): Promise<TalacheroBooking[]> {
   return (data ?? []).map((r) => ({
     id: r.id,
     status: r.status,
+    paymentStatus: r.payment_status,
     price: r.price,
     currency: r.currency,
     address: r.address,

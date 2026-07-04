@@ -181,6 +181,7 @@
     "error_slot_unavailable": "Ese horario acaba de ocuparse. Elige otro.",
     "error_slot_not_found": "Ese horario ya no está disponible.",
     "error_not_authenticated": "Inicia sesión para confirmar tu reserva.",
+    "error_talachero_not_payable": "Este Talachero aún no puede recibir pagos.",
     "error_generic": "No pudimos crear la reserva. Intenta de nuevo."
   },
   "auth": {
@@ -260,6 +261,14 @@
     "payments_pending": "En proceso",
     "payments_pending_desc": "Tu configuración de pagos está incompleta. Continúa en Stripe y luego actualiza el estado.",
     "payments_active": "Activos",
-    "payments_active_desc": "Tu cuenta está lista para recibir pagos y propinas."
+    "payments_active_desc": "Tu cuenta está lista para recibir pagos y propinas.",
+    "action_complete": "Marcar completada",
+    "pay_authorized": "Pago autorizado",
+    "pay_captured": "Pagado",
+    "pay_refunded": "Reembolsado",
+    "pay_failed": "Pago fallido",
+    "tip_prompt": "¿Quieres dejar propina?",
+    "tip_success": "¡Gracias por tu propina!",
+    "paid_success": "¡Pago autorizado! Tu reserva está en camino."
   }
 }

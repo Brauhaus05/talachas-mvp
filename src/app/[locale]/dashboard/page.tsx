@@ -14,7 +14,9 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { BookingCard } from "./booking-card";
-import { cancelBooking } from "./actions";
+import { cancelBooking, tipBooking } from "./actions";
+
+const TIP_PRESETS = [50, 100, 200];
 
 export default async function ClientDashboardPage({
   params,
@@ -24,7 +26,7 @@ export default async function ClientDashboardPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { locale } = await params;
-  const { booked } = await searchParams;
+  const { booked, paid, tipped } = await searchParams;
   const user = await getAppUser();
 
   // The layout already guaranteed a signed-in user; send the other roles to
@@ -49,13 +51,15 @@ export default async function ClientDashboardPage({
         <p className="text-text-secondary mt-1 text-sm">{t("client_subtitle")}</p>
       </div>
 
-      {booked && (
+      {(booked || paid || tipped) && (
         <div
           role="status"
           className="border-border-strong bg-surface-muted text-text-primary flex items-start gap-3 rounded-md border px-4 py-3 text-sm"
         >
           <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
-          <span>{t("booking_success")}</span>
+          <span>
+            {paid ? t("paid_success") : tipped ? t("tip_success") : t("booking_success")}
+          </span>
         </div>
       )}
 
@@ -80,10 +84,11 @@ export default async function ClientDashboardPage({
               party={t("booking_with", { name: b.talacheroName ?? "" })}
               slotStart={b.slotStart}
               status={b.status}
+              paymentStatus={b.paymentStatus}
               price={b.price}
               locale={locale}
               actions={
-                (b.status === "requested" || b.status === "confirmed") && (
+                b.status === "requested" || b.status === "confirmed" ? (
                   <form action={cancelBooking}>
                     <input type="hidden" name="bookingId" value={b.id} />
                     <button
@@ -93,7 +98,23 @@ export default async function ClientDashboardPage({
                       {t("action_cancel")}
                     </button>
                   </form>
-                )
+                ) : b.status === "completed" ? (
+                  <form action={tipBooking} className="flex flex-wrap items-center gap-2">
+                    <input type="hidden" name="bookingId" value={b.id} />
+                    <span className="text-text-secondary text-xs">{t("tip_prompt")}</span>
+                    {TIP_PRESETS.map((a) => (
+                      <button
+                        key={a}
+                        type="submit"
+                        name="amount"
+                        value={a}
+                        className="border-border-strong text-text-primary hover:bg-surface-muted rounded-md border px-2.5 py-1 text-xs font-medium transition-colors"
+                      >
+                        +${a}
+                      </button>
+                    ))}
+                  </form>
+                ) : null
               }
             />
           ))}

@@ -5,7 +5,7 @@ import { getAppUser, dashboardPathForRole } from "@/lib/auth";
 import { getTalacheroBookings } from "@/lib/data/bookings";
 import { PlaceholderPanel } from "../dashboard-ui";
 import { BookingCard } from "../booking-card";
-import { acceptBooking, rejectBooking, cancelBooking } from "../actions";
+import { acceptBooking, rejectBooking, cancelBooking, completeBooking } from "../actions";
 import { PaymentsPanel } from "./payments-panel";
 
 export default async function TalacheroDashboardPage({
@@ -56,6 +56,7 @@ export default async function TalacheroDashboardPage({
                 party={t("booking_from", { name: b.clientName ?? "" })}
                 slotStart={b.slotStart}
                 status={b.status}
+                paymentStatus={b.paymentStatus}
                 price={b.price}
                 locale={locale}
                 actions={
@@ -100,18 +101,32 @@ export default async function TalacheroDashboardPage({
                 party={t("booking_from", { name: b.clientName ?? "" })}
                 slotStart={b.slotStart}
                 status={b.status}
+                paymentStatus={b.paymentStatus}
                 price={b.price}
                 locale={locale}
                 actions={
-                  <form action={cancelBooking}>
-                    <input type="hidden" name="bookingId" value={b.id} />
-                    <button
-                      type="submit"
-                      className="border-border-strong text-text-primary hover:bg-surface-muted rounded-md border px-3 py-1.5 text-xs font-medium transition-colors"
-                    >
-                      {t("action_cancel")}
-                    </button>
-                  </form>
+                  <>
+                    {b.status === "confirmed" && (
+                      <form action={completeBooking}>
+                        <input type="hidden" name="bookingId" value={b.id} />
+                        <button
+                          type="submit"
+                          className="bg-action-primary text-text-inverse hover:bg-action-primary-hover rounded-md px-3 py-1.5 text-xs font-medium transition-colors"
+                        >
+                          {t("action_complete")}
+                        </button>
+                      </form>
+                    )}
+                    <form action={cancelBooking}>
+                      <input type="hidden" name="bookingId" value={b.id} />
+                      <button
+                        type="submit"
+                        className="border-border-strong text-text-primary hover:bg-surface-muted rounded-md border px-3 py-1.5 text-xs font-medium transition-colors"
+                      >
+                        {t("action_cancel")}
+                      </button>
+                    </form>
+                  </>
                 }
               />
             ))}
