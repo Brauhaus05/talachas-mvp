@@ -7,6 +7,7 @@ import { TalacheroCard } from "@/components/talacheros/talachero-card";
 import { SERVICES, type ServiceSlug } from "@/lib/mock/services";
 import type { Talachero } from "@/lib/mock/talacheros";
 import { cn } from "@/lib/utils";
+import { getCurrency } from "@/lib/format";
 
 type Availability = "any" | "today" | "week";
 type Sort = "recommended" | "price_asc" | "rating";
@@ -75,7 +76,9 @@ export function SearchResults({ talacheros }: { talacheros: Talachero[] }) {
             className="accent-text-primary w-full"
             aria-label={t("search.filter_price")}
           />
-          <p className="text-text-secondary text-xs">≤ ${maxPrice} MXN/h</p>
+          <p className="text-text-secondary text-xs">
+            ≤ ${maxPrice} {getCurrency()}/h
+          </p>
         </FilterGroup>
 
         <FilterGroup label={t("search.filter_rating")}>

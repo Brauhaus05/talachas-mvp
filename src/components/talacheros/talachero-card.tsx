@@ -6,7 +6,7 @@ import { Link } from "@/i18n/navigation";
 import { Avatar } from "@/components/ui/avatar";
 import { Rating } from "@/components/ui/rating";
 import { Badge } from "@/components/ui/badge";
-import { formatMxn } from "@/lib/format";
+import { formatMoney } from "@/lib/format";
 import type { Talachero } from "@/lib/mock/talacheros";
 
 export function TalacheroCard({ talachero }: { talachero: Talachero }) {
@@ -40,7 +40,7 @@ export function TalacheroCard({ talachero }: { talachero: Talachero }) {
         </div>
         <div className="flex flex-col items-end gap-1">
           <p className="text-text-primary text-lg font-semibold">
-            {formatMxn(talachero.hourlyRateMxn, locale)}
+            {formatMoney(talachero.hourlyRateMxn, locale)}
             <span className="text-text-muted text-xs font-normal">
               {t("common.per_hour")}
             </span>
