@@ -5,6 +5,7 @@ import { CheckCircle2 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { getAppUser } from "@/lib/auth";
 import { getMyBookings } from "@/lib/data/bookings";
+import { getUnreadMap } from "@/lib/data/chat";
 import { buttonVariants } from "@/components/ui/button";
 import {
   Card,
@@ -43,6 +44,7 @@ export default async function ClientDashboardPage({
 
   const t = await getTranslations("dashboard");
   const bookings = await getMyBookings();
+  const unreadMap = await getUnreadMap();
 
   return (
     <div className="flex flex-col gap-6">
@@ -80,6 +82,8 @@ export default async function ClientDashboardPage({
           {bookings.map((b) => (
             <BookingCard
               key={b.id}
+              bookingId={b.id}
+              unread={unreadMap.get(b.id) ?? 0}
               serviceSlug={b.serviceSlug}
               party={t("booking_with", { name: b.talacheroName ?? "" })}
               slotStart={b.slotStart}

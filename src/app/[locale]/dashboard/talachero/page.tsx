@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import type { Route } from "next";
 import { getAppUser, dashboardPathForRole } from "@/lib/auth";
 import { getTalacheroBookings } from "@/lib/data/bookings";
+import { getUnreadMap } from "@/lib/data/chat";
 import { PlaceholderPanel } from "../dashboard-ui";
 import { BookingCard } from "../booking-card";
 import { acceptBooking, rejectBooking, cancelBooking, completeBooking } from "../actions";
@@ -26,6 +27,7 @@ export default async function TalacheroDashboardPage({
 
   const t = await getTranslations("dashboard");
   const bookings = await getTalacheroBookings();
+  const unreadMap = await getUnreadMap();
   const pending = bookings.filter((b) => b.status === "requested");
   const active = bookings.filter(
     (b) => b.status === "confirmed" || b.status === "in_progress"
@@ -52,6 +54,8 @@ export default async function TalacheroDashboardPage({
             {pending.map((b) => (
               <BookingCard
                 key={b.id}
+                bookingId={b.id}
+                unread={unreadMap.get(b.id) ?? 0}
                 serviceSlug={b.serviceSlug}
                 party={t("booking_from", { name: b.clientName ?? "" })}
                 slotStart={b.slotStart}
@@ -97,6 +101,8 @@ export default async function TalacheroDashboardPage({
             {active.map((b) => (
               <BookingCard
                 key={b.id}
+                bookingId={b.id}
+                unread={unreadMap.get(b.id) ?? 0}
                 serviceSlug={b.serviceSlug}
                 party={t("booking_from", { name: b.clientName ?? "" })}
                 slotStart={b.slotStart}
