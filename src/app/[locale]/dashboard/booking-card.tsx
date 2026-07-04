@@ -15,6 +15,7 @@ export async function BookingCard({
   party,
   slotStart,
   status,
+  paymentStatus,
   price,
   locale,
   actions,
@@ -23,11 +24,13 @@ export async function BookingCard({
   party: string;
   slotStart: string | null;
   status: BookingStatus;
+  paymentStatus?: string;
   price: number | null;
   locale: string;
   actions?: React.ReactNode;
 }) {
   const t = await getTranslations();
+  const showPayment = paymentStatus && paymentStatus !== "none";
   const when = slotStart
     ? new Intl.DateTimeFormat(locale, {
         weekday: "short",
@@ -45,7 +48,12 @@ export async function BookingCard({
         <p className="text-text-primary text-sm font-semibold">
           {t(`services.${serviceSlug}.short`)}
         </p>
-        <Badge variant="muted">{t(`dashboard.status_${status}`)}</Badge>
+        <div className="flex items-center gap-2">
+          {showPayment && (
+            <Badge variant="outline">{t(`dashboard.pay_${paymentStatus}`)}</Badge>
+          )}
+          <Badge variant="muted">{t(`dashboard.status_${status}`)}</Badge>
+        </div>
       </div>
       <p className="text-text-secondary text-sm">{party}</p>
       <div className="flex items-center justify-between gap-3 text-sm">

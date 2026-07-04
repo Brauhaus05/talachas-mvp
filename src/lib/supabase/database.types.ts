@@ -603,6 +603,7 @@ export type Database = {
     }
     Functions: {
       cancel_booking: { Args: { p_booking_id: string }; Returns: undefined }
+      complete_booking: { Args: { p_booking_id: string }; Returns: undefined }
       create_booking: {
         Args: {
           p_address: string
@@ -621,6 +622,7 @@ export type Database = {
           created_at: string
           currency: string
           id: string
+          payment_status: string
           price: number
           service_slug: string
           slot_start: string
@@ -637,6 +639,7 @@ export type Database = {
           created_at: string
           currency: string
           id: string
+          payment_status: string
           price: number
           service_slug: string
           slot_start: string

@@ -181,6 +181,7 @@
     "error_slot_unavailable": "That time just got booked. Please pick another.",
     "error_slot_not_found": "That time is no longer available.",
     "error_not_authenticated": "Sign in to confirm your booking.",
+    "error_talachero_not_payable": "This Talachero can't receive payments yet.",
     "error_generic": "We couldn't create the booking. Please try again."
   },
   "auth": {
@@ -260,6 +261,14 @@
     "payments_pending": "In progress",
     "payments_pending_desc": "Your payment setup is incomplete. Continue on Stripe, then refresh the status.",
     "payments_active": "Active",
-    "payments_active_desc": "Your account is ready to receive payments and tips."
+    "payments_active_desc": "Your account is ready to receive payments and tips.",
+    "action_complete": "Mark completed",
+    "pay_authorized": "Payment authorized",
+    "pay_captured": "Paid",
+    "pay_refunded": "Refunded",
+    "pay_failed": "Payment failed",
+    "tip_prompt": "Leave a tip?",
+    "tip_success": "Thanks for your tip!",
+    "paid_success": "Payment authorized! Your booking is on its way."
   }
 }
