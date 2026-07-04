@@ -173,6 +173,7 @@
     "line_platform_fee": "Comisión de plataforma",
     "line_tip": "Propina (opcional)",
     "line_total": "Total",
+    "fee_note": "Incluye la comisión de plataforma del 15%, que se descuenta del pago al talachero.",
     "confirm_cta": "Confirmar reserva",
     "policy_note": "Al confirmar aceptas la política de cancelación y los términos del servicio.",
     "success_title": "¡Reserva confirmada!",

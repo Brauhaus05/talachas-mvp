@@ -72,9 +72,16 @@ export async function cancelBooking(formData: FormData) {
     if (pay.payment_status === "authorized") {
       await safe(() => stripe.paymentIntents.cancel(pay.stripe_payment_intent_id!));
     } else if (pay.payment_status === "captured") {
+      // Full refund of a completed booking: claw back the talachero's payout
+      // (reverse_transfer) and return the platform commission
+      // (refund_application_fee) so no party retains funds for a cancelled job.
+      // Tiered/partial refunds per cancellation policy are still TODO — see
+      // HANDOFF "cancellation-policy time windows (refund tiers)".
       await safe(() =>
         stripe.refunds.create({
           payment_intent: pay.stripe_payment_intent_id!,
+          reverse_transfer: true,
+          refund_application_fee: true,
         })
       );
     }

@@ -32,3 +32,13 @@ export function getPlatformFeePct(): number {
   const pct = raw ? Number(raw) : 0.15;
   return Number.isFinite(pct) && pct >= 0 && pct < 1 ? pct : 0.15;
 }
+
+/**
+ * Country for new Connect (Express) accounts. Production is Mexico (MX).
+ * Overridable via env for local test mode: Stripe blocks destination charges +
+ * application fees across regions, so to exercise payments against a non-MX
+ * platform test account, set STRIPE_CONNECT_COUNTRY to the platform's country.
+ */
+export function getConnectCountry(): string {
+  return process.env.STRIPE_CONNECT_COUNTRY?.trim() || "MX";
+}
