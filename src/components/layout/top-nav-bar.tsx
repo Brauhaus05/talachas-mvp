@@ -2,12 +2,14 @@ import { Search } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { getAppUser, dashboardPathForRole } from "@/lib/auth";
+import { getUnreadCount } from "@/lib/data/chat";
 import { signOut } from "@/app/[locale]/auth/actions";
 import { LocaleSwitcher } from "./locale-switcher";
 
 export async function TopNavBar() {
   const t = await getTranslations();
   const user = await getAppUser();
+  const unread = user ? await getUnreadCount() : 0;
 
   return (
     <header className="border-border bg-background sticky top-0 z-40 border-b">
@@ -41,9 +43,17 @@ export async function TopNavBar() {
             <>
               <Link
                 href={dashboardPathForRole(user.role)}
-                className="text-text-secondary hover:text-text-primary hidden text-sm md:inline-block"
+                className="text-text-secondary hover:text-text-primary relative hidden items-center gap-2 text-sm md:inline-flex"
               >
                 {t("dashboard.nav_dashboard")}
+                {unread > 0 && (
+                  <span
+                    aria-label={t("dashboard.unread_aria", { count: unread })}
+                    className="bg-action-primary text-text-inverse inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-medium"
+                  >
+                    {unread}
+                  </span>
+                )}
               </Link>
               <form action={signOut}>
                 <button
