@@ -5,6 +5,7 @@ import { getStripe } from "@/lib/stripe/server";
 import { getStripeWebhookSecret } from "@/lib/stripe/config";
 import { createServiceClient } from "@/lib/supabase/service";
 import type { Database } from "@/lib/supabase/types";
+import { notifyPaymentCaptured, notifyRefundIssued } from "@/lib/notifications/notify";
 
 // Stripe SDK needs the Node runtime and the raw request body for signature
 // verification.
@@ -148,6 +149,7 @@ export async function POST(request: NextRequest) {
             pi.currency,
             pi.id
           );
+          await notifyPaymentCaptured(bookingId);
         }
       }
       break;
@@ -187,6 +189,7 @@ export async function POST(request: NextRequest) {
             charge.currency,
             charge.id
           );
+          await notifyRefundIssued(booking.id);
         }
       }
       break;

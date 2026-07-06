@@ -283,5 +283,36 @@
     "read_only": "This booking is cancelled. History is read-only.",
     "back": "Back to dashboard",
     "send_error": "Couldn’t send. Try again."
+  },
+  "emails": {
+    "greeting": "Hi {name},",
+    "footer": "This is an automated message from Talachas. Please don't reply to this email.",
+    "service_label": "Service",
+    "when_label": "Date & time",
+    "booking_confirmed": {
+      "subject": "Your booking is confirmed",
+      "heading": "Booking confirmed",
+      "intro": "{talachero} confirmed your booking. Here are the details:",
+      "total_label": "Total"
+    },
+    "payment_client": {
+      "subject": "Payment complete — receipt",
+      "heading": "Payment complete",
+      "intro": "Payment for your service with {talachero} is complete. Thanks for using Talachas.",
+      "total_label": "Total paid"
+    },
+    "payment_talachero": {
+      "subject": "You've been paid",
+      "heading": "Payment received",
+      "intro": "{client} completed payment for your service.",
+      "gross_label": "Service total",
+      "net_label": "Your payout (after commission)"
+    },
+    "refund": {
+      "subject": "Refund processed",
+      "heading": "Refund processed",
+      "intro": "We've processed the refund for your booking with {talachero}.",
+      "total_label": "Amount refunded"
+    }
   }
 }

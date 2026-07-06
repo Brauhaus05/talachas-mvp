@@ -9,6 +9,7 @@ import { createServiceClient } from "@/lib/supabase/service";
 import { getStripe } from "@/lib/stripe/server";
 import { getAppUrl } from "@/lib/stripe/config";
 import { getCurrency } from "@/lib/format";
+import { notifyBookingConfirmed } from "@/lib/notifications/notify";
 
 async function revalidateDashboards(locale: string) {
   revalidatePath(`/${locale}/dashboard`);
@@ -43,7 +44,13 @@ async function safe(fn: () => Promise<unknown>) {
 export async function acceptBooking(formData: FormData) {
   const id = String(formData.get("bookingId") ?? "");
   const supabase = await createClient();
-  await supabase.rpc("respond_to_booking", { p_booking_id: id, p_accept: true });
+  const { error } = await supabase.rpc("respond_to_booking", {
+    p_booking_id: id,
+    p_accept: true,
+  });
+  if (!error) {
+    await notifyBookingConfirmed(id);
+  }
   await revalidateDashboards(await getLocale());
 }
 
