@@ -21,5 +21,6 @@ export function getEmailFrom(): string {
  * production → mail goes to real recipients.
  */
 export function getEmailDevRedirect(): string | undefined {
+  if (process.env.NODE_ENV === "production") return undefined;
   return process.env.EMAIL_DEV_REDIRECT?.trim() || undefined;
 }
