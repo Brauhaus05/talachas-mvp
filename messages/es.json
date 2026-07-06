@@ -283,5 +283,36 @@
     "read_only": "Esta reserva está cancelada. El historial es de solo lectura.",
     "back": "Volver al panel",
     "send_error": "No se pudo enviar. Inténtalo de nuevo."
+  },
+  "emails": {
+    "greeting": "Hola {name},",
+    "footer": "Este es un mensaje automático de Talachas. No respondas a este correo.",
+    "service_label": "Servicio",
+    "when_label": "Fecha y hora",
+    "booking_confirmed": {
+      "subject": "Tu reserva está confirmada",
+      "heading": "Reserva confirmada",
+      "intro": "{talachero} confirmó tu reserva. Aquí están los detalles:",
+      "total_label": "Total"
+    },
+    "payment_client": {
+      "subject": "Pago completado — recibo",
+      "heading": "Pago completado",
+      "intro": "Se completó el pago de tu servicio con {talachero}. Gracias por usar Talachas.",
+      "total_label": "Total pagado"
+    },
+    "payment_talachero": {
+      "subject": "Recibiste un pago",
+      "heading": "Pago recibido",
+      "intro": "{client} completó el pago de tu servicio.",
+      "gross_label": "Total del servicio",
+      "net_label": "Tu pago (después de la comisión)"
+    },
+    "refund": {
+      "subject": "Reembolso procesado",
+      "heading": "Reembolso procesado",
+      "intro": "Procesamos el reembolso de tu reserva con {talachero}.",
+      "total_label": "Monto reembolsado"
+    }
   }
 }
