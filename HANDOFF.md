@@ -1,4 +1,4 @@
-# Session Handoff — 2026-07-04
+# Session Handoff — 2026-07-06
 
 > Read alongside [prd.md](./prd.md) and [plan.md](./plan.md). This captures what the code and git log **don't** — session decisions, verification state, and where to pick up.
 
@@ -13,8 +13,9 @@
 | **4A — Stripe Connect onboarding** | ✅ merged (PR #4) — onboarding verified in Stripe test mode |
 | **4B — Payments (checkout / capture / refund / tips / ledger)** | ✅ merged (PR #6) + **verified end-to-end in Stripe test mode** (2026-07-04); verification fixes in **PR #7 (merged)** |
 | **5A — Chat + in-app unread badge** | ✅ merged (PR #10) — real-time 1:1 chat per booking (Supabase Realtime), **verified live in the browser** (2026-07-04) |
+| **5B — Email notifications (Resend)** | 🟡 **code-complete + fully reviewed** on branch `feat/phase5b-email-notifications` — 4 transactional emails; typecheck/lint/secretless-build green. **Live email run pending owner** (needs Docker + Stripe CLI + inbox — runbook below). Not yet merged. |
 
-`main` is at `0a590e7` (Phases 0–4B **+ 5A**). This session merged **PR #7** (4B verification fixes + expanded `CLAUDE.md` — start there for a fast architecture read), **PR #8** (completed-booking refund UI deferred to Phase 6 admin), **PR #9** (env-driven currency), and **PR #10** (Phase 5A chat + unread badge). Working tree clean. The local Supabase stack is **currently stopped** — `pnpm exec supabase start` to resume; the docker volume preserves seed data + Stripe onboarding + this session's chat/booking test data.
+`main` is at `7251299` (Phases 0–4B **+ 5A**). Phase **5B** is built and reviewed on branch `feat/phase5b-email-notifications` (design `669bd7b`, plan `b43b421`, impl through `986f58f`) but **awaits the owner's live email verification before the PR is opened/merged**. The local Supabase stack is **currently stopped** — `pnpm exec supabase start` to resume; the docker volume preserves seed data + Stripe onboarding + this session's chat/booking test data.
 
 **The core marketplace loop is now real end-to-end:** discover → book (concurrency-safe slot) → pay (Stripe escrow, manual capture) → **chat** → accept → complete → capture + 15% split → tip → refund, with an immutable `transactions` ledger.
 
@@ -84,16 +85,37 @@ A single **`NEXT_PUBLIC_CURRENCY`** (default `MXN`) now drives **both** the Stri
 - **Verified live in the browser** (2026-07-04): realtime send + receive, optimistic append (no dup), cancelled read-only, unread badge increments then clears on open, non-participant 404. typecheck / lint / build green.
 - Design + plan: `docs/superpowers/specs/2026-07-04-chat-unread-badge-design.md`, `docs/superpowers/plans/2026-07-04-phase5-chat.md`.
 
+## Phase 5B — what shipped (transactional email via Resend, branch `feat/phase5b-email-notifications`)
+
+- **Architecture: inline best-effort sends** (design Option A) through a self-contained `src/lib/notifications/` module — `config` (lazy Resend env getters) · `send` (Resend wrapper: dev-redirect + no-op when unconfigured, never throws) · `context` (service-role recipient/booking lookup — contact spans `users` own-row RLS) · `templates` (localized grayscale HTML) · `notify` (3 internally-best-effort orchestrators). No event bus, no cron — the `notify.ts` seam preserves the migration path if a second consumer ever appears.
+- **4 emails across 3 reactive events**: booking confirmed → client; payment **captured** (not authorized) → client (receipt) + talachero (payout, net of 15%); refund issued → client. Fired from `dashboard/actions.ts` (`acceptBooking`, gated on RPC success) and the Stripe webhook (`payment_intent.succeeded` non-tip branch; `charge.refunded`).
+- **Recipient-locale i18n**: copy in a new `emails` namespace in `messages/{es,en}.json`, resolved by each recipient's own `users.locale` via direct bundle import (the webhook has no request locale). Client can get Spanish while the talachero gets English on the same event.
+- **Idempotency** rides the existing webhook `stripe_events` PK dedupe (capture/refund emails send once even on Stripe retries); confirmed-email gated on a successful `respond_to_booking`.
+- **Security**: user-controlled display names (`users.full_name`) are HTML-escaped at the interpolation choke point in `templates.ts` (transactional payment email = a phishing-injection target). `EMAIL_DEV_REDIRECT` is force-disabled when `NODE_ENV==="production"` so a stray env var can't redirect real customer mail.
+- **Config/env** (`.env.example`): `RESEND_API_KEY` (unset → all sends no-op, CI/build stay green), `EMAIL_FROM` (default `Talachas <onboarding@resend.dev>`), `EMAIL_DEV_REDIRECT` (non-prod: redirect all mail to one inbox, real recipient shown in `[→ …]` subject prefix — needed because seed addresses `*.demo.talachas.mx` are non-deliverable).
+- **Verification so far**: typecheck + lint + **secretless `next build`** green; per-task spec+quality reviews + a final whole-feature review (Ready to merge, no Critical/Important). **Live email run still owed by the owner** — see runbook below.
+- **Deferred to Phase 6** (unchanged from the design): the **24h reminder** (needs cron) and the **new-review email** (needs the review UI). Two forward-looking Minor notes from review, tracked in Gotchas: refund email shows booking price (correct while all refunds are full) and recipient emails appear in server error logs.
+- Design + plan: `docs/superpowers/specs/2026-07-06-phase5b-email-notifications-design.md`, `docs/superpowers/plans/2026-07-06-phase5b-email-notifications.md`.
+
+### ▶ Verify 5B now (owner, with a Resend key)
+
+Prereq in `.env.local`: `RESEND_API_KEY=<your key>` and `EMAIL_DEV_REDIRECT=brauhaus05@gmail.com` (seed addresses bounce, so redirect all mail to your inbox). Bring the stack up (**never `db reset`** — wipes Carlos's onboarding); `stripe listen --forward-to localhost:3000/api/stripe/webhook`.
+
+1. As `mariana.ruiz@demo.talachas.mx`, book Carlos → pay (`4242 4242 4242 4242`).
+2. As `carlos.mendoza@demo.talachas.mx`, **Aceptar** → inbox gets **booking-confirmed** (subject `[→ mariana.ruiz@…]`).
+3. As Carlos, **Marcar completada** (captures) → **two** emails: payment receipt (`[→ mariana…]`) + payout (`[→ carlos…]`, ~15% below the service total).
+4. Refund via Stripe CLI: `stripe refunds create --payment-intent <pi_id> --reverse-transfer --refund-application-fee` → **refund** email (`[→ mariana…]`).
+5. Locale routing: `update public.users set locale='en' where email='mariana.ruiz@demo.talachas.mx';` then re-run an event → Mariana's mail arrives in **English** even though Carlos (actor) is Spanish.
+
 ## What's next (remaining MVP — PRD's 11 in-scope items)
 
-Done (9/11): auth, profiles, KYC (Connect), search/filter, availability slots, booking + concurrency, payments/commission/tips, **1:1 chat**.
+Done (10/11, pending 5B live check): auth, profiles, KYC (Connect), search/filter, availability slots, booking + concurrency, payments/commission/tips, **1:1 chat**, **transactional email**.
 
 | Phase | Scope | Size |
 |---|---|---|
-| **5B — Email notifications** | Resend for key events (booking confirmed, reminder, payment processed, new review), decoupled from business flows per PRD §6.6. The other half of Phase 5; chat + unread badge (5A) already shipped. | 1–2 d |
-| **6 — Reviews loop + admin** | post-completion review prompt (schema exists; needs UI + rating-rollup trigger), admin panel (users/bookings/disputes/**refunds** — includes the deferred completed-booking refund control; mechanics ready in `dashboard/actions.ts`) | 2–3 d |
+| **6 — Reviews loop + admin** | post-completion review prompt (schema exists; needs UI + rating-rollup trigger), admin panel (users/bookings/disputes/**refunds** — includes the deferred completed-booking refund control; mechanics ready in `dashboard/actions.ts`). **Also folds in the deferred 5B emails**: the **24h reminder** (needs a scheduler/cron) and the **new-review email** (hangs off the new review-submission trigger). | 2–3 d |
 
-**Recommended order:** Phase 5B → Phase 6, slotting the deferred talachero self-service tooling in before onboarding real (non-seed) talacheros.
+**Recommended order:** finish the 5B live email check + merge → Phase 6, slotting the deferred talachero self-service tooling in before onboarding real (non-seed) talacheros.
 
 ---
 
@@ -156,12 +178,14 @@ pnpm dev                           # :3000
 - **Prettier drift** — the committed Phase 1 files don't all match current prettier output; `pnpm format` reformats unrelated files. Format only the files you touched, or revert incidental reformats before committing.
 - **Supabase Realtime (chat)** — a table must be in the `supabase_realtime` publication AND the subscriber must pass the table's RLS `SELECT` to receive `postgres_changes` (so both booking participants get messages; outsiders get nothing). The browser client authenticates the stream via the SSR session. The **channel takes ~1s to reach `SUBSCRIBED`** after mount — a message sent in that window won't arrive via the echo, so `ChatView` **optimistically appends the sent row** (deduped by id) rather than relying on the echo alone.
 - **Server-computed unread badge** — `TopNavBar`/dashboards read `get_unread_count`/`get_unread_map` on render; **mark-read** (`chat_reads` upsert) happens client-side on chat open, so the badge clears on the *next* navigation, not instantly (by design — see 5A spec). These RPCs degrade to 0/empty on error so a failure never breaks the layout.
+- **Email is best-effort and off-by-default** (5B) — the `notify*` functions swallow all errors (never throw into a form action or the webhook), and `sendEmail` **no-ops when `RESEND_API_KEY` is unset**, so builds/CI and email-less dev stay green with no email traffic. To actually send, set the key. Seed addresses (`*.demo.talachas.mx`) bounce — set `EMAIL_DEV_REDIRECT` to a real inbox locally. `EMAIL_DEV_REDIRECT` is hard-ignored in production (`NODE_ENV==='production'`) so a leaked value can't reroute real customer mail. **Payment "processed" = capture (completion), not authorize.**
+- **Two forward-looking 5B notes** (from final review, not bugs today): (1) the **refund email displays the booking price**, which is correct while every refund is a *full* refund — thread `charge.amount_refunded` through `notifyRefundIssued` when partial/tiered refunds land (pairs with the deferred cancellation-policy windows). (2) `send.ts`/`notify.ts` log **recipient email addresses** to `console.warn/error` on failure — fine for MVP (server-only, own users, low volume), redact to local-part/`bookingId` if a production PII-log policy is adopted.
 
 ---
 
 ## What to say to Claude next session
 
-> Continuing Talachas. Phases 0–4B **and 5A (chat + unread badge)** are merged; **4B and 5A were both verified live in the browser** in Stripe test mode (see the sections above). `main` is at `0a590e7`; `CLAUDE.md` is the fast architecture read. Next up: **Phase 5B — email notifications** (Resend) for key booking events (confirmed, reminder, payment processed, new review), decoupled per PRD §6.6 — the second half of Phase 5. Read `plan.md` §Phase 5 and `prd.md` §6.6, bring up the local stack (`pnpm exec supabase start` — data preserved), and brainstorm 5B before building.
+> Continuing Talachas. Phases 0–4B **and 5A** are merged; **4B and 5A were verified live in the browser**. **Phase 5B (transactional email via Resend) is code-complete + fully reviewed on branch `feat/phase5b-email-notifications`** but **not yet merged — it still needs the owner's live email run** (runbook in the Phase 5B section: set `RESEND_API_KEY` + `EMAIL_DEV_REDIRECT`, book→accept→complete→refund, confirm 4 emails + locale routing). Once verified, push the branch and open the PR, then move to Phase 6. `main` is at `7251299`; `CLAUDE.md` is the fast architecture read. If the live check has already been done, just finish the PR and start **Phase 6 — reviews loop + admin** (also picks up the deferred 5B reminder + new-review emails).
 
 **Before onboarding any real talacheros**, resolve the **🚨 MX platform Stripe account** production blocker (below), and note the deferred Phase 6 items: the **admin completed-booking refund control** (mechanics wired; design in `docs/superpowers/specs/2026-07-04-completed-booking-refund-design.md`) and **talachero self-service tooling**. If you'd rather tackle those, or the deferred **neighborhood `ST_DWithin` search**, before 5B, say so.
 
