@@ -195,4 +195,35 @@ begin
     insert into public.reviews (booking_id, author_id, target_id, rating, comment, created_at)
     values (b_id, au_id, tu_id, r.rating, r.body, now() - make_interval(days => r.days_ago));
   end loop;
+
+  -- -------------------------------------------------------------------------
+  -- Platform admin. Inserting fires handle_new_user() (which forces role to
+  -- 'client' — admin is never self-assignable), so promote to admin after.
+  -- -------------------------------------------------------------------------
+  insert into auth.users (
+    instance_id, id, aud, role, email, encrypted_password, email_confirmed_at,
+    raw_app_meta_data, raw_user_meta_data, created_at, updated_at,
+    confirmation_token, recovery_token, email_change, email_change_token_new
+  )
+  values (
+    '00000000-0000-0000-0000-000000000000', gen_random_uuid(), 'authenticated',
+    'authenticated', 'admin@talachas.mx',
+    extensions.crypt('password123', extensions.gen_salt('bf')), now(),
+    '{"provider":"email","providers":["email"]}'::jsonb,
+    jsonb_build_object('role', 'admin', 'full_name', 'Plataforma Admin'),
+    now(), now(), '', '', '', ''
+  )
+  returning id into uid;
+
+  insert into auth.identities (
+    id, user_id, provider_id, identity_data, provider,
+    last_sign_in_at, created_at, updated_at
+  )
+  values (
+    gen_random_uuid(), uid, uid::text,
+    jsonb_build_object('sub', uid::text, 'email', 'admin@talachas.mx', 'email_verified', true),
+    'email', now(), now(), now()
+  );
+
+  update public.users set role = 'admin' where id = uid;
 end $$;
