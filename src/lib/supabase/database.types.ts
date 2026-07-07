@@ -635,6 +635,44 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_delete_review: { Args: { p_review_id: string }; Returns: undefined }
+      admin_list_bookings: {
+        Args: never
+        Returns: {
+          client_name: string
+          created_at: string
+          currency: string
+          id: string
+          payment_status: string
+          price: number
+          talachero_name: string
+        }[]
+      }
+      admin_list_reviews: {
+        Args: never
+        Returns: {
+          author_name: string
+          comment: string
+          created_at: string
+          id: string
+          rating: number
+          target_name: string
+        }[]
+      }
+      admin_list_users: {
+        Args: never
+        Returns: {
+          banned: boolean
+          email: string
+          full_name: string
+          id: string
+          role: Database["public"]["Enums"]["user_role"]
+        }[]
+      }
+      admin_set_ban: {
+        Args: { p_banned: boolean; p_user_id: string }
+        Returns: undefined
+      }
       cancel_booking: { Args: { p_booking_id: string }; Returns: undefined }
       complete_booking: { Args: { p_booking_id: string }; Returns: undefined }
       create_booking: {
