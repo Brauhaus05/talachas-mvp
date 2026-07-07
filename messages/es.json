@@ -313,6 +313,12 @@
       "heading": "Reembolso procesado",
       "intro": "Procesamos el reembolso de tu reserva con {talachero}.",
       "total_label": "Monto reembolsado"
+    },
+    "new_review": {
+      "subject": "Recibiste una nueva reseña",
+      "heading": "Nueva reseña",
+      "intro": "{client} dejó una reseña de tu servicio en Talachas.",
+      "rating_label": "Calificación"
     }
   }
 }

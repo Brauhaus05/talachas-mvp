@@ -313,6 +313,12 @@
       "heading": "Refund processed",
       "intro": "We've processed the refund for your booking with {talachero}.",
       "total_label": "Amount refunded"
+    },
+    "new_review": {
+      "subject": "You received a new review",
+      "heading": "New review",
+      "intro": "{client} left a review of your service on Talachas.",
+      "rating_label": "Rating"
     }
   }
 }

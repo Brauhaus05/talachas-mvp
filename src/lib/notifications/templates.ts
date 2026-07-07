@@ -149,3 +149,22 @@ export function refundEmail(
     row(t("emails.refund.total_label"), money(locale, b.price, b.currency));
   return { subject: t("emails.refund.subject"), html: layout(locale, t("emails.refund.heading"), body) };
 }
+
+/** → talachero, when a client leaves a review. Does not quote the comment body
+ * (unmoderated user text stays in-app); shows the numeric rating only. */
+export function newReviewEmail(
+  locale: string,
+  recipientName: string | null,
+  clientName: string | null,
+  rating: number
+): EmailContent {
+  const t = makeT(locale);
+  const body =
+    paragraph(t("emails.greeting", { name: recipientName ?? "" })) +
+    paragraph(t("emails.new_review.intro", { client: clientName ?? "" })) +
+    row(t("emails.new_review.rating_label"), `${rating}/5`);
+  return {
+    subject: t("emails.new_review.subject"),
+    html: layout(locale, t("emails.new_review.heading"), body),
+  };
+}
