@@ -1,10 +1,12 @@
+import "server-only";
 import { createClient } from "@/lib/supabase/server";
+import type { UserRole } from "@/lib/supabase/types";
 
 export interface AdminUser {
   id: string;
   email: string;
   fullName: string;
-  role: string;
+  role: UserRole;
   banned: boolean;
 }
 export interface AdminBooking {
