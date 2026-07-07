@@ -1,4 +1,4 @@
-# Session Handoff — 2026-07-06
+# Session Handoff — 2026-07-07
 
 > Read alongside [prd.md](./prd.md) and [plan.md](./plan.md). This captures what the code and git log **don't** — session decisions, verification state, and where to pick up.
 
@@ -14,9 +14,9 @@
 | **4B — Payments (checkout / capture / refund / tips / ledger)** | ✅ merged (PR #6) + **verified end-to-end in Stripe test mode** (2026-07-04); verification fixes in **PR #7 (merged)** |
 | **5A — Chat + in-app unread badge** | ✅ merged (PR #10) — real-time 1:1 chat per booking (Supabase Realtime), **verified live in the browser** (2026-07-04) |
 | **5B — Email notifications (Resend)** | ✅ **verified live + PR #12 merged** (2026-07-06) — 4 transactional emails; typecheck/lint/secretless-build green; live email run + recipient-locale routing confirmed against a real Resend key. |
-| **6 cycle 1 — Reviews loop** | 🟢 **code-complete + fully reviewed, PR #13 OPEN** (2026-07-06, branch `feat/phase6-reviews-loop`) — client→talachero reviews on completed bookings; typecheck/lint/secretless-build green + DB-level checks. **Not yet merged; owner browser check pending** (runbook below). Admin panel = cycle 2 (not built). |
+| **6 cycle 1 — Reviews loop** | ✅ **merged (PR #13, squash `00550c9`, 2026-07-07)** — client→talachero reviews on completed bookings; typecheck/lint/secretless-build green + **DB/RPC-level verification** (happy path, all 5 guards, rating rollup insert+delete, `has_review` flip). **UI browser walk-through still not eyeballed live** (Chrome extension wasn't connected) — see note below. Admin panel = cycle 2 (not built). |
 
-`main` carries Phases 0–4B **+ 5A + 5B** (PR #12 merged 2026-07-06). Phase **6 cycle 1 (reviews loop)** is built + reviewed on branch `feat/phase6-reviews-loop` (**PR #13 open**) but not yet merged — see the Phase 6 section below. The local Supabase stack docker volume preserves seed data + this session's test data (`pnpm exec supabase start` to resume if stopped). **⚠️ Phase 6's seed work required a `db reset`, which wiped Carlos's Stripe onboarding** — re-onboard a talachero (4A flow) before testing payments locally again.
+`main` carries Phases 0–4B **+ 5A + 5B + 6 cycle 1** (reviews loop, PR #13 merged 2026-07-07). The local Supabase stack docker volume preserves seed data + this session's test data (`pnpm exec supabase start` to resume if stopped). **⚠️ Phase 6's seed work required a `db reset`, which wiped Carlos's Stripe onboarding** — re-onboard a talachero (4A flow) before testing payments locally again. **A fresh completed booking `9a28d83f` (Mariana → Carlos, no review) was SQL-seeded this session** so the "Leave a review" CTA is exercisable in the browser without Stripe re-onboarding.
 
 **The core marketplace loop is now real end-to-end:** discover → book (concurrency-safe slot) → pay (Stripe escrow, manual capture) → **chat** → accept → complete → capture + 15% split → tip → refund → **review**, with an immutable `transactions` ledger.
 
@@ -111,7 +111,7 @@ Ledger reconciled throughout: `charge 560.00 CAD` on capture, `refund 560.00 CAD
 
 > **Gotcha surfaced during the run:** the client "book + pay" step fires **no** email (payment is only *authorized* there) — all 4 emails fire on **accept / complete / refund**. Also, the **booking flow lives under `/talacheros` → `/book/[profileId]`, NOT the dashboard** — the dashboard's completed-booking cards show **tip presets**, which are easy to click by mistake (a `tipBooking` + `?tipped=1` in the dev log means you hit the tip button, not a booking; tips deliberately send no email). Direct booking URL: `/{locale}/book/{talachero_profile_id}`.
 
-## Phase 6 cycle 1 — what shipped (reviews loop, branch `feat/phase6-reviews-loop`, PR #13 open)
+## Phase 6 cycle 1 — what shipped (reviews loop, PR #13 merged `00550c9` 2026-07-07)
 
 Decomposed Phase 6 into two cycles: **cycle 1 = the reviews loop** (this branch), **cycle 2 = the admin panel** (its own spec/plan/build, not started). Client → talachero only for MVP (bidirectional deferred — schema already supports it, no migration needed).
 
@@ -124,19 +124,25 @@ Decomposed Phase 6 into two cycles: **cycle 1 = the reviews loop** (this branch)
 - **Verification**: typecheck / lint / secretless build green; DB-level (rollup tracks insert/delete, RPC guards, `has_review` resolves, post-reset aggregates match real rows with 0 drift, full flow smoke test). Built via subagent-driven development — each of 9 tasks passed spec + code-quality review, plus a final holistic review; review caught & fixed the two column/insert lockdowns, a re-issued grant, action error-allowlisting, and two a11y fixes.
 - Design: `docs/superpowers/specs/2026-07-06-phase6-reviews-loop-design.md` · Plan: `docs/superpowers/plans/2026-07-06-phase6-reviews-loop.md`.
 
-### ▶ Verify 6-cycle-1 now (owner) — pending
-Bring the stack up. As a client, **complete a fresh booking** (the seed reviews *every* seeded completed booking, so existing ones show no CTA — you need a new completion): book → pay → as the talachero accept + **Marcar completada**. Then as the client: dashboard shows **"Leave a review"** → submit stars + comment → `?reviewed=1` banner + card flips to "Review submitted"; the talachero's profile shows the review + updated rating. Revisit the review URL → **404**; a duplicate submit → `already_reviewed`. With a `RESEND_API_KEY` set, the talachero gets the **new-review email** in their locale. Then merge PR #13.
+### ✅ Verified 6-cycle-1 (2026-07-07, DB/RPC layer) + ▶ browser walk-through still open
+**Merged (PR #13).** DB/RPC verification done live against a freshly SQL-seeded completed booking (Chrome extension wasn't connected, so the UI wasn't eyeballed):
+- **Happy path** → `create_review` inserts; rating rollup recomputed the talachero **4.67/3 → 4.75/4**, stored == derived-from-rows (0 drift).
+- **All 5 guards** return correct typed errors: `already_reviewed`, `not_your_booking`, `invalid_rating` (rating 0 and 6), `booking_not_completed`.
+- **`has_review`** flips `true` in `get_my_bookings` after review; **DELETE rollup** reverts cleanly to 4.67/3 (the path cycle-2 admin "delete review" relies on).
+- Auth-simulation recipe (reused elsewhere): `set local role authenticated; select set_config('request.jwt.claims','{"sub":"<user_id>","role":"authenticated"}',true);` then call the SECURITY DEFINER RPC — `auth.uid()` reads that GUC.
+
+**Still to do (optional, owner):** the **browser UI pass** — dashboard **"Leave a review"** → submit stars + comment → `?reviewed=1` banner + card flips to "Review submitted"; talachero profile shows the review + updated rating; revisit review URL → **404**; duplicate submit → `already_reviewed`; with `RESEND_API_KEY` set, the talachero gets the **new-review email** in their locale. **Fresh booking `9a28d83f` (Mariana → Carlos, no review) is primed** so the CTA shows without Stripe re-onboarding — sign in as `mariana.ruiz@demo.talachas.mx` / `password123`. Connect the Claude-in-Chrome extension to have Claude drive it.
 
 ## What's next (remaining MVP — PRD's 11 in-scope items)
 
-Done (11/11 features; reviews loop = **Phase 6 cycle 1**, PR #13 open pending owner browser check + merge): auth, profiles, KYC (Connect), search/filter, availability slots, booking + concurrency, payments/commission/tips, **1:1 chat**, **transactional email**, **reviews loop**.
+Done (11/11 features; reviews loop = **Phase 6 cycle 1**, PR #13 **merged** 2026-07-07): auth, profiles, KYC (Connect), search/filter, availability slots, booking + concurrency, payments/commission/tips, **1:1 chat**, **transactional email**, **reviews loop**. **Next work: Phase 6 cycle 2 — admin panel.**
 
 | Phase | Scope | Size |
 |---|---|---|
 | **6 cycle 2 — Admin panel** | admin panel at `/dashboard/admin` (placeholder shell exists): users list + ban, bookings list + **force-refund** (the deferred completed-booking refund control — reverse-transfer mechanics ready in `dashboard/actions.ts`, design in `docs/superpowers/specs/2026-07-04-completed-booking-refund-design.md`), reviews list + delete (rollup trigger already handles the DELETE), disputes queue (**needs a flag mechanism — none exists today**). No seed admin user exists — create one via service role/SQL. | 1.5–2 d |
 | **Deferred 5B emails** | **24h reminder** (needs a scheduler/cron) + the **new-review email is now DONE** in cycle 1. | folds into 6 |
 
-**Recommended order:** owner verifies + merges PR #13 → **Phase 6 cycle 2 (admin panel)**, slotting the deferred talachero self-service tooling in before onboarding real (non-seed) talacheros.
+**Recommended order (PR #13 now merged):** ▶ **START Phase 6 cycle 2 (admin panel)** — its own spec + plan + build, not started. Slot the deferred talachero self-service tooling in before onboarding real (non-seed) talacheros. Cycle-2 scope is the table above; the completed-booking **force-refund** control is the highest-value piece (reverse-transfer mechanics already sit ready in `dashboard/actions.ts`).
 
 ---
 
@@ -206,7 +212,7 @@ pnpm dev                           # :3000
 
 ## What to say to Claude next session
 
-> Continuing Talachas. Phases 0–4B, **5A, 5B all merged**; **Phase 6 cycle 1 (reviews loop) is code-complete + fully reviewed on branch `feat/phase6-reviews-loop`, PR #13 OPEN** (client→talachero reviews on completed bookings: `create_review` RPC, rating-rollup trigger, review form + dashboard prompt, new-review email). **It still needs the owner's browser check, then merge** — runbook in the "▶ Verify 6-cycle-1" section (complete a *fresh* booking first; the seed reviews every existing completed booking). Once merged, start **Phase 6 cycle 2 — admin panel** at `/dashboard/admin` (placeholder shell exists): users/ban, bookings/**force-refund** (completed-booking refund; reverse-transfer mechanics ready in `dashboard/actions.ts`, design in `docs/superpowers/specs/2026-07-04-completed-booking-refund-design.md`), reviews/delete (rollup trigger already handles DELETE), disputes queue (**needs a flag mechanism — none exists**). No seed admin user exists — create one via service role. The **24h reminder email** (needs cron) is still deferred; the **new-review email is done** (cycle 1). `CLAUDE.md` is the fast architecture read.
+> Continuing Talachas. Phases 0–4B, **5A, 5B, and 6 cycle 1 (reviews loop) all merged** (PR #13 squash `00550c9`, 2026-07-07: client→talachero reviews on completed bookings — `create_review` RPC, rating-rollup trigger, review form + dashboard prompt, new-review email). Reviews loop verified at the **DB/RPC layer** (happy path, all 5 guards, insert+delete rollup, `has_review` flip); the **browser UI pass is still un-eyeballed** (Chrome extension wasn't connected) — optional, fresh booking `9a28d83f` is primed for it (see "▶ Verify 6-cycle-1"). **Next work: START Phase 6 cycle 2 — admin panel** at `/dashboard/admin` (placeholder shell exists) — needs its own spec + plan + build: users/ban, bookings/**force-refund** (completed-booking refund; reverse-transfer mechanics ready in `dashboard/actions.ts`, design in `docs/superpowers/specs/2026-07-04-completed-booking-refund-design.md`), reviews/delete (rollup trigger already handles DELETE), disputes queue (**needs a flag mechanism — none exists**). No seed admin user exists — create one via service role. The **24h reminder email** (needs cron) is still deferred; the **new-review email is done** (cycle 1). `CLAUDE.md` is the fast architecture read.
 
 **Before onboarding any real talacheros**, resolve the **🚨 MX platform Stripe account** production blocker (below), plus the deferred **talachero self-service tooling** and **neighborhood `ST_DWithin` search**.
 
