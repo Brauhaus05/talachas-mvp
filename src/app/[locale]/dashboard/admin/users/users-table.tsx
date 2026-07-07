@@ -1,4 +1,5 @@
 import { getTranslations } from "next-intl/server";
+import { Badge } from "@/components/ui/badge";
 import type { AdminUser } from "@/lib/data/admin";
 import { setBan } from "../actions";
 import { ConfirmButton } from "../confirm-button";
@@ -13,11 +14,21 @@ export async function UsersTable({ users }: { users: AdminUser[] }) {
       <table className="w-full text-left text-sm">
         <thead className="text-text-secondary border-border border-b">
           <tr>
-            <th className="px-4 py-3 font-medium">{t("col_name")}</th>
-            <th className="px-4 py-3 font-medium">{t("col_email")}</th>
-            <th className="px-4 py-3 font-medium">{t("col_role")}</th>
-            <th className="px-4 py-3 font-medium">{t("col_status")}</th>
-            <th className="px-4 py-3 font-medium">{t("col_actions")}</th>
+            <th scope="col" className="px-4 py-3 font-medium">
+              {t("col_name")}
+            </th>
+            <th scope="col" className="px-4 py-3 font-medium">
+              {t("col_email")}
+            </th>
+            <th scope="col" className="px-4 py-3 font-medium">
+              {t("col_role")}
+            </th>
+            <th scope="col" className="px-4 py-3 font-medium">
+              {t("col_status")}
+            </th>
+            <th scope="col" className="px-4 py-3 font-medium">
+              {t("col_actions")}
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -26,11 +37,15 @@ export async function UsersTable({ users }: { users: AdminUser[] }) {
               <td className="text-text-primary px-4 py-3">{u.fullName}</td>
               <td className="text-text-secondary px-4 py-3">{u.email}</td>
               <td className="text-text-secondary px-4 py-3">{u.role}</td>
-              <td className="text-text-primary px-4 py-3">
-                {u.banned ? t("status_banned") : t("status_active")}
-              </td>
               <td className="px-4 py-3">
-                {u.role !== "admin" && (
+                <Badge variant={u.banned ? "outline" : "muted"}>
+                  {u.banned ? t("status_banned") : t("status_active")}
+                </Badge>
+              </td>
+              {u.role === "admin" ? (
+                <td className="text-text-secondary px-4 py-3">—</td>
+              ) : (
+                <td className="px-4 py-3">
                   <form action={setBan}>
                     <input type="hidden" name="userId" value={u.id} />
                     <input type="hidden" name="banned" value={u.banned ? "false" : "true"} />
@@ -39,8 +54,8 @@ export async function UsersTable({ users }: { users: AdminUser[] }) {
                       tone={u.banned ? "neutral" : "danger"}
                     />
                   </form>
-                )}
-              </td>
+                </td>
+              )}
             </tr>
           ))}
         </tbody>
