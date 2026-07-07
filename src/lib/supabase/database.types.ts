@@ -648,12 +648,17 @@ export type Database = {
         }
         Returns: string
       }
+      create_review: {
+        Args: { p_booking_id: string; p_comment: string; p_rating: number }
+        Returns: string
+      }
       get_my_bookings: {
         Args: never
         Returns: {
           address: string
           created_at: string
           currency: string
+          has_review: boolean
           id: string
           payment_status: string
           price: number
