@@ -269,7 +269,10 @@
     "pay_refunded": "Refunded",
     "pay_failed": "Payment failed",
     "tip_prompt": "Leave a tip?",
+    "review_cta": "Leave a review",
+    "reviewed": "Review submitted",
     "tip_success": "Thanks for your tip!",
+    "review_success": "Thanks for your review!",
     "paid_success": "Payment authorized! Your booking is on its way.",
     "action_messages": "Messages",
     "unread_aria": "{count} unread messages"
@@ -283,6 +286,19 @@
     "read_only": "This booking is cancelled. History is read-only.",
     "back": "Back to dashboard",
     "send_error": "Couldn’t send. Try again."
+  },
+  "reviews": {
+    "title": "Leave a review",
+    "subtitle": "How was your service with {name}?",
+    "rating_label": "Rating",
+    "comment_label": "Comment (optional)",
+    "comment_placeholder": "Tell us how it went…",
+    "submit": "Submit review",
+    "back": "Back to dashboard",
+    "star_aria": "{n} of 5 stars",
+    "error_invalid_rating": "Please select a rating from 1 to 5.",
+    "error_already_reviewed": "You already reviewed this booking.",
+    "error_generic": "Could not submit the review. Please try again."
   },
   "emails": {
     "greeting": "Hi {name},",
@@ -313,6 +329,12 @@
       "heading": "Refund processed",
       "intro": "We've processed the refund for your booking with {talachero}.",
       "total_label": "Amount refunded"
+    },
+    "new_review": {
+      "subject": "You received a new review",
+      "heading": "New review",
+      "intro": "{client} left a review of your service on Talachas.",
+      "rating_label": "Rating"
     }
   }
 }

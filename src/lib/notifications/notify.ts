@@ -8,6 +8,7 @@ import {
   paymentClientEmail,
   paymentTalacheroEmail,
   refundEmail,
+  newReviewEmail,
 } from "./templates";
 
 /** → client, when the talachero accepts a request. */
@@ -71,5 +72,23 @@ export async function notifyRefundIssued(bookingId: string): Promise<void> {
     await sendEmail({ to: ctx.client.email, ...email });
   } catch (err) {
     console.error(`[notifications] notifyRefundIssued(${bookingId}) failed:`, err);
+  }
+}
+
+/** → talachero, when a client leaves a review. Reuses the booking context
+ * (talachero = recipient, client = author). Best-effort; never throws. */
+export async function notifyNewReview(bookingId: string, rating: number): Promise<void> {
+  try {
+    const ctx = await getNotificationContext(createServiceClient(), bookingId);
+    if (!ctx) return;
+    const email = newReviewEmail(
+      ctx.talachero.locale,
+      ctx.talachero.name,
+      ctx.client.name,
+      rating
+    );
+    await sendEmail({ to: ctx.talachero.email, ...email });
+  } catch (err) {
+    console.error(`[notifications] notifyNewReview(${bookingId}) failed:`, err);
   }
 }

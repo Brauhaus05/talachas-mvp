@@ -27,7 +27,7 @@ export default async function ClientDashboardPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { locale } = await params;
-  const { booked, paid, tipped } = await searchParams;
+  const { booked, paid, tipped, reviewed } = await searchParams;
   const user = await getAppUser();
 
   // The layout already guaranteed a signed-in user; send the other roles to
@@ -53,14 +53,20 @@ export default async function ClientDashboardPage({
         <p className="text-text-secondary mt-1 text-sm">{t("client_subtitle")}</p>
       </div>
 
-      {(booked || paid || tipped) && (
+      {(booked || paid || tipped || reviewed) && (
         <div
           role="status"
           className="border-border-strong bg-surface-muted text-text-primary flex items-start gap-3 rounded-md border px-4 py-3 text-sm"
         >
           <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
           <span>
-            {paid ? t("paid_success") : tipped ? t("tip_success") : t("booking_success")}
+            {reviewed
+              ? t("review_success")
+              : paid
+                ? t("paid_success")
+                : tipped
+                  ? t("tip_success")
+                  : t("booking_success")}
           </span>
         </div>
       )}
@@ -103,21 +109,33 @@ export default async function ClientDashboardPage({
                     </button>
                   </form>
                 ) : b.status === "completed" ? (
-                  <form action={tipBooking} className="flex flex-wrap items-center gap-2">
-                    <input type="hidden" name="bookingId" value={b.id} />
-                    <span className="text-text-secondary text-xs">{t("tip_prompt")}</span>
-                    {TIP_PRESETS.map((a) => (
-                      <button
-                        key={a}
-                        type="submit"
-                        name="amount"
-                        value={a}
-                        className="border-border-strong text-text-primary hover:bg-surface-muted rounded-md border px-2.5 py-1 text-xs font-medium transition-colors"
+                  <div className="flex flex-col gap-2">
+                    <form action={tipBooking} className="flex flex-wrap items-center gap-2">
+                      <input type="hidden" name="bookingId" value={b.id} />
+                      <span className="text-text-secondary text-xs">{t("tip_prompt")}</span>
+                      {TIP_PRESETS.map((a) => (
+                        <button
+                          key={a}
+                          type="submit"
+                          name="amount"
+                          value={a}
+                          className="border-border-strong text-text-primary hover:bg-surface-muted rounded-md border px-2.5 py-1 text-xs font-medium transition-colors"
+                        >
+                          +${a}
+                        </button>
+                      ))}
+                    </form>
+                    {b.hasReview ? (
+                      <span className="text-text-secondary text-xs">{t("reviewed")}</span>
+                    ) : (
+                      <Link
+                        href={`/dashboard/bookings/${b.id}/review` as Route}
+                        className="border-border-strong text-text-primary hover:bg-surface-muted w-fit rounded-md border px-3 py-1.5 text-xs font-medium transition-colors"
                       >
-                        +${a}
-                      </button>
-                    ))}
-                  </form>
+                        {t("review_cta")}
+                      </Link>
+                    )}
+                  </div>
                 ) : null
               }
             />
