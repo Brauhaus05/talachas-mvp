@@ -90,8 +90,6 @@ begin
       bio                 = t.bio,
       hourly_rate         = t.rate,
       currency            = 'MXN',
-      rating_avg          = t.rating,
-      rating_count        = t.rcount,
       jobs_completed      = t.jobs,
       years_experience    = t.exp,
       verification_status = 'verified',
