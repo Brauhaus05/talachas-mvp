@@ -284,6 +284,19 @@
     "back": "Volver al panel",
     "send_error": "No se pudo enviar. Inténtalo de nuevo."
   },
+  "reviews": {
+    "title": "Deja una reseña",
+    "subtitle": "¿Cómo estuvo tu servicio con {name}?",
+    "rating_label": "Calificación",
+    "comment_label": "Comentario (opcional)",
+    "comment_placeholder": "Cuéntanos cómo te fue…",
+    "submit": "Enviar reseña",
+    "back": "Volver al panel",
+    "star_aria": "{n} de 5 estrellas",
+    "error_invalid_rating": "Selecciona una calificación de 1 a 5.",
+    "error_already_reviewed": "Ya dejaste una reseña para esta reserva.",
+    "error_generic": "No se pudo enviar la reseña. Inténtalo de nuevo."
+  },
   "emails": {
     "greeting": "Hola {name},",
     "footer": "Este es un mensaje automático de Talachas. No respondas a este correo.",

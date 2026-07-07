@@ -284,6 +284,19 @@
     "back": "Back to dashboard",
     "send_error": "Couldn’t send. Try again."
   },
+  "reviews": {
+    "title": "Leave a review",
+    "subtitle": "How was your service with {name}?",
+    "rating_label": "Rating",
+    "comment_label": "Comment (optional)",
+    "comment_placeholder": "Tell us how it went…",
+    "submit": "Submit review",
+    "back": "Back to dashboard",
+    "star_aria": "{n} of 5 stars",
+    "error_invalid_rating": "Please select a rating from 1 to 5.",
+    "error_already_reviewed": "You already reviewed this booking.",
+    "error_generic": "Could not submit the review. Please try again."
+  },
   "emails": {
     "greeting": "Hi {name},",
     "footer": "This is an automated message from Talachas. Please don't reply to this email.",
