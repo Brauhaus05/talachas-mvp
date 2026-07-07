@@ -26,9 +26,11 @@ export async function deleteReview(formData: FormData) {
   revalidatePath(`/${await getLocale()}/dashboard/admin/reviews`);
 }
 
-/** Force-refund a captured booking. Re-checks admin (defense in depth beyond the
- * page guard), verifies the booking is captured, then makes a best-effort Stripe
- * refund; the charge.refunded webhook reconciles payment_status + ledger. */
+/** Force-refund a captured booking. Required authorization check: this path
+ * reads via the service client (bypasses RLS) and calls no is_admin()-guarded
+ * RPC, so this is the only gate. Then verify the booking is captured and
+ * best-effort refund; the charge.refunded webhook reconciles payment_status +
+ * ledger. */
 export async function forceRefund(formData: FormData) {
   const bookingId = String(formData.get("bookingId") ?? "");
   const user = await getAppUser();
