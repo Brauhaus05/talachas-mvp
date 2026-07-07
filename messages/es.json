@@ -269,7 +269,10 @@
     "pay_refunded": "Reembolsado",
     "pay_failed": "Pago fallido",
     "tip_prompt": "¿Quieres dejar propina?",
+    "review_cta": "Dejar reseña",
+    "reviewed": "Reseña enviada",
     "tip_success": "¡Gracias por tu propina!",
+    "review_success": "¡Gracias por tu reseña!",
     "paid_success": "¡Pago autorizado! Tu reserva está en camino.",
     "action_messages": "Mensajes",
     "unread_aria": "{count} mensajes sin leer"

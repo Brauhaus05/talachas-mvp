@@ -269,7 +269,10 @@
     "pay_refunded": "Refunded",
     "pay_failed": "Payment failed",
     "tip_prompt": "Leave a tip?",
+    "review_cta": "Leave a review",
+    "reviewed": "Review submitted",
     "tip_success": "Thanks for your tip!",
+    "review_success": "Thanks for your review!",
     "paid_success": "Payment authorized! Your booking is on its way.",
     "action_messages": "Messages",
     "unread_aria": "{count} unread messages"
