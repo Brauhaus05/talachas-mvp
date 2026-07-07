@@ -233,11 +233,6 @@
     "talachero_schedule_desc": "Define tu disponibilidad de slots.",
     "talachero_requests": "Tus solicitudes",
     "talachero_requests_desc": "Acepta o rechaza reservas entrantes.",
-    "admin_title": "Panel de administración",
-    "admin_subtitle": "Moderación de usuarios, reservas y disputas.",
-    "admin_users": "Usuarios",
-    "admin_bookings": "Reservas",
-    "admin_disputes": "Disputas",
     "coming_soon": "Próximamente",
     "booking_success": "¡Reserva solicitada! Te avisaremos cuando el Talachero responda.",
     "booking_with": "Con {name}",
@@ -334,7 +329,6 @@
     "col_target": "Talachero",
     "col_rating": "Calificación",
     "col_comment": "Comentario",
-    "col_date": "Fecha",
     "action_delete": "Eliminar"
   },
   "emails": {
