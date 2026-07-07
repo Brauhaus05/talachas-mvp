@@ -1,8 +1,8 @@
-import { getTranslations } from "next-intl/server";
 import { redirect } from "next/navigation";
 import type { Route } from "next";
+import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import { getAppUser, dashboardPathForRole } from "@/lib/auth";
-import { PlaceholderPanel } from "../dashboard-ui";
 
 export default async function AdminDashboardPage({
   params,
@@ -11,40 +11,44 @@ export default async function AdminDashboardPage({
 }) {
   const { locale } = await params;
   const user = await getAppUser();
-
-  if (!user) {
-    redirect(`/${locale}/auth/sign-in` as Route);
-  }
+  if (!user) redirect(`/${locale}/auth/sign-in` as Route);
   // Admin-only. Non-admins never see this exists — they bounce to their home.
   if (user.role !== "admin") {
     redirect(`/${locale}${dashboardPathForRole(user.role)}` as Route);
   }
 
-  const t = await getTranslations("dashboard");
+  const t = await getTranslations("admin");
+  const cards: { href: Route; title: string; desc: string }[] = [
+    { href: "/dashboard/admin/users" as Route, title: t("nav_users"), desc: t("nav_users_desc") },
+    {
+      href: "/dashboard/admin/bookings" as Route,
+      title: t("nav_bookings"),
+      desc: t("nav_bookings_desc"),
+    },
+    {
+      href: "/dashboard/admin/reviews" as Route,
+      title: t("nav_reviews"),
+      desc: t("nav_reviews_desc"),
+    },
+  ];
 
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-text-primary text-2xl font-semibold">{t("admin_title")}</h1>
-        <p className="text-text-secondary mt-1 text-sm">{t("admin_subtitle")}</p>
+        <h1 className="text-text-primary text-2xl font-semibold">{t("overview_title")}</h1>
+        <p className="text-text-secondary mt-1 text-sm">{t("overview_subtitle")}</p>
       </div>
-
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <PlaceholderPanel
-          title={t("admin_users")}
-          description={t("admin_subtitle")}
-          comingSoon={t("coming_soon")}
-        />
-        <PlaceholderPanel
-          title={t("admin_bookings")}
-          description={t("admin_subtitle")}
-          comingSoon={t("coming_soon")}
-        />
-        <PlaceholderPanel
-          title={t("admin_disputes")}
-          description={t("admin_subtitle")}
-          comingSoon={t("coming_soon")}
-        />
+        {cards.map((c) => (
+          <Link
+            key={c.href}
+            href={c.href}
+            className="border-border hover:bg-surface-muted rounded-lg border p-5 transition-colors"
+          >
+            <h2 className="text-text-primary font-medium">{c.title}</h2>
+            <p className="text-text-secondary mt-1 text-sm">{c.desc}</p>
+          </Link>
+        ))}
       </div>
     </div>
   );

@@ -7,6 +7,7 @@ import { getLocale } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { createServiceClient } from "@/lib/supabase/service";
 import { getStripe } from "@/lib/stripe/server";
+import { refundCapturedBooking } from "@/lib/stripe/refunds";
 import { getAppUrl } from "@/lib/stripe/config";
 import { getCurrency } from "@/lib/format";
 import { notifyBookingConfirmed } from "@/lib/notifications/notify";
@@ -80,24 +81,11 @@ export async function cancelBooking(formData: FormData) {
     if (pay.payment_status === "authorized") {
       await safe(() => stripe.paymentIntents.cancel(pay.stripe_payment_intent_id!));
     } else if (pay.payment_status === "captured") {
-      // Full refund of a completed booking: claw back the talachero's payout
-      // (reverse_transfer) and return the platform commission
-      // (refund_application_fee) so no party retains funds for a cancelled job.
-      //
-      // NOTE: this branch is currently UNREACHABLE via cancelBooking — capture
-      // only happens at completion, and cancel_booking rejects 'completed'
-      // (raises invalid_state). It is intentionally kept as the reference
-      // implementation for the deferred Phase 6 ADMIN refund control (see
-      // docs/superpowers/specs/2026-07-04-completed-booking-refund-design.md).
-      // Do NOT delete as dead code. Tiered/partial refunds per cancellation
-      // policy are still TODO — see HANDOFF "cancellation-policy time windows".
-      await safe(() =>
-        stripe.refunds.create({
-          payment_intent: pay.stripe_payment_intent_id!,
-          reverse_transfer: true,
-          refund_application_fee: true,
-        })
-      );
+      // Full refund of a completed booking (reverse payout + commission). Shared
+      // with the admin force-refund action (dashboard/admin/actions.ts). This
+      // branch is currently unreachable via cancelBooking itself (cancel_booking
+      // rejects 'completed'); the admin panel is the real caller.
+      await safe(() => refundCapturedBooking(pay.stripe_payment_intent_id!));
     }
   }
   await revalidateDashboards(await getLocale());
