@@ -14,6 +14,7 @@ export interface ClientBooking {
   talacheroName: string | null;
   serviceSlug: string;
   slotStart: string | null;
+  hasReview: boolean;
 }
 
 export interface TalacheroBooking {
@@ -46,6 +47,7 @@ export async function getMyBookings(): Promise<ClientBooking[]> {
     talacheroName: r.talachero_name,
     serviceSlug: r.service_slug,
     slotStart: r.slot_start,
+    hasReview: r.has_review,
   }));
 }
 
