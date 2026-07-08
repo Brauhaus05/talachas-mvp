@@ -197,6 +197,24 @@ begin
   end loop;
 
   -- -------------------------------------------------------------------------
+  -- One open dispute so the admin queue renders without Stripe. Direct insert
+  -- (seed runs as superuser, not through raise_dispute); mark the booking
+  -- captured so it reads as refundable context in the queue.
+  -- -------------------------------------------------------------------------
+  select b.id into b_id
+    from public.bookings b
+    join public.users cu on cu.id = b.client_id
+    where cu.email = 'mariana.ruiz@demo.talachas.mx' and b.status = 'completed'
+    order by b.created_at desc
+    limit 1;
+  if b_id is not null then
+    update public.bookings set payment_status = 'captured' where id = b_id;
+    insert into public.disputes (booking_id, raised_by, reason)
+    select b_id, b.client_id, 'El trabajo quedó incompleto y no respondió mis mensajes.'
+      from public.bookings b where b.id = b_id;
+  end if;
+
+  -- -------------------------------------------------------------------------
   -- Platform admin. Inserting fires handle_new_user() (which forces role to
   -- 'client' — admin is never self-assignable), so promote to admin after.
   -- -------------------------------------------------------------------------
