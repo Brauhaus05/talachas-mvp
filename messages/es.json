@@ -305,6 +305,7 @@
     "reason_label": "¿Qué pasó?",
     "reason_placeholder": "Describe el problema con el servicio…",
     "submit": "Enviar reporte",
+    "error_empty_reason": "Escribe una descripción del problema.",
     "error_not_refundable": "Esta reserva no admite reembolso.",
     "error_already_disputed": "Ya existe un reporte para esta reserva.",
     "error_generic": "No se pudo enviar el reporte. Inténtalo de nuevo."

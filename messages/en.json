@@ -305,6 +305,7 @@
     "reason_label": "What happened?",
     "reason_placeholder": "Describe the problem with the service…",
     "submit": "Submit report",
+    "error_empty_reason": "Please describe the problem.",
     "error_not_refundable": "This booking is not refundable.",
     "error_already_disputed": "A report already exists for this booking.",
     "error_generic": "Could not submit the report. Please try again."
