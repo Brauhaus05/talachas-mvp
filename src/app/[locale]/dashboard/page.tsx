@@ -27,7 +27,7 @@ export default async function ClientDashboardPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { locale } = await params;
-  const { booked, paid, tipped, reviewed } = await searchParams;
+  const { booked, paid, tipped, reviewed, disputed } = await searchParams;
   const user = await getAppUser();
 
   // The layout already guaranteed a signed-in user; send the other roles to
@@ -53,20 +53,22 @@ export default async function ClientDashboardPage({
         <p className="text-text-secondary mt-1 text-sm">{t("client_subtitle")}</p>
       </div>
 
-      {(booked || paid || tipped || reviewed) && (
+      {(booked || paid || tipped || reviewed || disputed) && (
         <div
           role="status"
           className="border-border-strong bg-surface-muted text-text-primary flex items-start gap-3 rounded-md border px-4 py-3 text-sm"
         >
           <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
           <span>
-            {reviewed
-              ? t("review_success")
-              : paid
-                ? t("paid_success")
-                : tipped
-                  ? t("tip_success")
-                  : t("booking_success")}
+            {disputed
+              ? t("dispute_success")
+              : reviewed
+                ? t("review_success")
+                : paid
+                  ? t("paid_success")
+                  : tipped
+                    ? t("tip_success")
+                    : t("booking_success")}
           </span>
         </div>
       )}
@@ -110,9 +112,14 @@ export default async function ClientDashboardPage({
                   </form>
                 ) : b.status === "completed" ? (
                   <div className="flex flex-col gap-2">
-                    <form action={tipBooking} className="flex flex-wrap items-center gap-2">
+                    <form
+                      action={tipBooking}
+                      className="flex flex-wrap items-center gap-2"
+                    >
                       <input type="hidden" name="bookingId" value={b.id} />
-                      <span className="text-text-secondary text-xs">{t("tip_prompt")}</span>
+                      <span className="text-text-secondary text-xs">
+                        {t("tip_prompt")}
+                      </span>
                       {TIP_PRESETS.map((a) => (
                         <button
                           key={a}
@@ -135,6 +142,19 @@ export default async function ClientDashboardPage({
                         {t("review_cta")}
                       </Link>
                     )}
+                    {b.paymentStatus === "captured" &&
+                      (b.hasDispute ? (
+                        <span className="text-text-secondary text-xs">
+                          {t("dispute_pending")}
+                        </span>
+                      ) : (
+                        <Link
+                          href={`/dashboard/bookings/${b.id}/dispute` as Route}
+                          className="border-border-strong text-text-primary hover:bg-surface-muted w-fit rounded-md border px-3 py-1.5 text-xs font-medium transition-colors"
+                        >
+                          {t("dispute_cta")}
+                        </Link>
+                      ))}
                   </div>
                 ) : null
               }
