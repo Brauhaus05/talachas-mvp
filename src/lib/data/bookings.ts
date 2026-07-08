@@ -15,6 +15,7 @@ export interface ClientBooking {
   serviceSlug: string;
   slotStart: string | null;
   hasReview: boolean;
+  hasDispute: boolean;
 }
 
 export interface TalacheroBooking {
@@ -48,6 +49,7 @@ export async function getMyBookings(): Promise<ClientBooking[]> {
     serviceSlug: r.service_slug,
     slotStart: r.slot_start,
     hasReview: r.has_review,
+    hasDispute: r.has_dispute,
   }));
 }
 
