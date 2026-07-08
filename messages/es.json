@@ -268,6 +268,9 @@
     "reviewed": "Reseña enviada",
     "tip_success": "¡Gracias por tu propina!",
     "review_success": "¡Gracias por tu reseña!",
+    "dispute_cta": "Reportar un problema",
+    "dispute_pending": "Reporte en revisión",
+    "dispute_success": "Tu reporte se envió. Un moderador lo revisará.",
     "paid_success": "¡Pago autorizado! Tu reserva está en camino.",
     "action_messages": "Mensajes",
     "unread_aria": "{count} mensajes sin leer"
@@ -295,6 +298,17 @@
     "error_already_reviewed": "Ya dejaste una reseña para esta reserva.",
     "error_generic": "No se pudo enviar la reseña. Inténtalo de nuevo."
   },
+  "disputes": {
+    "title": "Reportar un problema",
+    "subtitle": "Cuéntanos qué salió mal con el servicio de {name}. Un moderador revisará tu caso.",
+    "back": "Volver",
+    "reason_label": "¿Qué pasó?",
+    "reason_placeholder": "Describe el problema con el servicio…",
+    "submit": "Enviar reporte",
+    "error_not_refundable": "Esta reserva no admite reembolso.",
+    "error_already_disputed": "Ya existe un reporte para esta reserva.",
+    "error_generic": "No se pudo enviar el reporte. Inténtalo de nuevo."
+  },
   "admin": {
     "overview_title": "Panel de administración",
     "overview_subtitle": "Moderación de usuarios, reservas y reseñas.",
@@ -304,6 +318,8 @@
     "nav_bookings_desc": "Reembolsar reservas cobradas.",
     "nav_reviews": "Reseñas",
     "nav_reviews_desc": "Eliminar reseñas.",
+    "nav_disputes": "Disputas",
+    "nav_disputes_desc": "Revisa y resuelve reportes de clientes.",
     "back": "Volver al panel",
     "confirm": "Confirmar",
     "cancel": "Cancelar",
@@ -329,7 +345,15 @@
     "col_target": "Talachero",
     "col_rating": "Calificación",
     "col_comment": "Comentario",
-    "action_delete": "Eliminar"
+    "action_delete": "Eliminar",
+    "disputes_title": "Disputas",
+    "col_reason": "Motivo",
+    "col_status": "Estado",
+    "col_date": "Fecha",
+    "action_dismiss": "Descartar",
+    "status_open": "Abierta",
+    "status_refunded": "Reembolsada",
+    "status_dismissed": "Descartada"
   },
   "emails": {
     "greeting": "Hola {name},",
