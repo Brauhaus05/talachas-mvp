@@ -1,6 +1,6 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
-import type { UserRole } from "@/lib/supabase/types";
+import type { UserRole, DisputeStatus } from "@/lib/supabase/types";
 
 export interface AdminUser {
   id: string;
@@ -25,6 +25,21 @@ export interface AdminReview {
   rating: number;
   comment: string | null;
   createdAt: string;
+}
+
+export interface AdminDispute {
+  id: string;
+  bookingId: string;
+  clientName: string;
+  talacheroName: string;
+  price: number;
+  currency: string;
+  paymentStatus: string;
+  reason: string;
+  status: DisputeStatus;
+  adminNote: string | null;
+  createdAt: string;
+  resolvedAt: string | null;
 }
 
 export async function listUsers(): Promise<AdminUser[]> {
@@ -63,5 +78,24 @@ export async function listReviews(): Promise<AdminReview[]> {
     rating: r.rating,
     comment: r.comment,
     createdAt: r.created_at,
+  }));
+}
+
+export async function listDisputes(): Promise<AdminDispute[]> {
+  const supabase = await createClient();
+  const { data } = await supabase.rpc("admin_list_disputes");
+  return (data ?? []).map((r) => ({
+    id: r.id,
+    bookingId: r.booking_id,
+    clientName: r.client_name ?? "",
+    talacheroName: r.talachero_name ?? "",
+    price: Number(r.price ?? 0),
+    currency: r.currency,
+    paymentStatus: r.payment_status,
+    reason: r.reason,
+    status: r.status,
+    adminNote: r.admin_note,
+    createdAt: r.created_at,
+    resolvedAt: r.resolved_at,
   }));
 }

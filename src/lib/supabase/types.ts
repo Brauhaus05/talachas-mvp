@@ -18,6 +18,7 @@ export type VerificationStatus = Database["public"]["Enums"]["verification_statu
 export type SlotStatus = Database["public"]["Enums"]["slot_status"];
 export type BookingStatus = Database["public"]["Enums"]["booking_status"];
 export type TransactionType = Database["public"]["Enums"]["transaction_type"];
+export type DisputeStatus = Database["public"]["Enums"]["dispute_status"];
 
 // Row aliases
 type Tables = Database["public"]["Tables"];
@@ -29,3 +30,4 @@ export type TalacheroProfileRow = Tables["talachero_profiles"]["Row"];
 export type AvailabilitySlotRow = Tables["availability_slots"]["Row"];
 export type BookingRow = Tables["bookings"]["Row"];
 export type ReviewRow = Tables["reviews"]["Row"];
+export type DisputeRow = Tables["disputes"]["Row"];

@@ -268,6 +268,9 @@
     "reviewed": "Review submitted",
     "tip_success": "Thanks for your tip!",
     "review_success": "Thanks for your review!",
+    "dispute_cta": "Report a problem",
+    "dispute_pending": "Report under review",
+    "dispute_success": "Your report was submitted. A moderator will review it.",
     "paid_success": "Payment authorized! Your booking is on its way.",
     "action_messages": "Messages",
     "unread_aria": "{count} unread messages"
@@ -295,6 +298,18 @@
     "error_already_reviewed": "You already reviewed this booking.",
     "error_generic": "Could not submit the review. Please try again."
   },
+  "disputes": {
+    "title": "Report a problem",
+    "subtitle": "Tell us what went wrong with {name}'s service. A moderator will review your case.",
+    "back": "Back",
+    "reason_label": "What happened?",
+    "reason_placeholder": "Describe the problem with the service…",
+    "submit": "Submit report",
+    "error_empty_reason": "Please describe the problem.",
+    "error_not_refundable": "This booking is not refundable.",
+    "error_already_disputed": "A report already exists for this booking.",
+    "error_generic": "Could not submit the report. Please try again."
+  },
   "admin": {
     "overview_title": "Admin panel",
     "overview_subtitle": "Moderate users, bookings, and reviews.",
@@ -304,6 +319,8 @@
     "nav_bookings_desc": "Refund captured bookings.",
     "nav_reviews": "Reviews",
     "nav_reviews_desc": "Delete reviews.",
+    "nav_disputes": "Disputes",
+    "nav_disputes_desc": "Review and resolve client reports.",
     "back": "Back to dashboard",
     "confirm": "Confirm",
     "cancel": "Cancel",
@@ -329,7 +346,15 @@
     "col_target": "Talachero",
     "col_rating": "Rating",
     "col_comment": "Comment",
-    "action_delete": "Delete"
+    "action_delete": "Delete",
+    "disputes_title": "Disputes",
+    "col_reason": "Reason",
+    "col_status": "Status",
+    "col_date": "Date",
+    "action_dismiss": "Dismiss",
+    "status_open": "Open",
+    "status_refunded": "Refunded",
+    "status_dismissed": "Dismissed"
   },
   "emails": {
     "greeting": "Hi {name},",
