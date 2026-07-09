@@ -6,11 +6,14 @@
 -- 1. Column defaults -> CAD
 alter table public.talachero_profiles alter column currency set default 'CAD';
 alter table public.bookings           alter column currency set default 'CAD';
-alter table public.transactions        alter column currency set default 'CAD';
+alter table public.transactions       alter column currency set default 'CAD';
 
--- 2. Backfill mutable rows (currency here is not read for display or used as the
---    charge source). NOT transactions: it is the immutable append-only ledger
---    (PRD §6.4) — historical rows keep the currency actually charged.
+-- 2. Backfill mutable rows. bookings.currency IS shown to users (admin tables,
+--    email receipts via formatMoney), so backfilling prevents stale MX$ on
+--    pre-migration rows. talachero_profiles.currency and cities.currency are
+--    unread today but flipped for consistency. NOT transactions: it is the
+--    immutable append-only ledger (PRD §6.4) — historical rows keep the
+--    currency actually charged.
 update public.talachero_profiles set currency = 'CAD' where currency = 'MXN';
 update public.bookings           set currency = 'CAD' where currency = 'MXN';
 update public.cities             set currency = 'CAD' where slug = 'cdmx';
