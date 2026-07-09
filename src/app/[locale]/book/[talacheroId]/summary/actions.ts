@@ -92,9 +92,8 @@ export async function confirmBooking(
 
   const amountMinor = Math.round(Number(booking?.price ?? 0) * 100);
   const feeMinor = Math.round(amountMinor * getPlatformFeePct());
-  // Charge in the configured currency (getCurrency, default MXN). Overridable
-  // via NEXT_PUBLIC_CURRENCY for local testing against a non-MX platform
-  // account, where charging MXN to a CA-region connected account conflicts.
+  // Charge in the configured currency (getCurrency, default CAD). Overridable
+  // via NEXT_PUBLIC_CURRENCY; must match the connected account's region.
   const currency = getCurrency().toLowerCase();
   const appUrl = getAppUrl();
 

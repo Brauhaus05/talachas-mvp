@@ -29,7 +29,7 @@ async function ledger(
     booking_id: bookingId,
     type,
     amount: minorToMajor(amountMinor),
-    currency: (currency ?? "mxn").toUpperCase(),
+    currency: (currency ?? "cad").toUpperCase(),
     provider_ref: providerRef,
   });
 }
