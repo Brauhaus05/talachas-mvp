@@ -89,7 +89,7 @@ begin
     set
       bio                 = t.bio,
       hourly_rate         = t.rate,
-      currency            = 'MXN',
+      currency            = 'CAD',
       jobs_completed      = t.jobs,
       years_experience    = t.exp,
       verification_status = 'verified',
@@ -186,7 +186,7 @@ begin
       created_at, updated_at
     )
     values (
-      au_id, tp_id, svc_id, 'completed', rate, 'MXN',
+      au_id, tp_id, svc_id, 'completed', rate, 'CAD',
       now() - make_interval(days => r.days_ago),
       now() - make_interval(days => r.days_ago)
     )
