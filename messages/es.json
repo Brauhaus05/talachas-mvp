@@ -114,7 +114,7 @@
     "results_count": "{count, plural, one {# Talachero disponible} other {# Talacheros disponibles}}",
     "filters_title": "Filtros",
     "filter_service": "Servicio",
-    "filter_price": "Rango de precio (MXN/h)",
+    "filter_price": "Rango de precio (CAD/h)",
     "filter_rating": "Calificación mínima",
     "filter_availability": "Disponibilidad",
     "availability_today": "Hoy",
