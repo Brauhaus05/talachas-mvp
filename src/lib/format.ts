@@ -4,7 +4,8 @@
  * inherently user-facing — not a secret. Single source for the Stripe charge
  * currency and the money formatter so the two can't drift.
  *
- * Defaults to `CAD`. Overridable via `NEXT_PUBLIC_CURRENCY` (e.g. `MXN`) — pairs
+ * Defaults to `CAD`. Overridable via `NEXT_PUBLIC_CURRENCY` (e.g. `USD`, or any
+ * ISO 4217 code) — pairs
  * with `STRIPE_CONNECT_COUNTRY`; the Stripe charge currency must match the
  * connected account's region (destination charges + application fees are
  * same-region only).
@@ -21,7 +22,6 @@ export function formatMoney(
   // Pin to en-MX so the currency symbol renders unambiguously as "CA$" in both
   // app locales (es-MX would render "CAD 560"). `locale` is kept for call-site
   // compatibility; it no longer changes the formatted output.
-  void locale;
   return new Intl.NumberFormat("en-MX", {
     style: "currency",
     currency,
