@@ -1,4 +1,4 @@
-# Session Handoff — 2026-07-07
+# Session Handoff — 2026-07-09
 
 > Read alongside [prd.md](./prd.md) and [plan.md](./plan.md). This captures what the code and git log **don't** — session decisions, verification state, and where to pick up.
 
