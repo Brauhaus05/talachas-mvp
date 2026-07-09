@@ -4,13 +4,14 @@
  * inherently user-facing — not a secret. Single source for the Stripe charge
  * currency and the money formatter so the two can't drift.
  *
- * Defaults to `MXN` (production). For local testing against a non-MX platform
- * Stripe account (destination charges + application fees only work same-region),
- * set `NEXT_PUBLIC_CURRENCY=CAD` in `.env.local` — pairs with
- * `STRIPE_CONNECT_COUNTRY`.
+ * Defaults to `CAD`. Overridable via `NEXT_PUBLIC_CURRENCY` (e.g. `USD`, or any
+ * ISO 4217 code) — pairs
+ * with `STRIPE_CONNECT_COUNTRY`; the Stripe charge currency must match the
+ * connected account's region (destination charges + application fees are
+ * same-region only).
  */
 export function getCurrency(): string {
-  return process.env.NEXT_PUBLIC_CURRENCY?.trim().toUpperCase() || "MXN";
+  return process.env.NEXT_PUBLIC_CURRENCY?.trim().toUpperCase() || "CAD";
 }
 
 export function formatMoney(
@@ -18,7 +19,10 @@ export function formatMoney(
   locale: string,
   currency: string = getCurrency()
 ): string {
-  return new Intl.NumberFormat(locale === "en" ? "en-MX" : "es-MX", {
+  // Pin to en-MX so the currency symbol renders unambiguously as "CA$" in both
+  // app locales (es-MX would render "CAD 560"). `locale` is kept for call-site
+  // compatibility; it no longer changes the formatted output.
+  return new Intl.NumberFormat("en-MX", {
     style: "currency",
     currency,
     maximumFractionDigits: 0,

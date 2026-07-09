@@ -34,11 +34,11 @@ export function getPlatformFeePct(): number {
 }
 
 /**
- * Country for new Connect (Express) accounts. Production is Mexico (MX).
- * Overridable via env for local test mode: Stripe blocks destination charges +
- * application fees across regions, so to exercise payments against a non-MX
- * platform test account, set STRIPE_CONNECT_COUNTRY to the platform's country.
+ * Country for new Connect (Express) accounts. Defaults to Canada (CA).
+ * Overridable via `STRIPE_CONNECT_COUNTRY`. Stripe blocks destination charges +
+ * application fees across regions, so the Connect country and the charge
+ * currency (`NEXT_PUBLIC_CURRENCY`) must match the platform account's region.
  */
 export function getConnectCountry(): string {
-  return process.env.STRIPE_CONNECT_COUNTRY?.trim() || "MX";
+  return process.env.STRIPE_CONNECT_COUNTRY?.trim() || "CA";
 }

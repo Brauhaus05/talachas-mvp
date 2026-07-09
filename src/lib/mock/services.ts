@@ -25,7 +25,7 @@ export interface ServiceCategory {
   icon: LucideIcon;
   /** Feature weight — larger tile in the bento grid. */
   featured: boolean;
-  /** Typical hourly rate in MXN, used as a placeholder anchor for the tile. */
+  /** Typical hourly rate, used as a placeholder anchor for the tile. */
   startingRateMxn: number;
 }
 
