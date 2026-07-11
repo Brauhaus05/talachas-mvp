@@ -1,6 +1,25 @@
-# Session Handoff — 2026-07-09
+# Session Handoff — 2026-07-11
 
 > Read alongside [prd.md](./prd.md) and [plan.md](./plan.md). This captures what the code and git log **don't** — session decisions, verification state, and where to pick up.
+
+## 🚀 LIVE on Vercel — https://talachas-mvp.vercel.app (2026-07-11, Stripe test mode, seed talacheros)
+
+First cloud deployment. Decision: **deploy now with seed talacheros** (talachero self-service tooling still unbuilt — new talachero signups get an empty profile shell + Stripe onboarding only; to act as a bookable talachero, sign in to a seed account). Client signup → browse → book → simulate-pay works end-to-end against the 10 seed talacheros.
+
+- **Vercel project:** `talachas-mvp` (scope `brauhaus05s-projects`, `prj_AReXIRBLwKuZuRDMCRNvAlZje2ct`) — **auto-deploys from `Brauhaus05/talachas-mvp` `main`** (GitHub connected). Production alias = `talachas-mvp.vercel.app` (== `NEXT_PUBLIC_APP_URL`, so Stripe return/success URLs resolve).
+- **Cloud Supabase:** project `talachas-mvp`, ref **`rcpfxcwooptmadyacfkk`** (org `wkuavigarfybmuwlqidp`, East US / N. Virginia). All 16 migrations pushed (`db push`) + seed loaded (`db reset --linked`) → 10 demo talacheros live. **DB password is only in this session's scratchpad — save it to your password manager or reset it in the Supabase dashboard (Settings → Database).** The local `.env.local` / `supabase start` stack is untouched (still points at local `:55321`).
+- **Auth config:** email confirmation **disabled** (`enable_confirmations=false` via `supabase config push`) so client/talachero signups get an immediate session — no SMTP needed; `site_url` + redirect URLs set to the Vercel domain. Local `config.toml` was edited only to push and then **reverted** (no repo change; local dev unaffected).
+- **Stripe:** **TEST mode**, existing Canadian platform account. New webhook endpoint **`we_1Ts4wlEkZnbeTZfTVDMMBPbd`** → `https://talachas-mvp.vercel.app/api/stripe/webhook` (6 events: checkout.session.completed/expired, payment_intent.succeeded/canceled, charge.refunded, account.updated). Carried the test workarounds: `STRIPE_CONNECT_COUNTRY=CA`, `NEXT_PUBLIC_CURRENCY=CAD`. **MX production blocker below still stands** — this is the CA test platform.
+- **Vercel prod env vars (10):** `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `STRIPE_SECRET_KEY` (test), `STRIPE_WEBHOOK_SECRET`, `NEXT_PUBLIC_APP_URL`, `PLATFORM_FEE_PCT=0.15`, `STRIPE_CONNECT_COUNTRY=CA`, `NEXT_PUBLIC_CURRENCY=CAD`, `RESEND_API_KEY`. (Set for **Production** only; add Preview/Development if you want branch previews to work.)
+- **Verified live (2026-07-11):** homepage + `/en/talacheros` render 10 seed talacheros in **CA$** with ratings/neighborhoods/availability (browser); `/` → `/es|/en` redirect; a real client signup returned an immediate session + `handle_new_user` created the `public.users` row + an authenticated RLS RPC (`get_my_bookings`) validated the cloud-issued JWT (API); webhook returns **400 "Invalid signature"** on a bad payload (route deployed + verifying). **Not yet exercised live: the Stripe onboarding + checkout → capture chain** (interactive owner runbook — below).
+
+### ▶ Simulate a payment on the live site (owner runbook)
+Seed talacheros are **not** Stripe-onboarded (seed doesn't set Stripe fields), and `confirmBooking` returns `talachero_not_payable` until `charges_enabled`. So onboard one first:
+1. **Sign in** at https://talachas-mvp.vercel.app as `carlos.mendoza@demo.talachas.mx` / `password123` → talachero dashboard → **Configurar pagos** → complete Stripe Express **test** onboarding (Stripe pre-fills test data / offers a skip in test mode). Back on the dashboard the panel flips to **Activos** (`refreshOnboarding()` re-fetches capabilities on return — no `account.updated` webhook needed).
+2. In an incognito window, **sign up a brand-new client** (proves the signup goal) or sign in `mariana.ruiz@demo.talachas.mx`. Open Carlos's profile → pick a slot → **Confirmar reserva** → pay on Stripe Checkout with test card **`4242 4242 4242 4242`**, any future expiry + any CVC.
+3. Booking shows **Pago autorizado**. Sign back in as Carlos → **Aceptar** → **Marcar completada** (captures). Watch deliveries under the webhook in the Stripe test dashboard; ledger rows land via the webhook.
+
+---
 
 ## Where we are
 
