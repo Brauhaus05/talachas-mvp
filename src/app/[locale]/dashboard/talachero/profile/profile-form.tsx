@@ -23,14 +23,13 @@ export function ProfileForm({ initial }: { initial: MyTalacheroProfileEdit }) {
   );
 
   function toggleService(slug: ServiceSlug) {
-    setServices((prev) => {
-      if (prev.includes(slug)) {
-        const next = prev.filter((s) => s !== slug);
-        setPrimary((p) => (p === slug ? (next[0] ?? null) : p));
-        return next;
-      }
-      setPrimary((p) => p ?? slug);
-      return [...prev, slug];
+    const selected = services.includes(slug);
+    setServices((prev) =>
+      selected ? prev.filter((s) => s !== slug) : [...prev, slug]
+    );
+    setPrimary((p) => {
+      if (!selected) return p ?? slug;
+      return p === slug ? (services.filter((s) => s !== slug)[0] ?? null) : p;
     });
   }
 
