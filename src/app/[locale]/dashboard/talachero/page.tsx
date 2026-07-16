@@ -8,6 +8,15 @@ import { PlaceholderPanel } from "../dashboard-ui";
 import { BookingCard } from "../booking-card";
 import { acceptBooking, rejectBooking, cancelBooking, completeBooking } from "../actions";
 import { PaymentsPanel } from "./payments-panel";
+import { Link } from "@/i18n/navigation";
+import { buttonVariants } from "@/components/ui/button";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
 
 export default async function TalacheroDashboardPage({
   params,
@@ -142,11 +151,20 @@ export default async function TalacheroDashboardPage({
 
       {/* Still-placeholder tools */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <PlaceholderPanel
-          title={t("talachero_profile")}
-          description={t("talachero_profile_desc")}
-          comingSoon={t("coming_soon")}
-        />
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">{t("talachero_profile")}</CardTitle>
+            <CardDescription>{t("talachero_profile_desc")}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link
+              href="/dashboard/talachero/profile"
+              className={buttonVariants({ size: "sm" })}
+            >
+              {t("talachero_profile_cta")}
+            </Link>
+          </CardContent>
+        </Card>
         <PlaceholderPanel
           title={t("talachero_schedule")}
           description={t("talachero_schedule_desc")}
