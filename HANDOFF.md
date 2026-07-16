@@ -2,6 +2,27 @@
 
 > Read alongside [prd.md](./prd.md) and [plan.md](./plan.md). This captures what the code and git log **don't** — session decisions, verification state, and where to pick up.
 
+---
+
+## 🗓️ Session 2026-07-16 — UI polish merged + talachero profile editor
+
+**Notion task tracker now drives the work** — the "✅ Tareas" database (under JALO) with three sprints: **Sprint 1 · Desbloqueo Stripe MX**, **Sprint 2 · Autoservicio de prestadores**, **Sprint 3 · Pulido y QA en vivo**. Cross-checked every code-verifiable task against the repo this session (tracker was accurate — no false "done"s). Statuses updated as work progressed.
+
+**PR #17 — ✅ MERGED to `main` (squash):** UI polish. Shared `Button` (`src/components/ui/button.tsx`) gained a `loading` prop (spinner + auto-disable + `aria-busy`), per-variant `active:` pressed states, and an `xs` size; **11 raw action `<button>`s migrated** to it (review/dispute/chat forms, admin confirm-button, payments panel, client + talachero booking actions). Selection chips (rating stars, search/booking filters) + nav sign-out intentionally left raw. Nav **"Cómo funciona" → "Catálogo"** (`nav.how_it_works` → `nav.catalog`, es/en). Closes Sprint 3 **Estados de botón** + **Títulos y etiquetas** (Notion: Hecho). typecheck/lint/build green.
+
+**PR #18 — 🔶 OPEN, branch `feat/talachero-profile-editor` (off `main`):** first talachero **self-service profile editor** — bio, hourly rate, services + primary, years of experience. Photos + coverage-zone **deferred** (own tasks). Closes Sprint 2 **Editor de perfil** (Notion: En revisión).
+- **`update_talachero_profile` SECURITY DEFINER RPC** (`supabase/migrations/20260716120001_*`) — forced by the `authenticated` UPDATE-revoke on `talachero_profiles`; validates `auth.uid()` ownership, writes ONLY bio/hourly_rate/years_experience, replaces the `talachero_services` set atomically, never touches money/verification/rating cols.
+- Data reader `getMyTalacheroProfileForEdit`, server action `updateTalacheroProfile`, dedicated route `/dashboard/talachero/profile` + `ProfileForm` (services multi-select with a primary-star affordance), dashboard placeholder → **Editar perfil** link card, es/en copy.
+- Built subagent-driven from a committed spec + plan in **`docs/superpowers/`** (per-task spec + code-quality review, final whole-branch review = ready to merge).
+- **Verified:** typecheck/lint/build + **live end-to-end as a real talachero** (JWT → RPC via PostgREST: valid update persists, atomic on failure, all negatives rejected with correct codes, public directory reflects the change) + **in-browser inspection** (edit → save → grayscale success banner, service toggle, primary reassignment, reload persistence, dashboard card, public profile, zero console errors).
+- **Independent of #17** (doesn't modify `Button`). If GitHub shows it behind after the #17 merge, rebase onto the new `main` before merging.
+
+**Decisions:** **CA$/CAD price display is intentional until further notice** (matches the CA test Stripe platform; the MX production blocker below still stands). The editor's rate field is labeled MXN (stored `hourly_rate` currency); directory/display uses `NEXT_PUBLIC_CURRENCY`.
+
+**Env at session end:** the local Supabase stack + dev server were started for migration/verification, then **shut down** (Supabase data preserved in its docker volume — `pnpm exec supabase start` to resume). Cloud Supabase / Vercel untouched. **⚠️ `main` now has #17 but `feat/talachero-profile-editor` was branched before that merge.**
+
+---
+
 ## 🚀 LIVE on Vercel — https://talachas-mvp.vercel.app (2026-07-11, Stripe test mode, seed talacheros)
 
 First cloud deployment. Decision: **deploy now with seed talacheros** (talachero self-service tooling still unbuilt — new talachero signups get an empty profile shell + Stripe onboarding only; to act as a bookable talachero, sign in to a seed account). Client signup → browse → book → simulate-pay works end-to-end against the 10 seed talacheros.
