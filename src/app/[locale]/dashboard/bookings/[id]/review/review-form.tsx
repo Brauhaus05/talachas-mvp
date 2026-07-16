@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { useTranslations } from "next-intl";
+import { Button } from "@/components/ui/button";
 import { RatingInput } from "@/components/ui/rating-input";
 import { submitReview, type ReviewState } from "./actions";
 
@@ -54,13 +55,9 @@ export function ReviewForm({ bookingId }: { bookingId: string }) {
         </p>
       )}
 
-      <button
-        type="submit"
-        disabled={pending}
-        className="bg-action-primary text-text-inverse hover:bg-action-primary-hover w-fit rounded-md px-4 py-2 text-sm font-medium disabled:opacity-60"
-      >
+      <Button type="submit" size="sm" loading={pending} className="w-fit">
         {t("submit")}
-      </button>
+      </Button>
     </form>
   );
 }

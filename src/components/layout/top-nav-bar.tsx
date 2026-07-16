@@ -36,7 +36,7 @@ export async function TopNavBar() {
             href="/talacheros"
             className="text-text-secondary hover:text-text-primary hidden text-sm md:inline-block"
           >
-            {t("nav.how_it_works")}
+            {t("nav.catalog")}
           </Link>
 
           {user ? (
