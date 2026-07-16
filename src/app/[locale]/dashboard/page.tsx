@@ -6,7 +6,7 @@ import { Link } from "@/i18n/navigation";
 import { getAppUser } from "@/lib/auth";
 import { getMyBookings } from "@/lib/data/bookings";
 import { getUnreadMap } from "@/lib/data/chat";
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Card,
   CardHeader,
@@ -103,12 +103,9 @@ export default async function ClientDashboardPage({
                 b.status === "requested" || b.status === "confirmed" ? (
                   <form action={cancelBooking}>
                     <input type="hidden" name="bookingId" value={b.id} />
-                    <button
-                      type="submit"
-                      className="border-border-strong text-text-primary hover:bg-surface-muted rounded-md border px-3 py-1.5 text-xs font-medium transition-colors"
-                    >
+                    <Button type="submit" size="xs" variant="outline">
                       {t("action_cancel")}
-                    </button>
+                    </Button>
                   </form>
                 ) : b.status === "completed" ? (
                   <div className="flex flex-col gap-2">
@@ -121,15 +118,16 @@ export default async function ClientDashboardPage({
                         {t("tip_prompt")}
                       </span>
                       {TIP_PRESETS.map((a) => (
-                        <button
+                        <Button
                           key={a}
                           type="submit"
                           name="amount"
                           value={a}
-                          className="border-border-strong text-text-primary hover:bg-surface-muted rounded-md border px-2.5 py-1 text-xs font-medium transition-colors"
+                          size="xs"
+                          variant="outline"
                         >
                           +${a}
-                        </button>
+                        </Button>
                       ))}
                     </form>
                     {b.hasReview ? (

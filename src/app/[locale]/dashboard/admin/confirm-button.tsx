@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { useTranslations } from "next-intl";
+import { Button } from "@/components/ui/button";
 
 /** Renders a labelled action button that requires a second click to submit the
  * enclosing form. `tone="danger"` (Ban/Delete/Refund) gets the high-emphasis
@@ -24,35 +25,27 @@ export function ConfirmButton({
     if (armed) confirmRef.current?.focus();
   }, [armed]);
 
-  const base =
-    "rounded-md px-3 py-1.5 text-sm font-medium transition-colors disabled:opacity-60";
-  const outline = "border-border-strong text-text-primary border hover:bg-surface-muted";
-  const solid = "bg-action-primary text-text-inverse hover:bg-action-primary-hover";
-
   if (!armed) {
     return (
-      <button
+      <Button
         type="button"
+        size="sm"
+        variant={tone === "danger" ? "primary" : "outline"}
         onClick={() => setArmed(true)}
-        className={`${base} ${tone === "danger" ? solid : outline}`}
       >
         {label}
-      </button>
+      </Button>
     );
   }
 
   return (
     <span className="inline-flex items-center gap-2">
-      <button ref={confirmRef} type="submit" disabled={pending} className={`${base} ${solid}`}>
+      <Button ref={confirmRef} type="submit" size="sm" loading={pending}>
         {t("confirm")}
-      </button>
-      <button
-        type="button"
-        onClick={() => setArmed(false)}
-        className={`${base} ${outline}`}
-      >
+      </Button>
+      <Button type="button" size="sm" variant="outline" onClick={() => setArmed(false)}>
         {t("cancel")}
-      </button>
+      </Button>
     </span>
   );
 }

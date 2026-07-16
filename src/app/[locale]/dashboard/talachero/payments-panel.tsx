@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { CheckCircle2, CreditCard } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { getMyTalacheroProfile } from "@/lib/data/talacheros";
 import { startOnboarding, refreshOnboarding } from "./payment-actions";
 
@@ -45,21 +46,15 @@ export async function PaymentsPanel() {
       {!enabled && (
         <div className="flex flex-wrap gap-2">
           <form action={startOnboarding}>
-            <button
-              type="submit"
-              className="bg-action-primary text-text-inverse hover:bg-action-primary-hover rounded-md px-4 py-2 text-sm font-medium transition-colors"
-            >
+            <Button type="submit" size="sm">
               {started ? t("payments_continue") : t("payments_start")}
-            </button>
+            </Button>
           </form>
           {started && (
             <form action={refreshOnboarding}>
-              <button
-                type="submit"
-                className="border-border-strong text-text-primary hover:bg-surface-muted rounded-md border px-4 py-2 text-sm font-medium transition-colors"
-              >
+              <Button type="submit" size="sm" variant="outline">
                 {t("payments_refresh")}
-              </button>
+              </Button>
             </form>
           )}
         </div>

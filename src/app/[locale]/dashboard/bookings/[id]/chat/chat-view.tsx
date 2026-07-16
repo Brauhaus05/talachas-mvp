@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
+import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
 import type { ChatMessageView } from "@/lib/data/chat";
 
@@ -138,13 +139,9 @@ export function ChatView({
             className="border-border text-text-primary placeholder:text-text-muted flex-1 rounded-md border bg-transparent px-3 py-2 text-sm focus:outline-none"
             aria-label={t("placeholder")}
           />
-          <button
-            type="submit"
-            disabled={pending}
-            className="bg-action-primary text-text-inverse hover:bg-action-primary-hover rounded-md px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50"
-          >
+          <Button type="submit" size="sm" loading={pending}>
             {t("send")}
-          </button>
+          </Button>
         </form>
       ) : (
         <p className="border-border text-text-muted border-t p-4 text-xs">{t("read_only")}</p>
