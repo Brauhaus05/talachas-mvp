@@ -844,6 +844,16 @@ export type Database = {
         Args: { p_accept: boolean; p_booking_id: string };
         Returns: undefined;
       };
+      update_talachero_profile: {
+        Args: {
+          p_bio: string;
+          p_hourly_rate: number;
+          p_primary_slug: string;
+          p_service_slugs: string[];
+          p_years_experience: number;
+        };
+        Returns: undefined;
+      };
     };
     Enums: {
       booking_status:
