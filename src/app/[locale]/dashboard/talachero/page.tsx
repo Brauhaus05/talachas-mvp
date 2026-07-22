@@ -4,10 +4,12 @@ import type { Route } from "next";
 import { getAppUser, dashboardPathForRole } from "@/lib/auth";
 import { getTalacheroBookings } from "@/lib/data/bookings";
 import { getUnreadMap } from "@/lib/data/chat";
+import { getMyOnboardingStatus } from "@/lib/data/talacheros";
 import { Button } from "@/components/ui/button";
 import { BookingCard } from "../booking-card";
 import { acceptBooking, rejectBooking, cancelBooking, completeBooking } from "../actions";
 import { PaymentsPanel } from "./payments-panel";
+import { OnboardingChecklist } from "./onboarding-checklist";
 import { Link } from "@/i18n/navigation";
 import { buttonVariants } from "@/components/ui/button";
 import {
@@ -37,6 +39,7 @@ export default async function TalacheroDashboardPage({
   const t = await getTranslations("dashboard");
   const bookings = await getTalacheroBookings();
   const unreadMap = await getUnreadMap();
+  const onboarding = await getMyOnboardingStatus();
   const pending = bookings.filter((b) => b.status === "requested");
   const active = bookings.filter(
     (b) => b.status === "confirmed" || b.status === "in_progress"
@@ -50,6 +53,8 @@ export default async function TalacheroDashboardPage({
         </h1>
         <p className="text-text-secondary mt-1 text-sm">{t("talachero_subtitle")}</p>
       </div>
+
+      {onboarding && <OnboardingChecklist initial={onboarding} />}
 
       <PaymentsPanel />
 
