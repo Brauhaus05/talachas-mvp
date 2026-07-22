@@ -39,6 +39,11 @@ export default async function AdminDashboardPage({
       title: t("nav_disputes"),
       desc: t("nav_disputes_desc"),
     },
+    {
+      href: "/dashboard/admin/verifications" as Route,
+      title: t("nav_verifications"),
+      desc: t("nav_verifications_desc"),
+    },
   ];
 
   return (
