@@ -80,9 +80,12 @@ begin
     raise exception 'not_authorized';
   end if;
 
+  -- Lock the slot row so a concurrent create_booking can't book it between the
+  -- status check and the delete (mirrors create_booking's SELECT ... FOR UPDATE).
   select s.status into v_status
   from public.availability_slots s
-  where s.id = p_slot_id and s.talachero_id = v_talachero_id;
+  where s.id = p_slot_id and s.talachero_id = v_talachero_id
+  for update;
 
   if v_status is null then
     raise exception 'not_authorized';  -- not owned / does not exist
