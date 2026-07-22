@@ -1,5 +1,6 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
+import { getPlatformFeePct } from "@/lib/stripe/config";
 import type { ServiceSlug } from "@/lib/mock/services";
 import type { Talachero, TalacheroReview } from "@/lib/mock/talacheros";
 import type { VerificationStatus } from "@/lib/supabase/types";
@@ -319,4 +320,77 @@ export async function getMyOnboardingStatus(): Promise<OnboardingStatus | null> 
     hasAvailability: (slotCount ?? 0) > 0,
     chargesEnabled: profile.charges_enabled,
   };
+}
+
+export interface EarningRow {
+  bookingId: string;
+  clientName: string;
+  serviceSlug: string;
+  /** ISO timestamp of the job (slot start, or booking creation). */
+  date: string;
+  currency: string;
+  gross: number;
+  commission: number;
+  tip: number;
+  net: number;
+  refunded: boolean;
+}
+
+export interface EarningsView {
+  rows: EarningRow[];
+  summary: { totalNet: number; thisMonthNet: number; jobCount: number };
+}
+
+const EARN_TZ = "America/Mexico_City";
+const cdmxMonthFmt = new Intl.DateTimeFormat("en-CA", {
+  timeZone: EARN_TZ,
+  year: "numeric",
+  month: "2-digit",
+});
+
+/**
+ * The signed-in talachero's earnings: one row per booking with ledger activity,
+ * with net = charge×(1−fee) + tips (0 charge-portion if refunded), plus a small
+ * summary. The 15% fee is applied server-side (env is not public). Degrades to
+ * an empty view on error so the page never throws.
+ */
+export async function getMyEarnings(): Promise<EarningsView> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("get_my_earnings");
+  if (error) {
+    console.error("getMyEarnings failed:", error.message);
+    return { rows: [], summary: { totalNet: 0, thisMonthNet: 0, jobCount: 0 } };
+  }
+
+  const fee = getPlatformFeePct();
+  const rows: EarningRow[] = (data ?? []).map((r) => {
+    const gross = Number(r.charge_gross ?? 0);
+    const tip = Number(r.tip_total ?? 0);
+    const refunded = Number(r.refund_total ?? 0) > 0;
+    const commission = refunded ? 0 : gross * fee;
+    const net = refunded ? tip : gross * (1 - fee) + tip;
+    return {
+      bookingId: r.booking_id,
+      clientName: r.client_name ?? "",
+      serviceSlug: r.service_slug,
+      date: r.booking_date,
+      currency: r.currency,
+      gross,
+      commission,
+      tip,
+      net,
+      refunded,
+    };
+  });
+
+  const thisMonth = cdmxMonthFmt.format(new Date());
+  const summary = {
+    totalNet: rows.reduce((acc, r) => acc + r.net, 0),
+    thisMonthNet: rows
+      .filter((r) => cdmxMonthFmt.format(new Date(r.date)) === thisMonth)
+      .reduce((acc, r) => acc + r.net, 0),
+    jobCount: rows.filter((r) => !r.refunded && r.gross > 0).length,
+  };
+
+  return { rows, summary };
 }
