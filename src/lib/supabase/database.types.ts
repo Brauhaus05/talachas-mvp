@@ -815,6 +815,20 @@ export type Database = {
           talachero_name: string
         }[]
       }
+      get_my_earnings: {
+        Args: never
+        Returns: {
+          booking_date: string
+          booking_id: string
+          charge_gross: number
+          client_name: string
+          currency: string
+          last_activity: string
+          refund_total: number
+          service_slug: string
+          tip_total: number
+        }[]
+      }
       get_or_create_thread: { Args: { p_booking_id: string }; Returns: string }
       get_talachero_bookings: {
         Args: never

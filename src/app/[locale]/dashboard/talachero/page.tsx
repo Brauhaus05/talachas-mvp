@@ -143,7 +143,7 @@ export default async function TalacheroDashboardPage({
       )}
 
       {/* Still-placeholder tools */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <Card>
           <CardHeader>
             <CardTitle className="text-base">{t("talachero_profile")}</CardTitle>
@@ -169,6 +169,20 @@ export default async function TalacheroDashboardPage({
               className={buttonVariants({ size: "sm" })}
             >
               {t("talachero_schedule_cta")}
+            </Link>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">{t("talachero_earnings")}</CardTitle>
+            <CardDescription>{t("talachero_earnings_desc")}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link
+              href="/dashboard/talachero/earnings"
+              className={buttonVariants({ size: "sm" })}
+            >
+              {t("talachero_earnings_cta")}
             </Link>
           </CardContent>
         </Card>
