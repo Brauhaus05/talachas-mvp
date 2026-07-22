@@ -143,6 +143,70 @@ export async function getTalacheroSlots(talacheroId: string): Promise<TalacheroS
   return (data ?? []).map((s) => ({ id: s.id, startTime: s.start_time }));
 }
 
+export interface AvailabilitySlotView {
+  id: string;
+  /** CDMX civil date, YYYY-MM-DD. */
+  date: string;
+  /** CDMX hour of day, 0–23. */
+  hour: number;
+  status: "open" | "booked";
+}
+
+const AVAIL_TZ = "America/Mexico_City";
+const cdmxDateFmt = new Intl.DateTimeFormat("en-CA", {
+  timeZone: AVAIL_TZ,
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+const cdmxHourFmt = new Intl.DateTimeFormat("en-GB", {
+  timeZone: AVAIL_TZ,
+  hour: "2-digit",
+  hour12: false,
+});
+
+/**
+ * The signed-in talachero's own slots (open + booked) within the next ~14 days,
+ * shaped for the availability grid. `blocked` slots are excluded (unused).
+ * Returns [] if the caller isn't a talachero / has no profile.
+ */
+export async function getMyAvailability(): Promise<AvailabilitySlotView[]> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  const { data: profile } = await supabase
+    .from("talachero_profiles")
+    .select("id")
+    .eq("user_id", user.id)
+    .maybeSingle();
+  if (!profile) return [];
+
+  const now = new Date();
+  const horizon = new Date(now.getTime() + 15 * 24 * 60 * 60 * 1000);
+  const { data, error } = await supabase
+    .from("availability_slots")
+    .select("id, start_time, status")
+    .eq("talachero_id", profile.id)
+    .in("status", ["open", "booked"])
+    .gte("start_time", now.toISOString())
+    .lt("start_time", horizon.toISOString())
+    .order("start_time");
+  if (error) throw error;
+
+  return (data ?? []).map((s) => {
+    const d = new Date(s.start_time);
+    return {
+      id: s.id,
+      date: cdmxDateFmt.format(d), // "2026-07-22"
+      hour: Number(cdmxHourFmt.format(d)), // 8..19
+      status: s.status as "open" | "booked",
+    };
+  });
+}
+
 export async function getTalacheroById(id: string): Promise<Talachero | null> {
   const supabase = await createClient();
   const [profile, reviews] = await Promise.all([
