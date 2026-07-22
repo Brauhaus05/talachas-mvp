@@ -232,6 +232,7 @@
     "talachero_profile_cta": "Editar perfil",
     "talachero_schedule": "Tu agenda",
     "talachero_schedule_desc": "Define tu disponibilidad de slots.",
+    "talachero_schedule_cta": "Editar disponibilidad",
     "talachero_requests": "Tus solicitudes",
     "talachero_requests_desc": "Acepta o rechaza reservas entrantes.",
     "coming_soon": "Próximamente",
@@ -376,6 +377,21 @@
     "status_open": "Abierta",
     "status_refunded": "Reembolsada",
     "status_dismissed": "Descartada"
+  },
+  "availability": {
+    "title": "Tu disponibilidad",
+    "subtitle": "Toca un horario para abrirlo o cerrarlo. Los clientes solo pueden reservar los horarios que abras.",
+    "week_1": "Semana 1",
+    "week_2": "Semana 2",
+    "cell_open": "Disponible a las {hour}:00. Toca para cerrar.",
+    "cell_booked": "Reservado a las {hour}:00.",
+    "cell_closed": "Cerrado a las {hour}:00. Toca para abrir.",
+    "cell_past": "Pasado — {hour}:00.",
+    "legend": "Marcado = disponible · candado = reservado · vacío = cerrado. Para liberar un horario reservado, cancela la reserva.",
+    "error_slot_booked": "Ese horario ya tiene una reserva. Cancélala para liberarlo.",
+    "error_out_of_range": "Ese horario está fuera del rango permitido.",
+    "error_not_authorized": "No pudimos actualizar ese horario.",
+    "error_generic": "No pudimos guardar el cambio. Inténtalo de nuevo."
   },
   "emails": {
     "greeting": "Hola {name},",

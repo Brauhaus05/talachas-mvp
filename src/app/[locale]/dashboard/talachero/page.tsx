@@ -5,7 +5,6 @@ import { getAppUser, dashboardPathForRole } from "@/lib/auth";
 import { getTalacheroBookings } from "@/lib/data/bookings";
 import { getUnreadMap } from "@/lib/data/chat";
 import { Button } from "@/components/ui/button";
-import { PlaceholderPanel } from "../dashboard-ui";
 import { BookingCard } from "../booking-card";
 import { acceptBooking, rejectBooking, cancelBooking, completeBooking } from "../actions";
 import { PaymentsPanel } from "./payments-panel";
@@ -154,11 +153,20 @@ export default async function TalacheroDashboardPage({
             </Link>
           </CardContent>
         </Card>
-        <PlaceholderPanel
-          title={t("talachero_schedule")}
-          description={t("talachero_schedule_desc")}
-          comingSoon={t("coming_soon")}
-        />
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">{t("talachero_schedule")}</CardTitle>
+            <CardDescription>{t("talachero_schedule_desc")}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Link
+              href="/dashboard/talachero/availability"
+              className={buttonVariants({ size: "sm" })}
+            >
+              {t("talachero_schedule_cta")}
+            </Link>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
