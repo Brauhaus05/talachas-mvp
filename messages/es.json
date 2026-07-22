@@ -386,6 +386,7 @@
     "cell_open": "Disponible a las {hour}:00. Toca para cerrar.",
     "cell_booked": "Reservado a las {hour}:00.",
     "cell_closed": "Cerrado a las {hour}:00. Toca para abrir.",
+    "cell_past": "Pasado — {hour}:00.",
     "legend": "Marcado = disponible · candado = reservado · vacío = cerrado. Para liberar un horario reservado, cancela la reserva.",
     "error_slot_booked": "Ese horario ya tiene una reserva. Cancélala para liberarlo.",
     "error_out_of_range": "Ese horario está fuera del rango permitido.",

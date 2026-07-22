@@ -186,7 +186,13 @@ export function AvailabilityGrid({ initial }: { initial: AvailabilitySlotView[] 
                         disabled={booked || past}
                         aria-pressed={open}
                         aria-label={t(
-                          open ? "cell_open" : booked ? "cell_booked" : "cell_closed",
+                          past
+                            ? "cell_past"
+                            : open
+                              ? "cell_open"
+                              : booked
+                                ? "cell_booked"
+                                : "cell_closed",
                           { hour: h }
                         )}
                         className={cn(

@@ -386,6 +386,7 @@
     "cell_open": "Available at {hour}:00. Tap to close.",
     "cell_booked": "Booked at {hour}:00.",
     "cell_closed": "Closed at {hour}:00. Tap to open.",
+    "cell_past": "Past — {hour}:00.",
     "legend": "Checked = available · lock = booked · empty = closed. To free a booked time, cancel the booking.",
     "error_slot_booked": "That time already has a booking. Cancel it to free the slot.",
     "error_out_of_range": "That time is outside the allowed range.",
