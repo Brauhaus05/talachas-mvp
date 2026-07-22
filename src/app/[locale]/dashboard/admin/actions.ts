@@ -78,3 +78,31 @@ export async function resolveDispute(formData: FormData) {
   });
   revalidatePath(`/${locale}/dashboard/admin/disputes`);
 }
+
+/** Approve a talachero's submission. admin_review_talachero self-gates on
+ * is_admin(); the RLS client is fine (mirrors setBan/deleteReview). p_reason has
+ * a SQL default (null), so the generator marks it optional and we omit it — same
+ * as resolveDispute omitting p_note. */
+export async function approveTalachero(formData: FormData) {
+  const talacheroId = String(formData.get("talacheroId") ?? "");
+  const supabase = await createClient();
+  await supabase.rpc("admin_review_talachero", {
+    p_talachero_id: talacheroId,
+    p_approve: true,
+  });
+  revalidatePath(`/${await getLocale()}/dashboard/admin/verifications`);
+}
+
+/** Reject a talachero's submission with a reason. Empty reason is rejected by
+ * the RPC (empty_reason); the UI requires the field, so this is defensive. */
+export async function rejectTalachero(formData: FormData) {
+  const talacheroId = String(formData.get("talacheroId") ?? "");
+  const reason = String(formData.get("reason") ?? "");
+  const supabase = await createClient();
+  await supabase.rpc("admin_review_talachero", {
+    p_talachero_id: talacheroId,
+    p_approve: false,
+    p_reason: reason,
+  });
+  revalidatePath(`/${await getLocale()}/dashboard/admin/verifications`);
+}
