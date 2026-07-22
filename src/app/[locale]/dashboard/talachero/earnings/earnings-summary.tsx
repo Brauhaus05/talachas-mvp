@@ -1,11 +1,8 @@
 import { getTranslations, getLocale } from "next-intl/server";
 import { formatMoney } from "@/lib/format";
+import type { EarningsView } from "@/lib/data/talacheros";
 
-export async function EarningsSummary({
-  summary,
-}: {
-  summary: { totalNet: number; thisMonthNet: number; jobCount: number };
-}) {
+export async function EarningsSummary({ summary }: { summary: EarningsView["summary"] }) {
   const t = await getTranslations("earnings");
   const locale = await getLocale();
   const tiles = [
