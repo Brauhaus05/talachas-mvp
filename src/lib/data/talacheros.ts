@@ -155,3 +155,53 @@ export async function getTalacheroById(id: string): Promise<Talachero | null> {
   const mapped = ((reviews.data ?? []) as ReviewRow[]).map(toReview);
   return toTalachero(row, mapped);
 }
+
+export interface MyTalacheroProfileEdit {
+  bio: string;
+  hourlyRate: number | null;
+  yearsExperience: number | null;
+  services: ServiceSlug[];
+  primaryService: ServiceSlug | null;
+}
+
+/**
+ * The signed-in talachero's own editable profile: core fields + selected
+ * services. Reads the caller's own row directly (RLS SELECT allows
+ * user_id = auth.uid(); talachero_services + service_categories are public
+ * read). Returns null if the caller has no profile.
+ */
+export async function getMyTalacheroProfileForEdit(): Promise<MyTalacheroProfileEdit | null> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const { data, error } = await supabase
+    .from("talachero_profiles")
+    .select(
+      "bio, hourly_rate, years_experience, talachero_services(is_primary, service_categories(slug))"
+    )
+    .eq("user_id", user.id)
+    .maybeSingle();
+  if (error) throw error;
+  if (!data) return null;
+
+  const rows = (data.talachero_services ?? []) as Array<{
+    is_primary: boolean;
+    service_categories: { slug: string } | null;
+  }>;
+  const services = rows
+    .map((r) => r.service_categories?.slug)
+    .filter((s): s is string => Boolean(s)) as ServiceSlug[];
+  const primaryService = (rows.find((r) => r.is_primary)?.service_categories?.slug ??
+    null) as ServiceSlug | null;
+
+  return {
+    bio: data.bio ?? "",
+    hourlyRate: data.hourly_rate === null ? null : Number(data.hourly_rate),
+    yearsExperience: data.years_experience,
+    services,
+    primaryService,
+  };
+}
