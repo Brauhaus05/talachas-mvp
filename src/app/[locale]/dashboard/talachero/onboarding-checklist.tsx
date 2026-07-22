@@ -19,7 +19,7 @@ function Step({
   title: string;
   desc: string;
   href?: string;
-  editLabel: string;
+  editLabel?: string;
 }) {
   return (
     <li className="flex items-start gap-3">
@@ -121,7 +121,6 @@ export function OnboardingChecklist({ initial }: { initial: OnboardingStatus }) 
           done={initial.chargesEnabled}
           title={t("step_payments")}
           desc={t("step_payments_desc")}
-          editLabel={t("edit")}
         />
       </ul>
 
