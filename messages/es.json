@@ -233,6 +233,9 @@
     "talachero_schedule": "Tu agenda",
     "talachero_schedule_desc": "Define tu disponibilidad de slots.",
     "talachero_schedule_cta": "Editar disponibilidad",
+    "talachero_earnings": "Historial de pagos",
+    "talachero_earnings_desc": "Revisa lo que has ganado por cada trabajo.",
+    "talachero_earnings_cta": "Ver pagos",
     "talachero_requests": "Tus solicitudes",
     "talachero_requests_desc": "Acepta o rechaza reservas entrantes.",
     "coming_soon": "Próximamente",
@@ -467,5 +470,23 @@
       "intro": "{client} dejó una reseña de tu servicio en Talachas.",
       "rating_label": "Calificación"
     }
+  },
+  "earnings": {
+    "title": "Historial de pagos",
+    "subtitle": "Lo que has ganado por cada trabajo, ya con la comisión descontada.",
+    "total_earned": "Total ganado",
+    "this_month": "Este mes",
+    "jobs_paid": "Trabajos pagados",
+    "col_date": "Fecha",
+    "col_client": "Cliente",
+    "col_service": "Servicio",
+    "col_amount": "Monto",
+    "col_commission": "Comisión",
+    "col_tip": "Propina",
+    "col_net": "Neto",
+    "col_status": "Estado",
+    "status_paid": "Pagado",
+    "status_refunded": "Reembolsado",
+    "empty": "Aún no tienes pagos. Cuando completes trabajos, aparecerán aquí."
   }
 }

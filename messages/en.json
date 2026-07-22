@@ -233,6 +233,9 @@
     "talachero_schedule": "Your schedule",
     "talachero_schedule_desc": "Set your slot availability.",
     "talachero_schedule_cta": "Edit availability",
+    "talachero_earnings": "Payment history",
+    "talachero_earnings_desc": "Review what you've earned per job.",
+    "talachero_earnings_cta": "View payments",
     "talachero_requests": "Your requests",
     "talachero_requests_desc": "Accept or decline incoming bookings.",
     "coming_soon": "Coming soon",
@@ -467,5 +470,23 @@
       "intro": "{client} left a review of your service on Talachas.",
       "rating_label": "Rating"
     }
+  },
+  "earnings": {
+    "title": "Payment history",
+    "subtitle": "What you've earned per job, with the commission already deducted.",
+    "total_earned": "Total earned",
+    "this_month": "This month",
+    "jobs_paid": "Paid jobs",
+    "col_date": "Date",
+    "col_client": "Client",
+    "col_service": "Service",
+    "col_amount": "Amount",
+    "col_commission": "Commission",
+    "col_tip": "Tip",
+    "col_net": "Net",
+    "col_status": "Status",
+    "status_paid": "Paid",
+    "status_refunded": "Refunded",
+    "empty": "No payments yet. Once you complete jobs, they'll show up here."
   }
 }
