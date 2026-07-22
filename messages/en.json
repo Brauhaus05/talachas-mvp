@@ -232,6 +232,7 @@
     "talachero_profile_cta": "Edit profile",
     "talachero_schedule": "Your schedule",
     "talachero_schedule_desc": "Set your slot availability.",
+    "talachero_schedule_cta": "Edit availability",
     "talachero_requests": "Your requests",
     "talachero_requests_desc": "Accept or decline incoming bookings.",
     "coming_soon": "Coming soon",
@@ -376,6 +377,20 @@
     "status_open": "Open",
     "status_refunded": "Refunded",
     "status_dismissed": "Dismissed"
+  },
+  "availability": {
+    "title": "Your availability",
+    "subtitle": "Tap a time to open or close it. Clients can only book the times you open.",
+    "week_1": "Week 1",
+    "week_2": "Week 2",
+    "cell_open": "Available at {hour}:00. Tap to close.",
+    "cell_booked": "Booked at {hour}:00.",
+    "cell_closed": "Closed at {hour}:00. Tap to open.",
+    "legend": "Checked = available · lock = booked · empty = closed. To free a booked time, cancel the booking.",
+    "error_slot_booked": "That time already has a booking. Cancel it to free the slot.",
+    "error_out_of_range": "That time is outside the allowed range.",
+    "error_not_authorized": "We couldn't update that time.",
+    "error_generic": "We couldn't save the change. Please try again."
   },
   "emails": {
     "greeting": "Hi {name},",
