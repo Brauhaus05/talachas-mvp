@@ -2,6 +2,7 @@ import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import type { ServiceSlug } from "@/lib/mock/services";
 import type { Talachero, TalacheroReview } from "@/lib/mock/talacheros";
+import type { VerificationStatus } from "@/lib/supabase/types";
 
 /**
  * Data-access layer for talacheros. Reads through the SECURITY DEFINER RPCs
@@ -267,5 +268,55 @@ export async function getMyTalacheroProfileForEdit(): Promise<MyTalacheroProfile
     yearsExperience: data.years_experience,
     services,
     primaryService,
+  };
+}
+
+export interface OnboardingStatus {
+  status: VerificationStatus;
+  rejectionReason: string | null;
+  profileComplete: boolean;
+  hasAvailability: boolean;
+  chargesEnabled: boolean;
+}
+
+/**
+ * The signed-in talachero's onboarding state for the dashboard checklist:
+ * verification status + whether each step is done. `profileComplete` = rate set
+ * and >=1 service; `hasAvailability` = >=1 upcoming open slot. Returns null if
+ * the caller has no profile.
+ */
+export async function getMyOnboardingStatus(): Promise<OnboardingStatus | null> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const { data: profile } = await supabase
+    .from("talachero_profiles")
+    .select("id, verification_status, rejection_reason, hourly_rate, charges_enabled")
+    .eq("user_id", user.id)
+    .maybeSingle();
+  if (!profile) return null;
+
+  const [{ count: serviceCount }, { count: slotCount }] = await Promise.all([
+    supabase
+      .from("talachero_services")
+      .select("talachero_id", { count: "exact", head: true })
+      .eq("talachero_id", profile.id),
+    supabase
+      .from("availability_slots")
+      .select("id", { count: "exact", head: true })
+      .eq("talachero_id", profile.id)
+      .eq("status", "open")
+      .gte("start_time", new Date().toISOString()),
+  ]);
+
+  return {
+    status: profile.verification_status,
+    rejectionReason: profile.rejection_reason,
+    profileComplete: profile.hourly_rate !== null && (serviceCount ?? 0) > 0,
+    hasAvailability: (slotCount ?? 0) > 0,
+    chargesEnabled: profile.charges_enabled,
   };
 }

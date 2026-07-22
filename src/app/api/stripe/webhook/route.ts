@@ -66,12 +66,14 @@ export async function POST(request: NextRequest) {
       const account = event.data.object as Stripe.Account;
       const charges = Boolean(account.charges_enabled);
       const payouts = Boolean(account.payouts_enabled);
+      // Stripe onboarding sets payment readiness only. Directory verification is
+      // admin-driven (submit_talachero_for_review -> admin_review_talachero),
+      // so we no longer touch verification_status here.
       await service
         .from("talachero_profiles")
         .update({
           charges_enabled: charges,
           payouts_enabled: payouts,
-          verification_status: charges && payouts ? "verified" : "pending",
         })
         .eq("stripe_account_id", account.id);
       break;

@@ -67,9 +67,9 @@ export async function startOnboarding() {
 }
 
 /**
- * Pulls the latest capability flags from Stripe and syncs them (and
- * verification_status) onto the profile. Complements the account.updated
- * webhook for local dev where webhooks may not be wired.
+ * Pulls the latest capability flags from Stripe and syncs them onto the
+ * profile. Complements the account.updated webhook for local dev where
+ * webhooks may not be wired.
  */
 export async function refreshOnboarding() {
   const locale = await getLocale();
@@ -91,12 +91,13 @@ export async function refreshOnboarding() {
     const account = await getStripe().accounts.retrieve(profile.stripe_account_id);
     const charges = Boolean(account.charges_enabled);
     const payouts = Boolean(account.payouts_enabled);
+    // Payment readiness only; directory verification is admin-driven (see the
+    // onboarding review flow), so we no longer set verification_status here.
     await createServiceClient()
       .from("talachero_profiles")
       .update({
         charges_enabled: charges,
         payouts_enabled: payouts,
-        verification_status: charges && payouts ? "verified" : "pending",
       })
       .eq("id", profile.id);
   }

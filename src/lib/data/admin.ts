@@ -42,6 +42,18 @@ export interface AdminDispute {
   resolvedAt: string | null;
 }
 
+export interface AdminVerification {
+  talacheroId: string;
+  fullName: string;
+  bio: string | null;
+  hourlyRate: number;
+  currency: string;
+  serviceSlugs: string[];
+  slotCount: number;
+  chargesEnabled: boolean;
+  submittedAt: string | null;
+}
+
 export async function listUsers(): Promise<AdminUser[]> {
   const supabase = await createClient();
   const { data } = await supabase.rpc("admin_list_users");
@@ -97,5 +109,21 @@ export async function listDisputes(): Promise<AdminDispute[]> {
     adminNote: r.admin_note,
     createdAt: r.created_at,
     resolvedAt: r.resolved_at,
+  }));
+}
+
+export async function getVerificationQueue(): Promise<AdminVerification[]> {
+  const supabase = await createClient();
+  const { data } = await supabase.rpc("admin_list_verifications");
+  return (data ?? []).map((r) => ({
+    talacheroId: r.talachero_id,
+    fullName: r.full_name ?? "",
+    bio: r.bio,
+    hourlyRate: Number(r.hourly_rate ?? 0),
+    currency: r.currency,
+    serviceSlugs: r.service_slugs ?? [],
+    slotCount: Number(r.slot_count ?? 0),
+    chargesEnabled: r.charges_enabled,
+    submittedAt: r.submitted_at,
   }));
 }
