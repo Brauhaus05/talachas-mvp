@@ -4,6 +4,19 @@
 
 ---
 
+## 🗓️ Session 2026-07-22 — profile editor merged + talachero availability editor
+
+**PR #18 (talachero profile editor) — ✅ MERGED to `main` (squash `f5f3ed1`).** It was 0 commits behind `main` (no rebase needed despite the prior-session note). Notion **"Editor de perfil del prestador"** → **Hecho**. ⚠️ The task title mentions *foto* (photo) but the merged PR deferred photo upload + coverage zone — those need their own tracker rows.
+
+**PR #NN — 🔶 OPEN, branch `feat/talachero-availability-editor` (off `main`):** first talachero **self-service availability editor** — closes Sprint 2 **"Editor de disponibilidad (horarios semanales y excepciones)"**. Built subagent-driven from a committed spec + plan in `docs/superpowers/` (`2026-07-22-talachero-availability-editor-*`), each task through spec + code-quality review, plus a final holistic review (**ready to merge**, no Critical/Important).
+- **Model = Approach A "direct slot calendar"** (chosen over recurring-template/hybrid in brainstorming): the talachero directly opens/closes concrete 1-hour `availability_slots` rows on a **week grid** (`08:00–20:00`, hours 8–19), **14-day** rolling horizon paged into 2 weeks, mobile horizontal scroll, all in `America/Mexico_City`. **No recurring templates, no cron, no new tables** — the "horarios semanales" convenience layer is a deferred follow-up.
+- **Two `SECURITY DEFINER` RPCs** (`supabase/migrations/20260722120001_availability_editor.sql`): `open_availability_slot(p_date, p_hour)` (CDMX→UTC math in Postgres like the seed; validates ownership + hour 8–19 + date window; GiST-exclusion makes duplicate/overlap an idempotent no-op) and `close_availability_slot(p_slot_id)` (deletes only `status='open'`; **`SELECT … FOR UPDATE`** mirrors `create_booking`'s lock so a concurrent booking can't be yanked — a booked slot raises `slot_booked`; to free it, cancel the booking). Slots kept their permissive owner RLS; writes still go through the RPCs for tz-correctness + atomic guards.
+- Reader `getMyAvailability()` (open+booked, next ~14d, CDMX date/hour), server actions `openSlot`/`closeSlot` (optimistic-toggle friendly), client `AvailabilityGrid` (optimistic per-cell toggle with a `"pending"` double-click guard, past-hour cells disabled), route `/dashboard/talachero/availability` + talachero role guard, dashboard **"Editar disponibilidad"** link card (replaced the schedule placeholder), `availability` i18n namespace (es/en).
+- **Verified:** typecheck/lint/**secretless build** green (route in the build list) + **DB-level RPC checks** (idempotent open returns same row, `out_of_range` hour/date, `slot_booked` guard, `not_authorized`) + **live browser pass as talachero Carlos** (open → optimistic check → persists across reload; close/toggle-off; past cells disabled with a **"Pasado — H:00"** aria-label and the boundary exactly at the current CDMX hour; zero console errors).
+- **Two non-blocking follow-ups** logged from the final review (not fixed, note in PR): (a) `PlaceholderPanel` (`dashboard/dashboard-ui.tsx`) + the `dashboard.coming_soon` key are now **dead** — this PR removed the last consumer; delete in a cleanup pass. (b) Deliberate horizon-bound slack: grid renders 14 days, the RPC accepts `today..today+14`, the reader fetches a 15-day window — so `error_out_of_range` is defensive-only from the UI's perspective. Neither is a defect.
+
+---
+
 ## 🗓️ Session 2026-07-16 — UI polish merged + talachero profile editor
 
 **Notion task tracker now drives the work** — the "✅ Tareas" database (under JALO) with three sprints: **Sprint 1 · Desbloqueo Stripe MX**, **Sprint 2 · Autoservicio de prestadores**, **Sprint 3 · Pulido y QA en vivo**. Cross-checked every code-verifiable task against the repo this session (tracker was accurate — no false "done"s). Statuses updated as work progressed.
