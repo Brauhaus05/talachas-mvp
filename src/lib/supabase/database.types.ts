@@ -499,7 +499,9 @@ export type Database = {
           radius_meters: number | null
           rating_avg: number
           rating_count: number
+          rejection_reason: string | null
           stripe_account_id: string | null
+          submitted_at: string | null
           updated_at: string
           user_id: string
           verification_status: Database["public"]["Enums"]["verification_status"]
@@ -521,7 +523,9 @@ export type Database = {
           radius_meters?: number | null
           rating_avg?: number
           rating_count?: number
+          rejection_reason?: string | null
           stripe_account_id?: string | null
+          submitted_at?: string | null
           updated_at?: string
           user_id: string
           verification_status?: Database["public"]["Enums"]["verification_status"]
@@ -543,7 +547,9 @@ export type Database = {
           radius_meters?: number | null
           rating_avg?: number
           rating_count?: number
+          rejection_reason?: string | null
           stripe_account_id?: string | null
+          submitted_at?: string | null
           updated_at?: string
           user_id?: string
           verification_status?: Database["public"]["Enums"]["verification_status"]
@@ -744,8 +750,26 @@ export type Database = {
           role: Database["public"]["Enums"]["user_role"]
         }[]
       }
+      admin_list_verifications: {
+        Args: never
+        Returns: {
+          bio: string
+          charges_enabled: boolean
+          currency: string
+          full_name: string
+          hourly_rate: number
+          service_slugs: string[]
+          slot_count: number
+          submitted_at: string
+          talachero_id: string
+        }[]
+      }
       admin_resolve_dispute: {
         Args: { p_dispute_id: string; p_note?: string; p_refunded: boolean }
+        Returns: undefined
+      }
+      admin_review_talachero: {
+        Args: { p_approve: boolean; p_reason?: string; p_talachero_id: string }
         Returns: undefined
       }
       admin_set_ban: {
@@ -860,6 +884,7 @@ export type Database = {
         Args: { p_accept: boolean; p_booking_id: string }
         Returns: undefined
       }
+      submit_talachero_for_review: { Args: never; Returns: undefined }
       update_talachero_profile: {
         Args: {
           p_bio: string
@@ -882,7 +907,7 @@ export type Database = {
       slot_status: "open" | "booked" | "blocked"
       transaction_type: "charge" | "payout" | "refund" | "tip"
       user_role: "client" | "talachero" | "admin"
-      verification_status: "pending" | "verified" | "rejected"
+      verification_status: "pending" | "verified" | "rejected" | "in_review"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1024,7 +1049,7 @@ export const Constants = {
       slot_status: ["open", "booked", "blocked"],
       transaction_type: ["charge", "payout", "refund", "tip"],
       user_role: ["client", "talachero", "admin"],
-      verification_status: ["pending", "verified", "rejected"],
+      verification_status: ["pending", "verified", "rejected", "in_review"],
     },
   },
 } as const
