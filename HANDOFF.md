@@ -4,6 +4,19 @@
 
 ---
 
+## 🗓️ Session 2026-07-22 (cont. 2) — talachero payment-history (earnings) view
+
+**PR #NN — 🔶 OPEN, branch `feat/talachero-earnings` (off `main`):** a read-only **earnings** page closing the "historial de pagos" gap the panel audit surfaced (the `transactions` ledger existed but had no talachero-facing view). Built subagent-driven from a committed spec + plan (`docs/superpowers/2026-07-22-talachero-earnings-*`); each task through spec + code-quality review + a final holistic review (**ready to merge**, no Critical/Important).
+- **What:** `/dashboard/talachero/earnings` — a summary header (3 tiles: **Total ganado / Este mes / Trabajos pagados**) + a per-booking list (*Fecha · Cliente · Servicio · Monto · Comisión · Propina · Neto · Estado*), all in **net** terms (after the 15% commission). Dashboard gets a **"Historial de pagos"** link card (tools grid now 3 cards). New `earnings` i18n namespace (es/en).
+- **Data:** new `get_my_earnings()` `SECURITY DEFINER` RPC (migration `20260722140001`) — one row per booking with ledger activity, aggregating `charge`/`tip`/`refund` per booking, self-scoped via `auth.uid()` (mirrors `get_talachero_bookings`). Reader `getMyEarnings()` applies `getPlatformFeePct()` **server-side** (fee env isn't public) → `net = refunded ? tip : gross×(1−fee) + tip`, `commission = refunded ? 0 : gross×fee`; summary totals + `thisMonthNet` (CDMX month) + `jobCount` (non-refunded). Read-only — the ledger stays immutable.
+- **Only captured jobs appear** — the RPC inner-joins `transactions`, so authorized-but-uncaptured bookings (no `charge` row yet) are excluded; "Trabajos pagados" = captured.
+- **Verified:** typecheck/lint/secretless build green (route in the build list) + **DB-level RPC check** (aggregation `560/50/560`, cross-talachero self-scope → 0 rows) + **live browser pass as Carlos** (seeded 3 test txns: CA$400→net CA$340 Pagado; CA$560 refunded→CA$0 Reembolsado; CA$560+CA$50 tip→−CA$84/CA$50/**CA$526** Pagado; **Total CA$866**, Este mes CA$0, 2 trabajos — all math exact; zero console errors). ⚠️ The 3 seeded test transactions on Carlos's local bookings persist (harmless local data).
+- **🔎 PR notes / follow-ups (not bugs, deliberate):** (a) `refunded` is a boolean "any refund" → a **partial** refund would collapse the charge portion to net 0; only cosmetic since **refunds are full today** (partial refunds are the deferred cancellation-policy work). (b) a refunded booking that also had a tip shows `net = tip` (tips are separate/fee-free/kept) — near-impossible flow (refunds are pre-completion, tips post-completion). (c) mixed-currency summary uses the default currency (app is all-CAD; out of scope, per spec).
+- **Cloud:** migration `20260722140001` must be pushed via `supabase db push` before the live site shows earnings.
+- **Panel task:** this closes the one real gap in Notion's "Diseñar panel del prestador"; that task's other Notas items (consolidated message inbox, availability date-blocks) remain as optional follow-ups — **owner to decide** close-vs-split (see the panel audit).
+
+---
+
 ## 🗓️ Session 2026-07-22 (cont.) — self-service talachero onboarding (admin-review gate)
 
 **PR #NN — 🔶 OPEN, branch `feat/talachero-onboarding` (off `main`):** self-service onboarding that ties the (now-built) profile + availability editors + Stripe onboarding into a guided, **admin-reviewed** go-live flow. Closes Sprint 2 **"Registro y onboarding de prestadores"** + **"Diseñar flujo de onboarding"**. Built subagent-driven from a committed spec + plan (`docs/superpowers/2026-07-22-talachero-onboarding-*`), each task through spec + code-quality review + a final holistic review (**ready to merge**, no Critical/Important).
