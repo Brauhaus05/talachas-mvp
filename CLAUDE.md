@@ -102,3 +102,4 @@ The **webhook (`app/api/stripe/webhook/route.ts`) is the source of truth** for `
 
 - **`HANDOFF.md`** — living session-to-session status, current phase, blockers, and a payments test runbook. Read it at the start of substantial work.
 - **`prd.md`** / **`plan.md`** — product requirements and phased build plan (referenced throughout migrations as "PRD §…").
+- **Notion task board (`✅ Tareas`)** — sprint/task tracker of record (JALO project). Board grouped by sprint: Sprint 1 (Stripe MX unblock), Sprint 2 (provider self-service), Sprint 3 (polish + live QA), Post-launch. URL: https://app.notion.com/p/jumpafterus/e70360225ed44e46954a6e1e756c0fb8?v=a33b9ec386e34cfa801143114deccf25
