@@ -109,27 +109,29 @@ export default async function ClientDashboardPage({
                   </form>
                 ) : b.status === "completed" ? (
                   <div className="flex flex-col gap-2">
-                    <form
-                      action={tipBooking}
-                      className="flex flex-wrap items-center gap-2"
-                    >
-                      <input type="hidden" name="bookingId" value={b.id} />
-                      <span className="text-text-secondary text-xs">
-                        {t("tip_prompt")}
-                      </span>
-                      {TIP_PRESETS.map((a) => (
-                        <Button
-                          key={a}
-                          type="submit"
-                          name="amount"
-                          value={a}
-                          size="xs"
-                          variant="outline"
-                        >
-                          +${a}
-                        </Button>
-                      ))}
-                    </form>
+                    {b.paymentStatus === "captured" && (
+                      <form
+                        action={tipBooking}
+                        className="flex flex-wrap items-center gap-2"
+                      >
+                        <input type="hidden" name="bookingId" value={b.id} />
+                        <span className="text-text-secondary text-xs">
+                          {t("tip_prompt")}
+                        </span>
+                        {TIP_PRESETS.map((a) => (
+                          <Button
+                            key={a}
+                            type="submit"
+                            name="amount"
+                            value={a}
+                            size="xs"
+                            variant="outline"
+                          >
+                            +${a}
+                          </Button>
+                        ))}
+                      </form>
+                    )}
                     {b.hasReview ? (
                       <span className="text-text-secondary text-xs">{t("reviewed")}</span>
                     ) : (

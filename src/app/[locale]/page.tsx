@@ -24,7 +24,7 @@ export default async function HomePage({
       <section className="border-border border-b">
         <div className="mx-auto grid max-w-7xl grid-cols-1 gap-16 px-10 py-24 lg:grid-cols-2 lg:items-center">
           <div className="flex flex-col gap-8">
-            <h1 className="text-text-primary text-5xl font-semibold leading-[1.05] tracking-tight sm:text-6xl">
+            <h1 className="text-text-primary text-5xl leading-[1.05] font-semibold tracking-tight sm:text-6xl">
               {t("home.hero_title")}
             </h1>
             <p className="text-text-secondary max-w-lg text-lg leading-relaxed">
@@ -45,11 +45,7 @@ export default async function HomePage({
                   aria-label={t("home.hero_input_placeholder")}
                 />
               </label>
-              <Button
-                type="submit"
-                size="lg"
-                className="rounded-none sm:rounded-l-none"
-              >
+              <Button type="submit" size="lg" className="rounded-none sm:rounded-l-none">
                 {t("home.hero_cta")}
                 <ArrowRight className="h-4 w-4" aria-hidden />
               </Button>
@@ -57,9 +53,21 @@ export default async function HomePage({
 
             <div className="flex items-center gap-3">
               <div className="flex -space-x-2">
-                <Avatar initials="CM" size="sm" className="border-background ring-background ring-2" />
-                <Avatar initials="AL" size="sm" className="border-background ring-background ring-2" />
-                <Avatar initials="JH" size="sm" className="border-background ring-background ring-2" />
+                <Avatar
+                  initials="CM"
+                  size="sm"
+                  className="border-background ring-background ring-2"
+                />
+                <Avatar
+                  initials="AL"
+                  size="sm"
+                  className="border-background ring-background ring-2"
+                />
+                <Avatar
+                  initials="JH"
+                  size="sm"
+                  className="border-background ring-background ring-2"
+                />
               </div>
               <p className="text-text-muted text-sm">{t("home.trust_line")}</p>
             </div>
@@ -84,7 +92,7 @@ export default async function HomePage({
               <div className="border-border bg-background col-span-2 flex items-center gap-3 rounded-xl border p-4 shadow-sm">
                 <Star className="text-text-primary h-5 w-5 fill-current" aria-hidden />
                 <p className="text-text-primary text-sm font-semibold">
-                  4.9 / 5.0 — 2,500+ {t("common.reviews_count", { count: 2500 })}
+                  4.9 / 5.0 — {t("home.reviews_stat")}
                 </p>
               </div>
             </div>

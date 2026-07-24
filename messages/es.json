@@ -22,7 +22,9 @@
     "catalog": "Catálogo",
     "become_talachero": "Conviértete en Talachero",
     "login": "Iniciar sesión",
-    "signup": "Registrarse"
+    "signup": "Registrarse",
+    "menu_open": "Abrir menú",
+    "menu_close": "Cerrar menú"
   },
   "footer": {
     "brand_description": "Tu plataforma de confianza para resolver tareas del hogar con expertos locales.",
@@ -54,6 +56,7 @@
     "hero_input_placeholder": "Ej. Armar un escritorio, Pintar recámara...",
     "hero_cta": "Buscar Talachero",
     "trust_line": "Más de 2,500 Talacheros verificados en tu ciudad",
+    "reviews_stat": "2,500+ reseñas",
     "services_title": "Servicios Populares",
     "services_subtitle": "Explora las categorías más solicitadas por nuestra comunidad.",
     "services_view_all": "Ver todos"
@@ -114,8 +117,10 @@
     "results_count": "{count, plural, one {# Talachero disponible} other {# Talacheros disponibles}}",
     "filters_title": "Filtros",
     "filter_service": "Servicio",
+    "service_all": "Todos",
     "filter_price": "Rango de precio (CAD/h)",
     "filter_rating": "Calificación mínima",
+    "rating_all": "Todas",
     "filter_availability": "Disponibilidad",
     "availability_today": "Hoy",
     "availability_week": "Esta semana",

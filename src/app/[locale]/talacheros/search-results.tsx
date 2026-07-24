@@ -33,8 +33,7 @@ export function SearchResults({ talacheros }: { talacheros: Talachero[] }) {
       if (sort === "price_asc") return a.hourlyRateMxn - b.hourlyRateMxn;
       if (sort === "rating") return b.ratingAvg - a.ratingAvg;
       // recommended: rating desc, then availability
-      const availDiff =
-        (b.availableToday ? 1 : 0) - (a.availableToday ? 1 : 0);
+      const availDiff = (b.availableToday ? 1 : 0) - (a.availableToday ? 1 : 0);
       if (availDiff !== 0) return availDiff;
       return b.ratingAvg - a.ratingAvg;
     });
@@ -43,16 +42,13 @@ export function SearchResults({ talacheros }: { talacheros: Talachero[] }) {
   return (
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-[280px_1fr]">
       <aside className="border-border bg-surface-raised h-fit rounded-2xl border p-6">
-        <h2 className="text-text-primary mb-4 text-sm font-semibold uppercase tracking-wider">
+        <h2 className="text-text-primary mb-4 text-sm font-semibold tracking-wider uppercase">
           {t("search.filters_title")}
         </h2>
 
         <FilterGroup label={t("search.filter_service")}>
-          <FilterOption
-            active={service === "any"}
-            onClick={() => setService("any")}
-          >
-            {t("common.starting_at")} ⋯
+          <FilterOption active={service === "any"} onClick={() => setService("any")}>
+            {t("search.service_all")}
           </FilterOption>
           {SERVICES.map((s) => (
             <FilterOption
@@ -95,7 +91,7 @@ export function SearchResults({ talacheros }: { talacheros: Talachero[] }) {
                     : "border-border bg-background text-text-secondary hover:bg-surface-muted"
                 )}
               >
-                {v === 0 ? t("common.starting_at") : `${v}+`}
+                {v === 0 ? t("search.rating_all") : `${v}+`}
                 {v > 0 && <Star className="ml-1 inline h-3 w-3 fill-current" />}
               </button>
             ))}
@@ -156,16 +152,10 @@ export function SearchResults({ talacheros }: { talacheros: Talachero[] }) {
   );
 }
 
-function FilterGroup({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
+function FilterGroup({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="border-border mb-5 flex flex-col gap-2 border-b pb-5 last:mb-0 last:border-b-0 last:pb-0">
-      <p className="text-text-secondary text-xs font-medium uppercase tracking-wider">
+      <p className="text-text-secondary text-xs font-medium tracking-wider uppercase">
         {label}
       </p>
       <div className="flex flex-col gap-2">{children}</div>
