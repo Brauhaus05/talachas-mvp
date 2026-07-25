@@ -29,6 +29,8 @@ The core loop is real end-to-end: discover → book (concurrency-safe slot) → 
 
 ## What's next
 
+**▶ Next session (planned): disputes ↔ bookings reconciliation.** The two admin surfaces don't reconcile — a booking refunded via `/admin/bookings` still shows `Abierta` in `/admin/disputes` with a live "Reembolsar" button (double-refund risk), and a dismissed dispute leaves the client on "Reporte en revisión" forever. Scope: add a payment-status/date column to the disputes table + hide/close disputes whose booking is already refunded, and expose `dispute_status` through `get_my_bookings` for a client closed/reviewed state. Tracked on the Notion `✅ Tareas` board (rows "Reconciliar disputas ↔ reservas" P1 + "Disputa descartada muestra 'Reporte en revisión'…" P2). See the two dispute follow-ups below for detail.
+
 **Verification / QA:**
 - ✅ **Live "reservar y pagar" E2E** (2026-07-24) — re-verified on the deployed site (book → authorize → accept → capture → 15% split; both webhooks delivered). Cloud DB now has one extra test booking (24 jul, Mariana↔Carlos, CA$560 captured).
 - ✅ **Browser passes done** (2026-07-24): landing, catálogo, profile, reviews, booking flow, client dashboard, admin (all surfaces), disputes, talachero dashboard/earnings/availability/profile — desktop + mobile. Findings → Notion `✅ Tareas` board; UI fixes in PR #24. Sign-ins: `mariana.ruiz@demo.talachas.mx` (client), `carlos.mendoza@demo.talachas.mx` (talachero), `admin@talachas.mx` (admin) — all `password123`.
