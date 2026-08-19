@@ -21,6 +21,19 @@ export async function refundCapturedBooking(paymentIntentId: string) {
  * what made the disputes-queue "Reembolsar" button a silent no-op. */
 export type RefundOutcome = "refunded" | "already_refunded" | "not_refundable" | "error";
 
+/** Stripe rejects a second full refund of the same charge. That rejection means
+ * the money is already back with the client — a force-refund or a refund issued
+ * from the Stripe dashboard landed inside the charge.refunded webhook lag — so
+ * it must map to already_refunded. Mapping it to "error" is what left the
+ * disputes-queue button doing nothing during that window. */
+function isAlreadyRefundedError(err: unknown): boolean {
+  const e = err as { code?: string; message?: string } | null;
+  return (
+    e?.code === "charge_already_refunded" ||
+    /already been refunded/i.test(e?.message ?? "")
+  );
+}
+
 /** Look up a booking and, if it's captured with a payment intent, issue a full
  * refund (best-effort). The charge.refunded webhook reconciles payment_status +
  * the ledger. Shared by the admin force-refund and dispute-resolution paths. */
@@ -38,7 +51,9 @@ export async function refundBookingIfCaptured(bookingId: string): Promise<Refund
   try {
     await refundCapturedBooking(booking.stripe_payment_intent_id);
     return "refunded";
-  } catch {
+  } catch (err) {
+    if (isAlreadyRefundedError(err)) return "already_refunded";
+    console.error(`[refunds] refundBookingIfCaptured(${bookingId}) failed:`, err);
     return "error";
   }
 }

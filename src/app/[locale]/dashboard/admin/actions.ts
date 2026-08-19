@@ -29,8 +29,11 @@ export async function deleteReview(formData: FormData) {
 
 /** Close an open dispute on a booking that was just refunded from the bookings
  * surface, so the two admin queues agree. admin_resolve_dispute self-gates on
- * is_admin() and only accepts an 'open' dispute, which also settles the race
- * with an admin resolving the same dispute from the other surface. */
+ * is_admin() and only accepts an 'open' dispute, so this can never overwrite a
+ * decision an admin already recorded. Note that it does NOT fully settle a race:
+ * if a dismissal commits first, the dispute stays 'dismissed' on a refunded
+ * booking, and the RPC refuses to reopen it — correcting that needs a SQL
+ * backfill, as in 20260819120001_dispute_reconciliation.sql. */
 async function closeOpenDisputeAsRefunded(bookingId: string): Promise<void> {
   const { data: dispute } = await createServiceClient()
     .from("disputes")
@@ -58,7 +61,7 @@ export async function forceRefund(formData: FormData) {
   if (user?.role !== "admin") return;
 
   const outcome = await refundBookingIfCaptured(bookingId);
-  if (outcome === "refunded") {
+  if (outcome === "refunded" || outcome === "already_refunded") {
     await closeOpenDisputeAsRefunded(bookingId);
   }
 
@@ -84,40 +87,54 @@ export async function resolveDispute(formData: FormData) {
   const action = String(formData.get("action") ?? "");
   const user = await getAppUser();
   if (user?.role !== "admin") return;
+  // Anything that isn't an explicit refund/dismiss is a malformed or replayed
+  // POST. Don't let it fall through to the dismiss path and tell a client their
+  // report was closed.
+  if (action !== "refund" && action !== "dismiss") return;
 
   const locale = await getLocale();
+  const revalidateBoth = () => {
+    revalidatePath(`/${locale}/dashboard/admin/disputes`);
+    revalidatePath(`/${locale}/dashboard/admin/bookings`);
+  };
+
   const { data: dispute } = await createServiceClient()
     .from("disputes")
     .select("booking_id")
     .eq("id", disputeId)
     .maybeSingle();
-  if (!dispute?.booking_id) {
-    revalidatePath(`/${locale}/dashboard/admin/disputes`);
-    return;
-  }
 
   let refunded = false;
   if (action === "refund") {
+    // Only the refund path genuinely needs the booking; the dismiss path uses
+    // booking_id solely for the email, so a failed read must not turn Descartar
+    // into a silent no-op.
+    if (!dispute?.booking_id) {
+      revalidateBoth();
+      return;
+    }
     const outcome = await refundBookingIfCaptured(dispute.booking_id);
     refunded = outcome === "refunded" || outcome === "already_refunded";
     if (!refunded) {
-      revalidatePath(`/${locale}/dashboard/admin/disputes`);
+      revalidateBoth();
       return;
     }
   }
 
   const supabase = await createClient();
-  await supabase.rpc("admin_resolve_dispute", {
+  // supabase-js returns { error } rather than throwing, so a lost race
+  // (dispute_not_open) arrives here silently. Only tell the client the case is
+  // closed if the DB actually recorded it.
+  const { error } = await supabase.rpc("admin_resolve_dispute", {
     p_dispute_id: disputeId,
     p_refunded: refunded,
   });
 
-  if (!refunded) {
+  if (!error && !refunded && dispute?.booking_id) {
     await notifyDisputeDismissed(dispute.booking_id);
   }
 
-  revalidatePath(`/${locale}/dashboard/admin/disputes`);
-  revalidatePath(`/${locale}/dashboard/admin/bookings`);
+  revalidateBoth();
 }
 
 /** Approve a talachero's submission. admin_review_talachero self-gates on
