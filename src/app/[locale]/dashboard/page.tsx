@@ -142,6 +142,13 @@ export default async function ClientDashboardPage({
                         {t("review_cta")}
                       </Link>
                     )}
+                    {/* Covers all three dispute_status values; the trailing branch is the
+                        no-dispute CTA. Add a branch here if the enum ever gains a value —
+                        an unhandled status falls through and offers the "report a problem"
+                        CTA on a booking that already has a dispute. (Harmless today: the
+                        route guard in bookings/[id]/dispute/page.tsx 404s any non-null
+                        status independently, so it would be a dead-end button, not a
+                        re-filing path.) */}
                     {b.disputeStatus === "open" ? (
                       <span className="text-text-secondary text-xs">
                         {t("dispute_pending")}

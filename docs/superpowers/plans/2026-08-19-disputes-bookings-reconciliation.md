@@ -614,9 +614,14 @@ Run: `pnpm typecheck && pnpm lint`
 
 Expected: PASS. Lint may still report the 2 pre-existing warnings in `onboarding-actions.ts` — those are untouched and expected.
 
-Run: `grep -rn "{b.paymentStatus}" "src/app/[locale]/dashboard/admin/"`
+Run: `grep -rnE ">\{[bd]\.paymentStatus\}<" "src/app/[locale]/dashboard/admin/"`
 
-Expected: **no output** (no raw payment status left in either admin table).
+Expected: **no output** (no raw payment status rendered as a JSX text node in either admin table).
+
+> The pattern must be anchored with `>` … `<` so it matches only a rendered text node.
+> An unanchored `grep "{b.paymentStatus}"` also matches the **correct** prop pass
+> `<PaymentBadge status={b.paymentStatus} />`, so it can never come back empty and is
+> useless as a check.
 
 - [ ] **Step 6: Commit**
 
