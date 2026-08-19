@@ -12,7 +12,12 @@
 -- ---- get_my_bookings: has_dispute → dispute_status --------------------------
 -- CREATE OR REPLACE cannot alter a function's OUT columns → DROP then CREATE.
 -- disputes.booking_id is UNIQUE, so the scalar subquery returns at most one row;
--- NULL means "no dispute", exactly the old has_dispute = false.
+-- NULL means "no dispute", exactly the old has_dispute = false. The LIMIT 1 is
+-- belt-and-braces: it costs nothing and keeps a duplicate dispute row (if that
+-- UNIQUE constraint were ever dropped) from raising "more than one row returned
+-- by a subquery" and failing get_my_bookings for ALL of a client's bookings —
+-- a far bigger blast radius than the exists() this replaced, which was
+-- insensitive to cardinality.
 drop function if exists public.get_my_bookings();
 
 create function public.get_my_bookings()
@@ -41,7 +46,7 @@ as $$
     b.created_at, tp.id, tu.full_name, sc.slug, s.start_time,
     exists (select 1 from reviews r
             where r.booking_id = b.id and r.author_id = auth.uid()) as has_review,
-    (select d.status from disputes d where d.booking_id = b.id) as dispute_status
+    (select d.status from disputes d where d.booking_id = b.id limit 1) as dispute_status
   from bookings b
   join talachero_profiles tp on tp.id = b.talachero_id
   join users tu on tu.id = tp.user_id

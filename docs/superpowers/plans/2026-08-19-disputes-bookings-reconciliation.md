@@ -35,6 +35,7 @@
 | `src/app/[locale]/dashboard/admin/actions.ts` | modify | both admin refund paths reconcile disputes |
 | `src/lib/data/bookings.ts` | modify | `disputeStatus` replaces `hasDispute` on `ClientBooking` |
 | `src/app/[locale]/dashboard/page.tsx` | modify | client card terminal dispute states |
+| `src/app/[locale]/dashboard/bookings/[id]/dispute/page.tsx` | modify | re-file route guard reads the new field |
 | `src/app/[locale]/dashboard/admin/payment-badge.tsx` | create | shared translated payment chip (both admin tables) |
 | `src/app/[locale]/dashboard/admin/disputes/disputes-table.tsx` | modify | payment + resolved columns |
 | `src/app/[locale]/dashboard/admin/bookings/bookings-table.tsx` | modify | use the translated badge |
@@ -455,6 +456,20 @@ In `messages/en.json`, same position in `dashboard`:
     "dispute_refunded": "Report resolved — refunded",
     "dispute_reviewed": "Report reviewed",
 ```
+
+- [ ] **Step 3b: Update the re-file route guard**
+
+`src/app/[locale]/dashboard/bookings/[id]/dispute/page.tsx:27` is a **third** consumer of the
+old boolean (it blocks a client opening the dispute form twice). Change `booking.hasDispute` to:
+
+```tsx
+    booking.disputeStatus !== null
+```
+
+Any non-null status blocks re-filing, preserving today's behaviour exactly. This is not a
+judgement call: `disputes.booking_id` is `UNIQUE` ("dismissal is final; intentional, no
+re-raise") and `raise_dispute` throws `already_disputed` on the unique violation, so a
+narrower guard would only route the client to a form whose submit must fail.
 
 - [ ] **Step 4: Verify**
 

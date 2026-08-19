@@ -64,8 +64,14 @@ So the refunded case has no confirmation whatsoever, not merely a stale label.
 - **The refund path already emails the client.** `notifyRefundIssued` fires from the
   `charge.refunded` webhook (`api/stripe/webhook/route.ts:194`), so a dispute-resolution email
   on the refund path would double up. Only dismissal needs a new email.
-- **`has_dispute` has exactly two consumers** — `lib/data/bookings.ts:52` and the dashboard
-  card — both of which this change touches anyway.
+- **`has_dispute` has three consumers**, all of which this change touches:
+  `lib/data/bookings.ts:52`, the dashboard card, and — easy to miss —
+  `dashboard/bookings/[id]/dispute/page.tsx:27`, the server-side route guard that stops a
+  client re-filing. That third one becomes `disputeStatus !== null`, preserving behaviour
+  1:1: `disputes.booking_id` is `UNIQUE` ("one dispute per booking, dismissal is final;
+  intentional, no re-raise") and `raise_dispute` throws `already_disputed` on the unique
+  violation, so re-filing is impossible in *every* state — a narrower guard would only route
+  the client to a form whose submit is guaranteed to fail.
 
 ## Design
 
