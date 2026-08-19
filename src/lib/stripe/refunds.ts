@@ -15,23 +15,30 @@ export async function refundCapturedBooking(paymentIntentId: string) {
   });
 }
 
+/** Outcome of an attempted refund. `already_refunded` is split out from the
+ * failure cases deliberately: nothing is owed to Stripe, but a dispute on that
+ * booking should still close as refunded. Collapsing it into a bare `false` is
+ * what made the disputes-queue "Reembolsar" button a silent no-op. */
+export type RefundOutcome = "refunded" | "already_refunded" | "not_refundable" | "error";
+
 /** Look up a booking and, if it's captured with a payment intent, issue a full
- * refund (best-effort). Returns true iff a refund was actually issued to Stripe.
- * The charge.refunded webhook reconciles payment_status + the ledger. Shared by
- * the admin force-refund and dispute-resolution paths. */
-export async function refundBookingIfCaptured(bookingId: string): Promise<boolean> {
+ * refund (best-effort). The charge.refunded webhook reconciles payment_status +
+ * the ledger. Shared by the admin force-refund and dispute-resolution paths. */
+export async function refundBookingIfCaptured(bookingId: string): Promise<RefundOutcome> {
   const { data: booking } = await createServiceClient()
     .from("bookings")
     .select("stripe_payment_intent_id, payment_status")
     .eq("id", bookingId)
     .maybeSingle();
-  if (booking?.payment_status !== "captured" || !booking.stripe_payment_intent_id) {
-    return false;
+  if (!booking) return "not_refundable";
+  if (booking.payment_status === "refunded") return "already_refunded";
+  if (booking.payment_status !== "captured" || !booking.stripe_payment_intent_id) {
+    return "not_refundable";
   }
   try {
     await refundCapturedBooking(booking.stripe_payment_intent_id);
-    return true;
+    return "refunded";
   } catch {
-    return false;
+    return "error";
   }
 }
