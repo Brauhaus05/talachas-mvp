@@ -12,10 +12,15 @@ export async function DisputesTable({ disputes }: { disputes: AdminDispute[] }) 
     return <p className="text-text-secondary text-sm">{t("empty")}</p>;
   }
   const locale = await getLocale();
+  // Includes the year, unlike the earnings table this pattern comes from: that
+  // one lists a talachero's recent payouts, whereas resolved disputes are an
+  // audit trail where a case closed 14 months ago must not read the same as one
+  // closed last month.
   const dateFmt = new Intl.DateTimeFormat(locale, {
     timeZone: "America/Mexico_City",
     day: "numeric",
     month: "short",
+    year: "numeric",
   });
   return (
     <div className="border-border overflow-x-auto rounded-lg border">
@@ -66,7 +71,11 @@ export async function DisputesTable({ disputes }: { disputes: AdminDispute[] }) 
                 <PaymentBadge status={d.paymentStatus} />
               </td>
               <td className="text-text-secondary px-4 py-3">
-                {d.resolvedAt ? dateFmt.format(new Date(d.resolvedAt)) : "—"}
+                {d.resolvedAt ? (
+                  dateFmt.format(new Date(d.resolvedAt))
+                ) : (
+                  <span className="text-text-muted text-xs">—</span>
+                )}
               </td>
               <td className="px-4 py-3">
                 {d.status === "open" ? (
