@@ -29,7 +29,58 @@ The core loop is real end-to-end: discover → book (concurrency-safe slot) → 
 
 ## What's next
 
-**▶ Next session (planned): disputes ↔ bookings reconciliation.** The two admin surfaces don't reconcile — a booking refunded via `/admin/bookings` still shows `Abierta` in `/admin/disputes` with a live "Reembolsar" button (double-refund risk), and a dismissed dispute leaves the client on "Reporte en revisión" forever. Scope: add a payment-status/date column to the disputes table + hide/close disputes whose booking is already refunded, and expose `dispute_status` through `get_my_bookings` for a client closed/reviewed state. Tracked on the Notion `✅ Tareas` board (rows "Reconciliar disputas ↔ reservas" P1 + "Disputa descartada muestra 'Reporte en revisión'…" P2). See the two dispute follow-ups below for detail.
+**▶ Next session: owner-run QA of the disputes reconciliation** (branch
+`feat/disputes-bookings-reconciliation`, PR open). The code is complete and statically verified;
+what remains needs a browser + a running Stripe listener. See "Disputes ↔ bookings reconciliation"
+below for the exact flows.
+
+After that, the remaining board items are the deferred features listed at the bottom (tiered
+refunds, 24h reminder email, neighborhood picker, photo upload).
+
+### Disputes ↔ bookings reconciliation (2026-08-19, branch `feat/disputes-bookings-reconciliation`)
+
+Closes the Sprint 3 P1/P2 dispute rows. The two admin surfaces now agree, and a resolved dispute
+reaches the client.
+
+- `get_my_bookings` returns **`dispute_status`** (enum) instead of the boolean `has_dispute`;
+  one-time backfill closes disputes whose booking was already refunded out-of-band.
+- `refundBookingIfCaptured` returns a discriminated **`RefundOutcome`** instead of `boolean`.
+  Splitting `already_refunded` out of the old `false` is the whole fix — that conflation is why
+  the disputes-queue "Reembolsar" button silently did nothing.
+- `forceRefund` closes an open dispute after a successful refund (best-effort, sequenced *after*
+  the refund so a dispute-write failure can never strand money). `resolveDispute` records
+  `refunded` on both `refunded` and `already_refunded`.
+- Admin disputes table gains **payment-status + resolved-date** columns; both admin tables now use
+  a shared **translated** payment badge (closes the "raw `captured` label" finding).
+- Client card shows a terminal state: `open` → "Reporte en revisión", `refunded` → "Reporte
+  resuelto — reembolsado", `dismissed` → "Reporte revisado". The block is no longer gated on
+  `payment_status = 'captured'`, which is why a refunded dispute previously vanished entirely.
+- New **dismissal email** (`notifyDisputeDismissed`). The refund path deliberately sends none —
+  `notifyRefundIssued` already fires from `charge.refunded`.
+
+**Corrections to the earlier framing in this file:** there was never a real double-refund risk —
+`admin_list_bookings` filters on `payment_status = 'captured'` and `refundBookingIfCaptured`
+re-reads before calling Stripe. The actual defect was that an out-of-band refund left the dispute
+with *no correct terminal state*. And the client side was worse than recorded: a **refunded**
+dispute showed the client nothing at all, not merely a stale label.
+
+**Verified:** `pnpm typecheck` + `pnpm lint` (2 pre-existing warnings only) + `pnpm build` clean;
+es/en keys 431/431; migration applied via `migration up --local`; backfill leaves 0 stuck rows and
+re-runs as `UPDATE 0` (idempotent).
+
+**⚠ Still owner-run — needs a browser + `stripe listen`:**
+1. Raise a dispute as `mariana.ruiz@demo.talachas.mx` → force-refund that booking from
+   `/admin/bookings` → the dispute should self-close as `Reembolsada` with a resolved date, and
+   Mariana's card should read "Reporte resuelto — reembolsado".
+2. Raise a dispute → **Descartar** → card reads "Reporte revisado" (not "en revisión"), and the
+   dismissal email arrives (set `EMAIL_DEV_REDIRECT` to a real inbox).
+3. The previously-broken case: mark a booking with an open dispute as refunded directly in the DB,
+   then click **Reembolsar** in the disputes queue — it must now close the dispute (the
+   `already_refunded` branch) instead of reloading unchanged.
+
+**Cloud push:** the migration reaches production via `supabase db push` on the **pooler** `--db-url`
+(owner runs it — the password is theirs). **The backfill `UPDATE` runs against production data on
+that push.**
 
 **Verification / QA:**
 - ✅ **Live "reservar y pagar" E2E** (2026-07-24) — re-verified on the deployed site (book → authorize → accept → capture → 15% split; both webhooks delivered). Cloud DB now has one extra test booking (24 jul, Mariana↔Carlos, CA$560 captured).
@@ -38,8 +89,6 @@ The core loop is real end-to-end: discover → book (concurrency-safe slot) → 
 
 **Small follow-ups (non-blocking, logged from reviews):**
 - _**PR #24 merged 2026-08-19** (squashed as `9947303`; branch `qa/sprint3-quick-fixes` deleted; production deploy Ready on `talachas-mvp.vercel.app`). Shipped: landing review-count dup, review-card rating display, "Desde ⋯" filter labels, tip-hidden-on-refunded, and the mobile nav menu. Remaining open findings (incl. the two dispute items below) are tracked as rows on the Notion `✅ Tareas` board._
-- **Dismissed disputes show the client "Report under review" forever** — `has_dispute` is a boolean; expose `dispute_status` through `get_my_bookings` + a client closed/reviewed state (+ optional email).
-- **Admin force-refund (`/admin/bookings`) can leave a dispute stuck `open`** — the two admin surfaces don't reconcile; render a payment-status/date column in the disputes table and/or hide disputes whose booking is already refunded.
 - **`verified` no longer implies *payable*** (onboarding decoupled Stripe from verification) — an admin can approve a talachero before Stripe is done, so a listed talachero may return `talachero_not_payable` until they finish Stripe. Accepted "Stripe is parallel" decision; admin queue shows a `payments_ready/pending` badge. Optional tightening: also filter `list_talacheros` on `charges_enabled`.
 - Panel task optional extras (owner to close-vs-split): consolidated message inbox, availability date-blocks.
 - Dead code cleanup: `PlaceholderPanel` + `dashboard.coming_soon` key (last consumer removed).
@@ -116,4 +165,13 @@ pnpm dev                           # :3000
 - **Seed runner batching** — `supabase db reset` doesn't preserve session temp tables across statement batches; write seeds as one `DO` block. Seed auth users via `auth.users` insert (fires the signup trigger) + matching `auth.identities` row.
 - **Supabase Realtime (chat)** — a table must be in the `supabase_realtime` publication AND the subscriber must pass its RLS `SELECT`. The channel takes ~1s to reach `SUBSCRIBED`; `ChatView` optimistically appends the sent row (deduped by id) so a message sent in that window isn't lost.
 - **Email is best-effort and off-by-default (5B)** — `notify*` swallow all errors (never throw into a form action or the webhook); `sendEmail` no-ops when `RESEND_API_KEY` is unset. Payment "processed" = **capture** (completion), not authorize. `EMAIL_DEV_REDIRECT` is hard-ignored in production. Refund email currently shows the full booking price (correct while all refunds are full — thread `charge.amount_refunded` when partial refunds land).
+- **`supabase gen types` lies about nullability for function OUT columns** — a `RETURNS TABLE`
+  column that can be SQL `NULL` is typed non-nullable in `database.types.ts` (e.g.
+  `get_my_bookings.dispute_status`). The hand-written view types in `lib/data/` widen it back
+  (`DisputeStatus | null`), so read those, not the generated row type, or you'll trust a
+  non-null claim that isn't true.
+- **Verifying a function's shape:** query `information_schema.parameters`, NOT
+  `information_schema.columns` — `columns` only covers real tables/views/composite types and
+  returns 0 rows for any function. `psql` isn't on the host PATH; go through
+  `docker exec supabase_db_talachas-mvp psql -U postgres -d postgres`.
 - **Auth-aware nav made locale pages dynamic** — `TopNavBar` reads the session, so pages render on demand (all `ƒ`). Expected tradeoff.

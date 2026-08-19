@@ -129,6 +129,11 @@ export async function resolveDispute(formData: FormData) {
     p_dispute_id: disputeId,
     p_refunded: refunded,
   });
+  if (error) {
+    // Losing a race with the other admin surface is correct behaviour, but it
+    // is otherwise invisible: the operator just sees the row change under them.
+    console.error(`[admin] admin_resolve_dispute(${disputeId}) failed:`, error);
+  }
 
   if (!error && !refunded && dispute?.booking_id) {
     await notifyDisputeDismissed(dispute.booking_id);

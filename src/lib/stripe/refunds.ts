@@ -25,13 +25,16 @@ export type RefundOutcome = "refunded" | "already_refunded" | "not_refundable" |
  * the money is already back with the client — a force-refund or a refund issued
  * from the Stripe dashboard landed inside the charge.refunded webhook lag — so
  * it must map to already_refunded. Mapping it to "error" is what left the
- * disputes-queue button doing nothing during that window. */
+ * disputes-queue button doing nothing during that window.
+ *
+ * Matches on the error CODE only, deliberately. stripe-node copies the API
+ * error code onto the thrown StripeError, so this is exact. A message-text
+ * fallback was considered and rejected: it adds no coverage this code check
+ * misses, and a message like "Application fee ... has already been refunded"
+ * would misclassify a non-refund as already_refunded — marking a dispute
+ * refunded while the client's money is still gone, the worst outcome here. */
 function isAlreadyRefundedError(err: unknown): boolean {
-  const e = err as { code?: string; message?: string } | null;
-  return (
-    e?.code === "charge_already_refunded" ||
-    /already been refunded/i.test(e?.message ?? "")
-  );
+  return (err as { code?: string } | null)?.code === "charge_already_refunded";
 }
 
 /** Look up a booking and, if it's captured with a payment intent, issue a full
