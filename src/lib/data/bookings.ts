@@ -1,6 +1,6 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
-import type { BookingStatus } from "@/lib/supabase/types";
+import type { BookingStatus, DisputeStatus } from "@/lib/supabase/types";
 
 export interface ClientBooking {
   id: string;
@@ -15,7 +15,7 @@ export interface ClientBooking {
   serviceSlug: string;
   slotStart: string | null;
   hasReview: boolean;
-  hasDispute: boolean;
+  disputeStatus: DisputeStatus | null;
 }
 
 export interface TalacheroBooking {
@@ -49,7 +49,7 @@ export async function getMyBookings(): Promise<ClientBooking[]> {
     serviceSlug: r.service_slug,
     slotStart: r.slot_start,
     hasReview: r.has_review,
-    hasDispute: r.has_dispute,
+    disputeStatus: r.dispute_status,
   }));
 }
 

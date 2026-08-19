@@ -280,6 +280,8 @@
     "review_success": "¡Gracias por tu reseña!",
     "dispute_cta": "Reportar un problema",
     "dispute_pending": "Reporte en revisión",
+    "dispute_refunded": "Reporte resuelto — reembolsado",
+    "dispute_reviewed": "Reporte revisado",
     "dispute_success": "Tu reporte se envió. Un moderador lo revisará.",
     "paid_success": "¡Pago autorizado! Tu reserva está en camino.",
     "action_messages": "Mensajes",

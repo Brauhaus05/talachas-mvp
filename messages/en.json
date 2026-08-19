@@ -280,6 +280,8 @@
     "review_success": "Thanks for your review!",
     "dispute_cta": "Report a problem",
     "dispute_pending": "Report under review",
+    "dispute_refunded": "Report resolved — refunded",
+    "dispute_reviewed": "Report reviewed",
     "dispute_success": "Your report was submitted. A moderator will review it.",
     "paid_success": "Payment authorized! Your booking is on its way.",
     "action_messages": "Messages",

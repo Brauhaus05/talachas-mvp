@@ -142,19 +142,26 @@ export default async function ClientDashboardPage({
                         {t("review_cta")}
                       </Link>
                     )}
-                    {b.paymentStatus === "captured" &&
-                      (b.hasDispute ? (
-                        <span className="text-text-secondary text-xs">
-                          {t("dispute_pending")}
-                        </span>
-                      ) : (
-                        <Link
-                          href={`/dashboard/bookings/${b.id}/dispute` as Route}
-                          className="border-border-strong text-text-primary hover:bg-surface-muted w-fit rounded-md border px-3 py-1.5 text-xs font-medium transition-colors"
-                        >
-                          {t("dispute_cta")}
-                        </Link>
-                      ))}
+                    {b.disputeStatus === "open" ? (
+                      <span className="text-text-secondary text-xs">
+                        {t("dispute_pending")}
+                      </span>
+                    ) : b.disputeStatus === "refunded" ? (
+                      <span className="text-text-secondary text-xs">
+                        {t("dispute_refunded")}
+                      </span>
+                    ) : b.disputeStatus === "dismissed" ? (
+                      <span className="text-text-secondary text-xs">
+                        {t("dispute_reviewed")}
+                      </span>
+                    ) : b.paymentStatus === "captured" ? (
+                      <Link
+                        href={`/dashboard/bookings/${b.id}/dispute` as Route}
+                        className="border-border-strong text-text-primary hover:bg-surface-muted w-fit rounded-md border px-3 py-1.5 text-xs font-medium transition-colors"
+                      >
+                        {t("dispute_cta")}
+                      </Link>
+                    ) : null}
                   </div>
                 ) : null
               }
