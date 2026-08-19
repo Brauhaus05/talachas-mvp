@@ -9,6 +9,7 @@ import {
   paymentTalacheroEmail,
   refundEmail,
   newReviewEmail,
+  disputeDismissedEmail,
 } from "./templates";
 
 /** → client, when the talachero accepts a request. */
@@ -40,7 +41,8 @@ export async function notifyPaymentCaptured(bookingId: string): Promise<void> {
       ctx.talachero.name,
       ctx.booking
     );
-    const net = Math.round((ctx.booking.price ?? 0) * (1 - getPlatformFeePct()) * 100) / 100;
+    const net =
+      Math.round((ctx.booking.price ?? 0) * (1 - getPlatformFeePct()) * 100) / 100;
     const talacheroEmail = paymentTalacheroEmail(
       ctx.talachero.locale,
       ctx.talachero.name,
@@ -90,5 +92,24 @@ export async function notifyNewReview(bookingId: string, rating: number): Promis
     await sendEmail({ to: ctx.talachero.email, ...email });
   } catch (err) {
     console.error(`[notifications] notifyNewReview(${bookingId}) failed:`, err);
+  }
+}
+
+/** → client, when an admin dismisses their dispute. The refund path is NOT
+ * covered here: notifyRefundIssued already fires from charge.refunded, so
+ * emailing on both would double up. Best-effort; never throws. */
+export async function notifyDisputeDismissed(bookingId: string): Promise<void> {
+  try {
+    const ctx = await getNotificationContext(createServiceClient(), bookingId);
+    if (!ctx) return;
+    const email = disputeDismissedEmail(
+      ctx.client.locale,
+      ctx.client.name,
+      ctx.talachero.name,
+      ctx.booking
+    );
+    await sendEmail({ to: ctx.client.email, ...email });
+  } catch (err) {
+    console.error(`[notifications] notifyDisputeDismissed(${bookingId}) failed:`, err);
   }
 }

@@ -477,6 +477,11 @@
       "intro": "Procesamos el reembolso de tu reserva con {talachero}.",
       "total_label": "Monto reembolsado"
     },
+    "dispute_dismissed": {
+      "subject": "Revisamos tu reporte",
+      "heading": "Reporte revisado",
+      "intro": "Revisamos el reporte de tu reserva con {talachero}. El caso quedó cerrado."
+    },
     "new_review": {
       "subject": "Recibiste una nueva reseña",
       "heading": "Nueva reseña",

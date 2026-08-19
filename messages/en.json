@@ -477,6 +477,11 @@
       "intro": "We've processed the refund for your booking with {talachero}.",
       "total_label": "Amount refunded"
     },
+    "dispute_dismissed": {
+      "subject": "We've reviewed your report",
+      "heading": "Report reviewed",
+      "intro": "We've reviewed the report for your booking with {talachero}. The case is now closed."
+    },
     "new_review": {
       "subject": "You received a new review",
       "heading": "New review",

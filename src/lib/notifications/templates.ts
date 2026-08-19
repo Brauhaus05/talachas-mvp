@@ -5,8 +5,9 @@ import { formatMoney } from "@/lib/format";
 const bundles: Record<string, unknown> = { es, en };
 
 function escapeHtml(s: string): string {
-  return s.replace(/[&<>"']/g, (c) =>
-    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!
+  return s.replace(
+    /[&<>"']/g,
+    (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!
   );
 }
 
@@ -19,7 +20,8 @@ function makeT(locale: string) {
       .reduce<unknown>((o, k) => (o as Record<string, unknown> | undefined)?.[k], dict);
     let s = typeof raw === "string" ? raw : path;
     if (vars) {
-      for (const [k, v] of Object.entries(vars)) s = s.replaceAll(`{${k}}`, escapeHtml(String(v)));
+      for (const [k, v] of Object.entries(vars))
+        s = s.replaceAll(`{${k}}`, escapeHtml(String(v)));
     }
     return s;
   };
@@ -94,11 +96,16 @@ export function bookingConfirmedEmail(
   const t = makeT(locale);
   const body =
     paragraph(t("emails.greeting", { name: recipientName ?? "" })) +
-    paragraph(t("emails.booking_confirmed.intro", { talachero: counterpartyName ?? "Talachas" })) +
+    paragraph(
+      t("emails.booking_confirmed.intro", { talachero: counterpartyName ?? "Talachas" })
+    ) +
     row(t("emails.service_label"), serviceLabel(locale, b.serviceSlug)) +
     row(t("emails.when_label"), formatDateTime(locale, b.slotStart)) +
     row(t("emails.booking_confirmed.total_label"), money(locale, b.price, b.currency));
-  return { subject: t("emails.booking_confirmed.subject"), html: layout(locale, t("emails.booking_confirmed.heading"), body) };
+  return {
+    subject: t("emails.booking_confirmed.subject"),
+    html: layout(locale, t("emails.booking_confirmed.heading"), body),
+  };
 }
 
 /** → client, on capture (final receipt). */
@@ -111,10 +118,15 @@ export function paymentClientEmail(
   const t = makeT(locale);
   const body =
     paragraph(t("emails.greeting", { name: recipientName ?? "" })) +
-    paragraph(t("emails.payment_client.intro", { talachero: counterpartyName ?? "Talachas" })) +
+    paragraph(
+      t("emails.payment_client.intro", { talachero: counterpartyName ?? "Talachas" })
+    ) +
     row(t("emails.service_label"), serviceLabel(locale, b.serviceSlug)) +
     row(t("emails.payment_client.total_label"), money(locale, b.price, b.currency));
-  return { subject: t("emails.payment_client.subject"), html: layout(locale, t("emails.payment_client.heading"), body) };
+  return {
+    subject: t("emails.payment_client.subject"),
+    html: layout(locale, t("emails.payment_client.heading"), body),
+  };
 }
 
 /** → talachero, on capture ("you've been paid", net of commission). */
@@ -132,7 +144,10 @@ export function paymentTalacheroEmail(
     row(t("emails.service_label"), serviceLabel(locale, b.serviceSlug)) +
     row(t("emails.payment_talachero.gross_label"), money(locale, b.price, b.currency)) +
     row(t("emails.payment_talachero.net_label"), money(locale, net, b.currency));
-  return { subject: t("emails.payment_talachero.subject"), html: layout(locale, t("emails.payment_talachero.heading"), body) };
+  return {
+    subject: t("emails.payment_talachero.subject"),
+    html: layout(locale, t("emails.payment_talachero.heading"), body),
+  };
 }
 
 /** → client, on refund. */
@@ -147,7 +162,32 @@ export function refundEmail(
     paragraph(t("emails.greeting", { name: recipientName ?? "" })) +
     paragraph(t("emails.refund.intro", { talachero: counterpartyName ?? "Talachas" })) +
     row(t("emails.refund.total_label"), money(locale, b.price, b.currency));
-  return { subject: t("emails.refund.subject"), html: layout(locale, t("emails.refund.heading"), body) };
+  return {
+    subject: t("emails.refund.subject"),
+    html: layout(locale, t("emails.refund.heading"), body),
+  };
+}
+
+/** → client, when an admin dismisses their dispute. Deliberately neutral: the
+ * app offers no appeal path and no reason field, so the email states closure
+ * rather than a verdict. */
+export function disputeDismissedEmail(
+  locale: string,
+  recipientName: string | null,
+  counterpartyName: string | null,
+  b: BookingFacts
+): EmailContent {
+  const t = makeT(locale);
+  const body =
+    paragraph(t("emails.greeting", { name: recipientName ?? "" })) +
+    paragraph(
+      t("emails.dispute_dismissed.intro", { talachero: counterpartyName ?? "Talachas" })
+    ) +
+    row(t("emails.service_label"), serviceLabel(locale, b.serviceSlug));
+  return {
+    subject: t("emails.dispute_dismissed.subject"),
+    html: layout(locale, t("emails.dispute_dismissed.heading"), body),
+  };
 }
 
 /** → talachero, when a client leaves a review. Does not quote the comment body
