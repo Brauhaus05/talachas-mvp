@@ -1,9 +1,9 @@
 import { getTranslations, getLocale } from "next-intl/server";
-import { Badge } from "@/components/ui/badge";
 import { formatMoney } from "@/lib/format";
 import type { AdminBooking } from "@/lib/data/admin";
 import { forceRefund } from "../actions";
 import { ConfirmButton } from "../confirm-button";
+import { PaymentBadge } from "../payment-badge";
 
 export async function BookingsTable({ bookings }: { bookings: AdminBooking[] }) {
   const t = await getTranslations("admin");
@@ -42,7 +42,7 @@ export async function BookingsTable({ bookings }: { bookings: AdminBooking[] }) 
                 {formatMoney(b.price, locale, b.currency)}
               </td>
               <td className="px-4 py-3">
-                <Badge variant="muted">{b.paymentStatus}</Badge>
+                <PaymentBadge status={b.paymentStatus} />
               </td>
               <td className="px-4 py-3">
                 <form action={forceRefund}>
