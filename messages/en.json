@@ -22,7 +22,9 @@
     "catalog": "Catalog",
     "become_talachero": "Become a Talachero",
     "login": "Log in",
-    "signup": "Sign up"
+    "signup": "Sign up",
+    "menu_open": "Open menu",
+    "menu_close": "Close menu"
   },
   "footer": {
     "brand_description": "Your trusted platform for solving home tasks with local experts.",
@@ -54,6 +56,7 @@
     "hero_input_placeholder": "e.g. Assemble a desk, Paint bedroom...",
     "hero_cta": "Find a Talachero",
     "trust_line": "Over 2,500 verified Talacheros in your city",
+    "reviews_stat": "2,500+ reviews",
     "services_title": "Popular Services",
     "services_subtitle": "Explore the categories most requested by our community.",
     "services_view_all": "View all"
@@ -114,8 +117,10 @@
     "results_count": "{count, plural, one {# Talachero available} other {# Talacheros available}}",
     "filters_title": "Filters",
     "filter_service": "Service",
+    "service_all": "All",
     "filter_price": "Price range (CAD/h)",
     "filter_rating": "Minimum rating",
+    "rating_all": "Any",
     "filter_availability": "Availability",
     "availability_today": "Today",
     "availability_week": "This week",

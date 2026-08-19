@@ -1,4 +1,4 @@
-# Session Handoff — 2026-07-22
+# Session Handoff — 2026-07-24
 
 > Living session-to-session status: what's live, what's next, and the operational facts the code + git log don't capture. Read alongside [CLAUDE.md](./CLAUDE.md) (architecture), [prd.md](./prd.md), [plan.md](./plan.md).
 >
@@ -13,6 +13,7 @@
 - **All 11 PRD in-scope features are code-complete and merged** (auth, profiles, KYC/Connect, search, availability, booking+concurrency, payments/commission/tips, chat, email, reviews, admin panel + disputes). Phases 0–6 (cycles 1–3) on `main`.
 - **Sprint 2 "Autoservicio de prestadores" is complete and merged:** talachero self-service **profile editor** (#18), **availability editor** (#19), **onboarding with admin-review gate** (#21), **earnings/payment-history view** (#22), and a **manual QA runbook** (#23, `docs/qa/2026-07-22-self-service-provider-qa-runbook.md`). All self-service migrations pushed to cloud.
 - **Full Stripe payment chain exercised live** (2026-07-11): onboard → book → authorize (manual-capture hold) → accept → capture → 15% split → ledger, both webhooks delivered to Vercel. Refund/tip mechanics proven in test mode.
+- **Live QA pass + E2E payment re-verified (2026-07-24):** full visual audit (client/admin/talachero, desktop + mobile) and a fresh live "reservar y pagar" E2E — book → authorize → accept → capture → 15% ledger split, all correct (Neto CA$476, comisión CA$84). ~15 findings logged to the Notion board (`✅ Tareas`); quick-win fixes + a **mobile nav menu** shipped in **PR #24** (`qa/sprint3-quick-fixes`). Carlos is Stripe-active on the **cloud** DB, so E2E tests can book him directly (no re-onboarding).
 
 The core loop is real end-to-end: discover → book (concurrency-safe slot) → pay (Stripe escrow) → chat → accept → complete → capture + 15% split → tip → refund → review → dispute (admin-mediated), with an immutable `transactions` ledger.
 
@@ -28,11 +29,15 @@ The core loop is real end-to-end: discover → book (concurrency-safe slot) → 
 
 ## What's next
 
-**Verification / QA (owner-run — need sign-ins the build agent couldn't do):**
-- Work through the **self-service QA runbook** (`docs/qa/2026-07-22-self-service-provider-qa-runbook.md`) — new-talachero signup → onboarding checklist → submit-for-review → admin approve/reject, profile/availability/earnings. Carlos is left `in_review` on the local DB to prime the admin queue.
-- Older cycle 1–3 **browser passes** still not eyeballed live: review CTA, admin panel, disputes flow. Sign in `mariana.ruiz@demo.talachas.mx` (client), `carlos.mendoza@demo.talachas.mx` (talachero), `admin@talachas.mx` (admin) — all `password123`.
+**▶ Next session (planned): disputes ↔ bookings reconciliation.** The two admin surfaces don't reconcile — a booking refunded via `/admin/bookings` still shows `Abierta` in `/admin/disputes` with a live "Reembolsar" button (double-refund risk), and a dismissed dispute leaves the client on "Reporte en revisión" forever. Scope: add a payment-status/date column to the disputes table + hide/close disputes whose booking is already refunded, and expose `dispute_status` through `get_my_bookings` for a client closed/reviewed state. Tracked on the Notion `✅ Tareas` board (rows "Reconciliar disputas ↔ reservas" P1 + "Disputa descartada muestra 'Reporte en revisión'…" P2). See the two dispute follow-ups below for detail.
+
+**Verification / QA:**
+- ✅ **Live "reservar y pagar" E2E** (2026-07-24) — re-verified on the deployed site (book → authorize → accept → capture → 15% split; both webhooks delivered). Cloud DB now has one extra test booking (24 jul, Mariana↔Carlos, CA$560 captured).
+- ✅ **Browser passes done** (2026-07-24): landing, catálogo, profile, reviews, booking flow, client dashboard, admin (all surfaces), disputes, talachero dashboard/earnings/availability/profile — desktop + mobile. Findings → Notion `✅ Tareas` board; UI fixes in PR #24. Sign-ins: `mariana.ruiz@demo.talachas.mx` (client), `carlos.mendoza@demo.talachas.mx` (talachero), `admin@talachas.mx` (admin) — all `password123`.
+- Still owner-run: the **self-service QA runbook** (`docs/qa/2026-07-22-self-service-provider-qa-runbook.md`) — new-talachero signup → onboarding checklist → submit-for-review → admin approve/reject, profile/availability/earnings. Carlos is left `in_review` on the **local** DB to prime the queue (cloud has no pending verifications).
 
 **Small follow-ups (non-blocking, logged from reviews):**
+- _PR #24 (2026-07-24) shipped: landing review-count dup, review-card rating display, "Desde ⋯" filter labels, tip-hidden-on-refunded, and the mobile nav menu. Remaining open findings (incl. the two dispute items below) are tracked as rows on the Notion `✅ Tareas` board._
 - **Dismissed disputes show the client "Report under review" forever** — `has_dispute` is a boolean; expose `dispute_status` through `get_my_bookings` + a client closed/reviewed state (+ optional email).
 - **Admin force-refund (`/admin/bookings`) can leave a dispute stuck `open`** — the two admin surfaces don't reconcile; render a payment-status/date column in the disputes table and/or hide disputes whose booking is already refunded.
 - **`verified` no longer implies *payable*** (onboarding decoupled Stripe from verification) — an admin can approve a talachero before Stripe is done, so a listed talachero may return `talachero_not_payable` until they finish Stripe. Accepted "Stripe is parallel" decision; admin queue shows a `payments_ready/pending` badge. Optional tightening: also filter `list_talacheros` on `charges_enabled`.

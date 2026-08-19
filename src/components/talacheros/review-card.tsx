@@ -14,12 +14,10 @@ export function ReviewCard({ review }: { review: TalacheroReview }) {
       <header className="flex items-center gap-3">
         <Avatar initials={review.authorInitials} size="sm" />
         <div className="flex flex-1 flex-col">
-          <p className="text-text-primary text-sm font-medium">
-            {review.authorName}
-          </p>
+          <p className="text-text-primary text-sm font-medium">{review.authorName}</p>
           <p className="text-text-muted text-xs">{timeLabel}</p>
         </div>
-        <Rating value={review.rating} showValue={false} />
+        <Rating value={review.rating} />
       </header>
       <p className="text-text-secondary text-sm leading-relaxed">{body}</p>
     </article>

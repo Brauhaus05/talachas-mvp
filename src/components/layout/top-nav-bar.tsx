@@ -5,6 +5,7 @@ import { getAppUser, dashboardPathForRole } from "@/lib/auth";
 import { getUnreadCount } from "@/lib/data/chat";
 import { signOut } from "@/app/[locale]/auth/actions";
 import { LocaleSwitcher } from "./locale-switcher";
+import { MobileMenu } from "./mobile-menu";
 
 export async function TopNavBar() {
   const t = await getTranslations();
@@ -87,6 +88,11 @@ export async function TopNavBar() {
             </>
           )}
           <LocaleSwitcher />
+          <MobileMenu
+            isSignedIn={!!user}
+            dashboardPath={user ? dashboardPathForRole(user.role) : ""}
+            unread={unread}
+          />
         </nav>
       </div>
     </header>
