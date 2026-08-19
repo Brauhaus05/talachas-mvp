@@ -4,6 +4,7 @@ import { formatMoney } from "@/lib/format";
 import type { AdminDispute } from "@/lib/data/admin";
 import { resolveDispute } from "../actions";
 import { ConfirmButton } from "../confirm-button";
+import { PaymentBadge } from "../payment-badge";
 
 export async function DisputesTable({ disputes }: { disputes: AdminDispute[] }) {
   const t = await getTranslations("admin");
@@ -11,6 +12,16 @@ export async function DisputesTable({ disputes }: { disputes: AdminDispute[] }) 
     return <p className="text-text-secondary text-sm">{t("empty")}</p>;
   }
   const locale = await getLocale();
+  // Includes the year, unlike the earnings table this pattern comes from: that
+  // one lists a talachero's recent payouts, whereas resolved disputes are an
+  // audit trail where a case closed 14 months ago must not read the same as one
+  // closed last month.
+  const dateFmt = new Intl.DateTimeFormat(locale, {
+    timeZone: "America/Mexico_City",
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
   return (
     <div className="border-border overflow-x-auto rounded-lg border">
       <table className="w-full text-left text-sm">
@@ -32,6 +43,12 @@ export async function DisputesTable({ disputes }: { disputes: AdminDispute[] }) 
               {t("col_status")}
             </th>
             <th scope="col" className="px-4 py-3 font-medium">
+              {t("col_payment")}
+            </th>
+            <th scope="col" className="px-4 py-3 font-medium">
+              {t("col_resolved")}
+            </th>
+            <th scope="col" className="px-4 py-3 font-medium">
               {t("col_actions")}
             </th>
           </tr>
@@ -49,6 +66,16 @@ export async function DisputesTable({ disputes }: { disputes: AdminDispute[] }) 
               </td>
               <td className="px-4 py-3">
                 <Badge variant="muted">{t(`status_${d.status}`)}</Badge>
+              </td>
+              <td className="px-4 py-3">
+                <PaymentBadge status={d.paymentStatus} />
+              </td>
+              <td className="text-text-secondary px-4 py-3">
+                {d.resolvedAt ? (
+                  dateFmt.format(new Date(d.resolvedAt))
+                ) : (
+                  <span className="text-text-muted text-xs">—</span>
+                )}
               </td>
               <td className="px-4 py-3">
                 {d.status === "open" ? (

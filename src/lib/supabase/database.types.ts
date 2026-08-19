@@ -803,7 +803,7 @@ export type Database = {
           address: string
           created_at: string
           currency: string
-          has_dispute: boolean
+          dispute_status: Database["public"]["Enums"]["dispute_status"]
           has_review: boolean
           id: string
           payment_status: string

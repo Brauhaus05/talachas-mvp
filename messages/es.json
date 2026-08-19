@@ -280,6 +280,8 @@
     "review_success": "¡Gracias por tu reseña!",
     "dispute_cta": "Reportar un problema",
     "dispute_pending": "Reporte en revisión",
+    "dispute_refunded": "Reporte resuelto — reembolsado",
+    "dispute_reviewed": "Reporte revisado",
     "dispute_success": "Tu reporte se envió. Un moderador lo revisará.",
     "paid_success": "¡Pago autorizado! Tu reserva está en camino.",
     "action_messages": "Mensajes",
@@ -411,6 +413,12 @@
     "status_open": "Abierta",
     "status_refunded": "Reembolsada",
     "status_dismissed": "Descartada",
+    "payment_none": "Sin pago",
+    "payment_authorized": "Autorizado",
+    "payment_captured": "Cobrado",
+    "payment_refunded": "Reembolsado",
+    "payment_failed": "Fallido",
+    "col_resolved": "Resuelta",
     "verifications_title": "Verificaciones de prestadores",
     "col_services": "Servicios",
     "col_rate": "Tarifa",
@@ -468,6 +476,11 @@
       "heading": "Reembolso procesado",
       "intro": "Procesamos el reembolso de tu reserva con {talachero}.",
       "total_label": "Monto reembolsado"
+    },
+    "dispute_dismissed": {
+      "subject": "Revisamos tu reporte",
+      "heading": "Reporte revisado",
+      "intro": "Revisamos el reporte de tu reserva con {talachero}. El caso quedó cerrado."
     },
     "new_review": {
       "subject": "Recibiste una nueva reseña",

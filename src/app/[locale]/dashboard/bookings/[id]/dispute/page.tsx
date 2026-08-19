@@ -24,7 +24,7 @@ export default async function DisputePage({
     !booking ||
     booking.status !== "completed" ||
     booking.paymentStatus !== "captured" ||
-    booking.hasDispute
+    booking.disputeStatus !== null
   ) {
     notFound();
   }
