@@ -140,19 +140,24 @@ Expected: `Applying migration 20260819120001_dispute_reconciliation.sql...` and 
 Run:
 
 ```bash
-PGPASSWORD=postgres psql -h 127.0.0.1 -p 55322 -U postgres -d postgres -c \
-  "select column_name, data_type from information_schema.columns
-    where table_name = 'get_my_bookings' order by ordinal_position;"
+docker exec supabase_db_talachas-mvp psql -U postgres -d postgres -c \
+  "select parameter_name, data_type, ordinal_position from information_schema.parameters
+    where specific_name like 'get_my_bookings%' order by ordinal_position;"
 ```
 
 Expected: 13 rows ending with `has_review | boolean` and `dispute_status | USER-DEFINED`. There must be **no** `has_dispute` row.
+
+> Use `information_schema.parameters`, **not** `information_schema.columns` — a `RETURNS TABLE`
+> function registers its OUT params on `pg_proc`, and `columns` only covers real
+> tables/views/composite types, so it returns 0 rows for any function. Commands here go
+> through `docker exec` because `psql` is not on the host PATH in this project.
 
 - [ ] **Step 4: Verify the backfill left nothing stuck**
 
 Run:
 
 ```bash
-PGPASSWORD=postgres psql -h 127.0.0.1 -p 55322 -U postgres -d postgres -c \
+docker exec supabase_db_talachas-mvp psql -U postgres -d postgres -c \
   "select count(*) as stuck from disputes d join bookings b on b.id = d.booking_id
     where d.status = 'open' and b.payment_status = 'refunded';"
 ```
@@ -771,7 +776,7 @@ Expected: every one of those. Step 4 failing means `closeOpenDisputeAsRefunded` 
 Simulate an out-of-band refund to confirm the button no longer no-ops:
 
 ```bash
-PGPASSWORD=postgres psql -h 127.0.0.1 -p 55322 -U postgres -d postgres -c \
+docker exec supabase_db_talachas-mvp psql -U postgres -d postgres -c \
   "update bookings set payment_status='refunded'
     where id = (select booking_id from disputes where status='open' limit 1);"
 ```
