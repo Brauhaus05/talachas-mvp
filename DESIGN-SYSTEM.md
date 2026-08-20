@@ -32,7 +32,7 @@ These are not preferences. Several are enforced by tests in the DS; the rest are
 6. **Never fake muted text with `opacity`.** Ink at 50% measures 3.27:1. Use `--jalo-ink-muted`. Opacity is invisible to the DS contrast suite, so it fails silently.
 7. **On the inverted footer, `--jalo-ink-muted` is unreadable.** Body text is `--jalo-bone`, headings are `--jalo-highlight`.
 8. **Elevation is a hard offset shadow with no blur** — `3px 3px 0`, `4px 4px 0`, `6px 6px 0`. Never a blurred shadow. Pressing collapses the shadow to `0 0 0` and translates the element by the offset (`jalo-pressable` alongside `jalo-shadow-*`).
-9. **Body weight is 700, not 400.** Display type is Anton, text is Barlow — **pending the Futura decision, see §4.** Buttons and eyebrows are uppercase with letter-spacing.
+9. **Body weight is 700, not 400.** Display type is Jost, text is Barlow. Jost is the open-source Futura-derived face standing in until the Futura licence is resolved — **it is what this app ships, even though the DS itself still self-hosts Anton; see §4 decision 3.** Buttons and eyebrows are uppercase with letter-spacing.
 10. **Do not invent `jalo-`-prefixed class names.** The utility vocabulary is closed and documented in `conventions.md`. Classes like `jalo-button` exist but belong to components — never apply them by hand.
 11. **Never format money by hand.** DS components take `rate`/`price`/`amount`/`total` as **numbers** and format internally via `useMoney()`. When you adopt such a component, delete the `formatMoney()` call at that call site.
 12. **Never build a clickable `<div>`.** DS `Card` has `href` (renders an anchor) and `interactive` + `onSelect` (renders a button). Use them.
@@ -109,7 +109,7 @@ Each phase is independently shippable. Stop after any one and the app is coheren
 
 ### Phase 1 — Foundation swap · ~1 file · highest leverage
 
-> **Prompt:** Rewrite the `@theme` block in `src/app/globals.css` so every semantic token resolves to a JALO token. Map: `background`→bone, `surface-raised`→paper, `text-primary`→ink, `text-muted`/`text-secondary`→ink-muted, `action-primary`→magenta *(fill)*, and add a separate token for magenta-as-text→magenta-ink. Set **all five `--radius-*` tokens to `0`**. Replace Inter with Anton (`--font-display`) and Barlow (`--font-sans`) via `next/font/google`, and set base body weight to 700. **Do not modify any component file.**
+> **Prompt:** Rewrite the `@theme` block in `src/app/globals.css` so every semantic token resolves to a JALO token. Map: `background`→bone, `surface-raised`→paper, `text-primary`→ink, `text-muted`/`text-secondary`→ink-muted, `action-primary`→magenta *(fill)*, and add a separate token for magenta-as-text→magenta-ink. Set **all six `--radius-*` tokens to `0`** — the five this app already declares, plus `--radius-3xl`, which it does not (see the first straggler below). Replace Inter with Jost (`--font-display`) and Barlow (`--font-sans`) via `next/font/google`, and set base body weight to 700. **Do not modify any component file** beyond the stragglers listed below.
 
 Setting the radius tokens to `0` flattens **62 of the 74** `rounded-*` usages at once, because Tailwind v4 resolves `rounded-xl` → `--radius-xl`. That is the trick that makes this phase nearly one file. The other 12 need hands — do them in this phase too:
 
