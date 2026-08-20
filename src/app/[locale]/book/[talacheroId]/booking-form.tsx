@@ -109,7 +109,7 @@ export function BookingForm({
   return (
     <form
       onSubmit={onSubmit}
-      className="border-border bg-surface-raised flex flex-col gap-6 rounded-2xl border p-8"
+      className="border-border bg-surface-raised flex flex-col gap-6 border p-8"
     >
       <Field
         label={t("booking.field_service")}
@@ -117,7 +117,7 @@ export function BookingForm({
       >
         <select
           {...register("service")}
-          className="border-border bg-background text-text-primary focus-visible:border-border-strong flex h-11 w-full rounded-md border px-4 text-sm transition-colors focus-visible:outline-none"
+          className="border-border bg-background text-text-primary focus-visible:border-border-strong flex h-11 w-full border px-4 text-sm transition-colors focus-visible:outline-none"
         >
           {allowedServices.map((slug) => (
             <option key={slug} value={slug}>
@@ -133,7 +133,7 @@ export function BookingForm({
         error={slotError ? t("booking.select_slot") : undefined}
       >
         {days.length === 0 ? (
-          <p className="text-text-secondary border-border bg-background rounded-md border px-4 py-3 text-sm">
+          <p className="text-text-secondary border-border bg-background border px-4 py-3 text-sm">
             {t("booking.no_slots")}
           </p>
         ) : (
@@ -145,7 +145,7 @@ export function BookingForm({
                   type="button"
                   onClick={() => setActiveDay(i)}
                   className={cn(
-                    "rounded-md border px-3 py-1.5 text-xs font-medium capitalize transition-colors",
+                    "border px-3 py-1.5 text-xs font-medium capitalize transition-colors",
                     i === activeDay
                       ? "border-border-strong bg-action-primary text-text-inverse"
                       : "border-border bg-background text-text-secondary hover:bg-surface-muted"
@@ -165,7 +165,7 @@ export function BookingForm({
                     setSlotError(false);
                   }}
                   className={cn(
-                    "rounded-md border px-3 py-1.5 text-sm font-medium transition-colors",
+                    "border px-3 py-1.5 text-sm font-medium transition-colors",
                     slotId === s.id
                       ? "border-border-strong bg-action-primary text-text-inverse"
                       : "border-border bg-background text-text-secondary hover:bg-surface-muted"
@@ -187,7 +187,7 @@ export function BookingForm({
           {...register("description")}
           placeholder={t("booking.field_description_placeholder")}
           rows={4}
-          className="border-border bg-background text-text-primary placeholder:text-text-muted focus-visible:border-border-strong flex w-full rounded-md border px-4 py-3 text-sm transition-colors focus-visible:outline-none"
+          className="border-border bg-background text-text-primary placeholder:text-text-muted focus-visible:border-border-strong flex w-full border px-4 py-3 text-sm transition-colors focus-visible:outline-none"
         />
       </Field>
 
@@ -212,7 +212,7 @@ export function BookingForm({
       </Field>
 
       <Field label={t("booking.field_payment")}>
-        <label className="border-border bg-background flex cursor-pointer items-center gap-3 rounded-md border px-4 py-3">
+        <label className="border-border bg-background flex cursor-pointer items-center gap-3 border px-4 py-3">
           <input
             type="radio"
             value="card_4242"

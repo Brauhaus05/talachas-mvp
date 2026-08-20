@@ -32,7 +32,7 @@ export function ProfileForm({ initial }: { initial: MyTalacheroProfileEdit }) {
   }
 
   const banner =
-    "flex items-start gap-3 rounded-md border border-border-strong bg-surface-muted px-4 py-3 text-sm text-text-primary";
+    "flex items-start gap-3 border border-border-strong bg-surface-muted px-4 py-3 text-sm text-text-primary";
 
   const errorMsg =
     state.status === "error"
@@ -64,7 +64,7 @@ export function ProfileForm({ initial }: { initial: MyTalacheroProfileEdit }) {
           maxLength={600}
           defaultValue={initial.bio}
           placeholder={t("profileEditor.bio_placeholder")}
-          className="border-border bg-surface text-text-primary rounded-md border px-3 py-2 text-sm"
+          className="border-border bg-surface text-text-primary border px-3 py-2 text-sm"
         />
       </label>
 

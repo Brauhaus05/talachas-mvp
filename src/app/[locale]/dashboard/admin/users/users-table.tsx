@@ -10,7 +10,7 @@ export async function UsersTable({ users }: { users: AdminUser[] }) {
     return <p className="text-text-secondary text-sm">{t("empty")}</p>;
   }
   return (
-    <div className="border-border overflow-x-auto rounded-lg border">
+    <div className="border-border overflow-x-auto border">
       <table className="w-full text-left text-sm">
         <thead className="text-text-secondary border-border border-b">
           <tr>
@@ -48,7 +48,11 @@ export async function UsersTable({ users }: { users: AdminUser[] }) {
                 <td className="px-4 py-3">
                   <form action={setBan}>
                     <input type="hidden" name="userId" value={u.id} />
-                    <input type="hidden" name="banned" value={u.banned ? "false" : "true"} />
+                    <input
+                      type="hidden"
+                      name="banned"
+                      value={u.banned ? "false" : "true"}
+                    />
                     <ConfirmButton
                       label={u.banned ? t("action_unban") : t("action_ban")}
                       tone={u.banned ? "neutral" : "danger"}

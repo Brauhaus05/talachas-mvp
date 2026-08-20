@@ -12,9 +12,7 @@ const HOURS = Array.from({ length: 12 }, (_, i) => 8 + i); // 8..19
 const HORIZON_DAYS = 14;
 
 type CellState =
-  | { kind: "empty" }
-  | { kind: "open"; slotId: string }
-  | { kind: "booked" };
+  { kind: "empty" } | { kind: "open"; slotId: string } | { kind: "booked" };
 
 function keyOf(date: string, hour: number) {
   return `${date}|${hour}`;
@@ -34,7 +32,11 @@ export function AvailabilityGrid({ initial }: { initial: AvailabilitySlotView[] 
       day: "2-digit",
     }).format(d);
     const hour = Number(
-      new Intl.DateTimeFormat("en-GB", { timeZone: TZ, hour: "2-digit", hour12: false }).format(d)
+      new Intl.DateTimeFormat("en-GB", {
+        timeZone: TZ,
+        hour: "2-digit",
+        hour12: false,
+      }).format(d)
     );
     return { date, hour };
   }, []);
@@ -135,7 +137,7 @@ export function AvailabilityGrid({ initial }: { initial: AvailabilitySlotView[] 
             onClick={() => setWeek(w)}
             aria-pressed={week === w}
             className={cn(
-              "rounded-md border px-3 py-1.5 text-sm font-medium transition-colors",
+              "border px-3 py-1.5 text-sm font-medium transition-colors",
               week === w
                 ? "border-border-strong bg-surface-muted text-text-primary"
                 : "border-border text-text-secondary hover:bg-surface-muted"
@@ -196,7 +198,7 @@ export function AvailabilityGrid({ initial }: { initial: AvailabilitySlotView[] 
                           { hour: h }
                         )}
                         className={cn(
-                          "flex h-9 w-full min-w-[64px] items-center justify-center rounded-md border text-xs transition-colors",
+                          "flex h-9 w-full min-w-[64px] items-center justify-center border text-xs transition-colors",
                           past && "border-border bg-background opacity-40",
                           !past &&
                             booked &&

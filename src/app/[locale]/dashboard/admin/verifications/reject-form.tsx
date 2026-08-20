@@ -42,7 +42,7 @@ export function RejectForm({ talacheroId }: { talacheroId: string }) {
           required
           rows={2}
           placeholder={t("reject_reason_placeholder")}
-          className="border-border bg-surface text-text-primary min-w-[220px] rounded-md border px-2 py-1 text-sm"
+          className="border-border bg-surface text-text-primary min-w-[220px] border px-2 py-1 text-sm"
         />
       </label>
       <div className="flex items-center gap-2">

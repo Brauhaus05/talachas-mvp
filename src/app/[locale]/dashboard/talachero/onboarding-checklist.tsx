@@ -49,7 +49,7 @@ export function OnboardingChecklist({ initial }: { initial: OnboardingStatus }) 
   );
 
   const banner =
-    "flex items-start gap-3 rounded-md border border-border-strong bg-surface-muted px-4 py-3 text-sm text-text-primary";
+    "flex items-start gap-3 border border-border-strong bg-surface-muted px-4 py-3 text-sm text-text-primary";
 
   if (initial.status === "verified") {
     return (
@@ -71,7 +71,7 @@ export function OnboardingChecklist({ initial }: { initial: OnboardingStatus }) 
     state.status === "error" ? t(`error_${state.error ?? "generic"}`) : null;
 
   return (
-    <section className="border-border flex flex-col gap-4 rounded-lg border p-5">
+    <section className="border-border flex flex-col gap-4 border p-5">
       <div>
         <h2 className="text-text-primary text-lg font-semibold">{t("title")}</h2>
         <p className="text-text-secondary mt-1 text-sm">{t("subtitle")}</p>

@@ -81,7 +81,7 @@ export async function TopNavBar() {
               </Link>
               <Link
                 href="/auth/sign-up"
-                className="bg-action-primary text-text-inverse hover:bg-action-primary-hover inline-flex h-9 items-center rounded-md px-4 text-sm font-medium transition-colors"
+                className="bg-action-primary text-text-inverse hover:bg-action-primary-hover inline-flex h-9 items-center px-4 text-sm font-medium transition-colors"
               >
                 {t("nav.signup")}
               </Link>

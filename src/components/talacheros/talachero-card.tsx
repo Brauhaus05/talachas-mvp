@@ -17,14 +17,12 @@ export function TalacheroCard({ talachero }: { talachero: Talachero }) {
   );
 
   return (
-    <article className="border-border bg-surface-raised hover:border-border-strong flex flex-col gap-4 rounded-2xl border p-6 transition-colors">
+    <article className="border-border bg-surface-raised hover:border-border-strong flex flex-col gap-4 border p-6 transition-colors">
       <header className="flex items-start gap-4">
         <Avatar initials={talachero.initials} size="lg" />
         <div className="flex flex-1 flex-col gap-1">
           <div className="flex items-center gap-2">
-            <h3 className="text-text-primary text-lg font-semibold">
-              {talachero.name}
-            </h3>
+            <h3 className="text-text-primary text-lg font-semibold">{talachero.name}</h3>
             {talachero.verified && (
               <CheckCircle2
                 className="text-text-primary h-4 w-4"
@@ -33,10 +31,7 @@ export function TalacheroCard({ talachero }: { talachero: Talachero }) {
             )}
           </div>
           <p className="text-text-muted text-xs">{talachero.neighborhood}</p>
-          <Rating
-            value={talachero.ratingAvg}
-            reviewsCount={talachero.ratingCount}
-          />
+          <Rating value={talachero.ratingAvg} reviewsCount={talachero.ratingCount} />
         </div>
         <div className="flex flex-col items-end gap-1">
           <p className="text-text-primary text-lg font-semibold">
@@ -52,9 +47,7 @@ export function TalacheroCard({ talachero }: { talachero: Talachero }) {
       </header>
 
       <div className="flex flex-wrap items-center gap-2">
-        <Badge variant="muted">
-          {t(`services.${talachero.primaryService}.short`)}
-        </Badge>
+        <Badge variant="muted">{t(`services.${talachero.primaryService}.short`)}</Badge>
         {secondaryServices.slice(0, 2).map((s) => (
           <Badge key={s} variant="muted">
             {t(`services.${s}.short`)}

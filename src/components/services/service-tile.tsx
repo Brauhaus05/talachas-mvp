@@ -20,7 +20,7 @@ export async function ServiceTile({
   return (
     <Link
       href="/talacheros"
-      className="group border-border bg-surface-raised hover:border-border-strong relative flex h-full flex-col justify-between overflow-hidden rounded-2xl border transition-colors"
+      className="group border-border bg-surface-raised hover:border-border-strong relative flex h-full flex-col justify-between overflow-hidden border transition-colors"
     >
       <div className={isLarge ? "p-8" : "p-6"}>
         <div className="flex items-start justify-between">
@@ -42,8 +42,8 @@ export async function ServiceTile({
         <h3
           className={
             isLarge
-              ? "text-text-primary text-3xl font-semibold leading-tight"
-              : "text-text-primary text-xl font-semibold leading-tight"
+              ? "text-text-primary text-3xl leading-tight font-semibold"
+              : "text-text-primary text-xl leading-tight font-semibold"
           }
         >
           {t(`services.${service.slug}.name`)}
@@ -51,7 +51,7 @@ export async function ServiceTile({
         <p className="text-text-secondary mt-2 text-sm">
           {t(`services.${service.slug}.description`)}
         </p>
-        <p className="text-text-muted mt-4 text-xs uppercase tracking-wider">
+        <p className="text-text-muted mt-4 text-xs tracking-wider uppercase">
           {t("common.starting_at")} {formatMoney(service.startingRateMxn, locale)}
           {t("common.per_hour")}
         </p>

@@ -74,22 +74,22 @@ export default async function HomePage({
           </div>
 
           {/* Image slot — grayscale placeholder */}
-          <div className="border-border bg-surface relative flex aspect-square w-full items-center justify-center overflow-hidden rounded-3xl border">
-            <div className="bg-surface-muted absolute inset-6 rounded-2xl" />
+          <div className="border-border bg-surface relative flex aspect-square w-full items-center justify-center overflow-hidden border">
+            <div className="bg-surface-muted absolute inset-6" />
             <div className="relative z-10 grid w-full max-w-sm grid-cols-2 gap-3 p-6">
-              <div className="border-border bg-background shadow-hard-sm flex flex-col gap-2 rounded-xl border p-4">
+              <div className="border-border bg-background shadow-hard-sm flex flex-col gap-2 border p-4">
                 <ShieldCheck className="text-text-primary h-5 w-5" aria-hidden />
                 <p className="text-text-primary text-sm font-semibold">
                   {t("profile.verified_badge")}
                 </p>
               </div>
-              <div className="border-border bg-background shadow-hard-sm flex flex-col gap-2 rounded-xl border p-4">
+              <div className="border-border bg-background shadow-hard-sm flex flex-col gap-2 border p-4">
                 <Clock className="text-text-primary h-5 w-5" aria-hidden />
                 <p className="text-text-primary text-sm font-semibold">
                   {t("profile.response_value")}
                 </p>
               </div>
-              <div className="border-border bg-background shadow-hard-sm col-span-2 flex items-center gap-3 rounded-xl border p-4">
+              <div className="border-border bg-background shadow-hard-sm col-span-2 flex items-center gap-3 border p-4">
                 <Star className="text-text-primary h-5 w-5 fill-current" aria-hidden />
                 <p className="text-text-primary text-sm font-semibold">
                   4.9 / 5.0 — {t("home.reviews_stat")}

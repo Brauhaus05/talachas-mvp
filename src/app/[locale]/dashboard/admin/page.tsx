@@ -59,7 +59,7 @@ export default async function AdminDashboardPage({
           <Link
             key={c.href}
             href={c.href}
-            className="border-border hover:bg-surface-muted rounded-lg border p-5 transition-colors"
+            className="border-border hover:bg-surface-muted border p-5 transition-colors"
           >
             <h2 className="text-text-primary font-medium">{c.title}</h2>
             <p className="text-text-secondary mt-1 text-sm">{c.desc}</p>

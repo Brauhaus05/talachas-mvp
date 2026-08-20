@@ -18,7 +18,7 @@ export async function VerificationsTable({
   const locale = await getLocale();
   const ts = await getTranslations("services");
   return (
-    <div className="border-border overflow-x-auto rounded-lg border">
+    <div className="border-border overflow-x-auto border">
       <table className="w-full text-left text-sm">
         <thead className="text-text-secondary border-border border-b">
           <tr>

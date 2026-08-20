@@ -64,7 +64,7 @@ export function CheckoutView({ data }: { data: CheckoutData }) {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px]">
         {/* Order details */}
-        <section className="border-border bg-surface-raised flex flex-col gap-5 rounded-2xl border p-6">
+        <section className="border-border bg-surface-raised flex flex-col gap-5 border p-6">
           <SummaryRow
             icon={<CheckCircle2 className="h-4 w-4" />}
             label={t("checkout.summary_service")}
@@ -94,7 +94,7 @@ export function CheckoutView({ data }: { data: CheckoutData }) {
         </section>
 
         {/* Totals */}
-        <aside className="border-border bg-surface-raised flex flex-col gap-4 rounded-2xl border p-6">
+        <aside className="border-border bg-surface-raised flex flex-col gap-4 border p-6">
           <LineItem
             label={t("checkout.line_subtotal")}
             value={formatMoney(data.subtotalMxn, data.currencyLocale)}
@@ -113,7 +113,7 @@ export function CheckoutView({ data }: { data: CheckoutData }) {
           {state.status === "error" && (
             <div
               role="alert"
-              className="border-border-strong bg-surface-muted text-text-primary flex items-start gap-3 rounded-md border px-4 py-3 text-sm"
+              className="border-border-strong bg-surface-muted text-text-primary flex items-start gap-3 border px-4 py-3 text-sm"
             >
               <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
               <span>{t(`checkout.error_${state.error}`)}</span>
@@ -153,7 +153,7 @@ function SummaryRow({
 }) {
   return (
     <div className="flex items-start gap-4">
-      <span className="bg-surface-muted text-text-primary flex h-9 w-9 items-center justify-center rounded-lg">
+      <span className="bg-surface-muted text-text-primary flex h-9 w-9 items-center justify-center">
         {icon}
       </span>
       <div className="flex flex-1 flex-col">

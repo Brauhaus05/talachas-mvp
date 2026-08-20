@@ -56,7 +56,7 @@ export default async function ClientDashboardPage({
       {(booked || paid || tipped || reviewed || disputed) && (
         <div
           role="status"
-          className="border-border-strong bg-surface-muted text-text-primary flex items-start gap-3 rounded-md border px-4 py-3 text-sm"
+          className="border-border-strong bg-surface-muted text-text-primary flex items-start gap-3 border px-4 py-3 text-sm"
         >
           <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
           <span>
@@ -137,7 +137,7 @@ export default async function ClientDashboardPage({
                     ) : (
                       <Link
                         href={`/dashboard/bookings/${b.id}/review` as Route}
-                        className="border-border-strong text-text-primary hover:bg-surface-muted w-fit rounded-md border px-3 py-1.5 text-xs font-medium transition-colors"
+                        className="border-border-strong text-text-primary hover:bg-surface-muted w-fit border px-3 py-1.5 text-xs font-medium transition-colors"
                       >
                         {t("review_cta")}
                       </Link>
@@ -164,7 +164,7 @@ export default async function ClientDashboardPage({
                     ) : b.paymentStatus === "captured" ? (
                       <Link
                         href={`/dashboard/bookings/${b.id}/dispute` as Route}
-                        className="border-border-strong text-text-primary hover:bg-surface-muted w-fit rounded-md border px-3 py-1.5 text-xs font-medium transition-colors"
+                        className="border-border-strong text-text-primary hover:bg-surface-muted w-fit border px-3 py-1.5 text-xs font-medium transition-colors"
                       >
                         {t("dispute_cta")}
                       </Link>
