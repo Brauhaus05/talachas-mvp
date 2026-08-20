@@ -14,6 +14,9 @@
 - **Sprint 2 "Autoservicio de prestadores" is complete and merged:** talachero self-service **profile editor** (#18), **availability editor** (#19), **onboarding with admin-review gate** (#21), **earnings/payment-history view** (#22), and a **manual QA runbook** (#23, `docs/qa/2026-07-22-self-service-provider-qa-runbook.md`). All self-service migrations pushed to cloud.
 - **Full Stripe payment chain exercised live** (2026-07-11): onboard → book → authorize (manual-capture hold) → accept → capture → 15% split → ledger, both webhooks delivered to Vercel. Refund/tip mechanics proven in test mode.
 - **Live QA pass + E2E payment re-verified (2026-07-24):** full visual audit (client/admin/talachero, desktop + mobile) and a fresh live "reservar y pagar" E2E — book → authorize → accept → capture → 15% ledger split, all correct (Neto CA$476, comisión CA$84). ~15 findings logged to the Notion board (`✅ Tareas`); quick-win fixes + a **mobile nav menu** shipped in **PR #24**, now **merged to `main` (2026-08-19)** and live in production. Carlos is Stripe-active on the **cloud** DB, so E2E tests can book him directly (no re-onboarding).
+- **Disputes ↔ bookings reconciliation shipped (2026-08-19, PR #25):** the two admin surfaces now
+  agree about a booking's payment state, and a resolved dispute reaches the client with a terminal
+  state. Migration live on cloud; app deployed. Browser QA still owner-run — see below.
 
 The core loop is real end-to-end: discover → book (concurrency-safe slot) → pay (Stripe escrow) → chat → accept → complete → capture + 15% split → tip → refund → review → dispute (admin-mediated), with an immutable `transactions` ledger.
 
@@ -29,15 +32,15 @@ The core loop is real end-to-end: discover → book (concurrency-safe slot) → 
 
 ## What's next
 
-**▶ Next session: owner-run QA of the disputes reconciliation** (branch
-`feat/disputes-bookings-reconciliation`, PR open). The code is complete and statically verified;
-what remains needs a browser + a running Stripe listener. See "Disputes ↔ bookings reconciliation"
-below for the exact flows.
+**▶ Next session: owner-run browser QA of the disputes reconciliation.** The work is **merged
+(PR #25, `6fcfa6e`), deployed, and the migration is live on cloud** — see below. What remains is
+the three browser flows, which need a signed-in session plus a running `stripe listen`. They are
+the only unverified part of this change.
 
 After that, the remaining board items are the deferred features listed at the bottom (tiered
 refunds, 24h reminder email, neighborhood picker, photo upload).
 
-### Disputes ↔ bookings reconciliation (2026-08-19, branch `feat/disputes-bookings-reconciliation`)
+### Disputes ↔ bookings reconciliation (2026-08-19 — merged PR #25, deployed, cloud migrated)
 
 Closes the Sprint 3 P1/P2 dispute rows. The two admin surfaces now agree, and a resolved dispute
 reaches the client.
@@ -78,9 +81,21 @@ re-runs as `UPDATE 0` (idempotent).
    then click **Reembolsar** in the disputes queue — it must now close the dispute (the
    `already_refunded` branch) instead of reloading unchanged.
 
-**Cloud push:** the migration reaches production via `supabase db push` on the **pooler** `--db-url`
-(owner runs it — the password is theirs). **The backfill `UPDATE` runs against production data on
-that push.**
+**Cloud push: DONE (2026-08-19).** `supabase db push` on the pooler `--db-url` applied
+`20260819120001_dispute_reconciliation.sql` to `rcpfxcwooptmadyacfkk`. Verified on the cloud DB
+afterwards: `get_my_bookings` has 13 OUT columns with `dispute_status` present, `has_dispute` gone,
+`LIMIT 1` live, and **0 stuck disputes**. **The backfill was a no-op in production** — both live
+disputes are `open` on `captured` bookings, so nothing had been stranded by the old bug. The repair
+path exists for when it's needed; it simply had nothing to fix.
+
+**⚠ Deploy ordering matters if this pattern repeats.** The migration drops `has_dispute` from the
+RPC, so DB and app code are one atomic unit. Pushing the migration while the app still reads
+`has_dispute` shows a live "report a problem" button to clients who already have a dispute (submit
+then fails `already_disputed`). Deploying the app *first* is worse — `disputeStatus` reads
+`undefined`, `undefined !== null` is true, and the dispute form 404s for **everyone**. The order
+used here was: push migration → merge immediately → Vercel redeploys (~40s window of the milder
+state). A zero-downtime version would ship both columns first, deploy, then drop the old one in a
+second migration.
 
 **Verification / QA:**
 - ✅ **Live "reservar y pagar" E2E** (2026-07-24) — re-verified on the deployed site (book → authorize → accept → capture → 15% split; both webhooks delivered). Cloud DB now has one extra test booking (24 jul, Mariana↔Carlos, CA$560 captured).
@@ -105,6 +120,9 @@ that push.**
 
 - **Vercel:** project `talachas-mvp` (scope `brauhaus05s-projects`, `prj_AReXIRBLwKuZuRDMCRNvAlZje2ct`), auto-deploys from `Brauhaus05/talachas-mvp` `main`. Prod alias `talachas-mvp.vercel.app` (== `NEXT_PUBLIC_APP_URL`, so Stripe return/success URLs resolve).
 - **Cloud Supabase:** project `talachas-mvp`, ref **`rcpfxcwooptmadyacfkk`** (org `wkuavigarfybmuwlqidp`, East US / N. Virginia). All migrations + seed loaded (10 demo talacheros). Email confirmation **disabled** (immediate session, no SMTP). **DB password lives only in the owner's password manager / Supabase dashboard.**
+  **⚠ ACTION PENDING (2026-08-19): rotate it.** It was pasted in plaintext into a terminal during
+  the cloud push, so it now sits in shell history on disk. Reset under Settings → Database, then
+  update the password manager. Pass it via an env var rather than inline next time.
   - **Cloud schema pushes: `supabase db push`, NEVER `db reset --linked`** (a reset wipes talachero Stripe onboarding). Use the **pooler `--db-url`** (`...pooler.supabase.com...`, us-east-1, session pooler `:5432`) — the direct `db.<ref>` host is IPv6-only and times out on most networks. Owner runs it (password is theirs).
 - **Stripe:** TEST mode, Canadian platform account. Webhook **`we_1Ts4wlEkZnbeTZfTVDMMBPbd`** → `https://talachas-mvp.vercel.app/api/stripe/webhook` (6 events: `checkout.session.completed/expired`, `payment_intent.succeeded/canceled`, `charge.refunded`, `account.updated`).
 - **Vercel prod env vars (Production scope):** `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `STRIPE_SECRET_KEY` (test), `STRIPE_WEBHOOK_SECRET`, `NEXT_PUBLIC_APP_URL`, `PLATFORM_FEE_PCT=0.15`, `STRIPE_CONNECT_COUNTRY=CA`, `NEXT_PUBLIC_CURRENCY=CAD`, `RESEND_API_KEY`. (Add Preview/Development if you want branch previews to work.)
