@@ -22,7 +22,7 @@ export async function TopNavBar() {
           {t("meta.brand")}
         </Link>
 
-        <div className="border-border bg-surface hidden max-w-md flex-1 items-center gap-3 rounded-full border px-4 py-2 md:flex">
+        <div className="border-border bg-surface hidden max-w-md flex-1 items-center gap-3 border px-4 py-2 md:flex">
           <Search className="text-text-muted h-4 w-4" aria-hidden />
           <input
             type="search"
@@ -50,7 +50,7 @@ export async function TopNavBar() {
                 {unread > 0 && (
                   <span
                     aria-label={t("dashboard.unread_aria", { count: unread })}
-                    className="bg-action-primary text-text-inverse inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-medium"
+                    className="bg-action-primary text-text-inverse inline-flex h-5 min-w-5 items-center justify-center px-1.5 text-xs font-medium"
                   >
                     {unread}
                   </span>

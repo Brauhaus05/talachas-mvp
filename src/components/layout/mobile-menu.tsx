@@ -51,7 +51,7 @@ export function MobileMenu({
             onClick={close}
             className="fixed inset-0 top-20 z-40 cursor-default"
           />
-          <div className="border-border bg-background absolute inset-x-0 top-20 z-50 border-b shadow-sm">
+          <div className="border-border bg-background shadow-hard-sm absolute inset-x-0 top-20 z-50 border-b">
             <nav className="mx-auto flex max-w-7xl flex-col gap-1 px-10 py-4">
               <Link href="/talacheros" onClick={close} className={linkClass}>
                 {t("nav.catalog")}
@@ -63,7 +63,7 @@ export function MobileMenu({
                   {unread > 0 && (
                     <span
                       aria-label={t("dashboard.unread_aria", { count: unread })}
-                      className="bg-action-primary text-text-inverse inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-medium"
+                      className="bg-action-primary text-text-inverse inline-flex h-5 min-w-5 items-center justify-center px-1.5 text-xs font-medium"
                     >
                       {unread}
                     </span>

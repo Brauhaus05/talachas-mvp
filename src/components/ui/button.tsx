@@ -8,13 +8,17 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
+        // The hard offset shadow is what delineates a magenta fill from the bone
+        // page — magenta on bone is only 2.51:1, below the 3:1 graphical floor,
+        // while the ink shadow reads at 12.73:1.
         primary:
-          "bg-action-primary text-text-inverse hover:bg-action-primary-hover active:bg-action-primary-hover",
+          "bg-action-primary text-text-on-accent shadow-hard-sm hover:bg-action-primary-hover active:bg-action-primary-hover",
         secondary:
           "bg-action-secondary text-text-primary hover:bg-action-secondary-hover active:bg-action-secondary-hover",
         outline:
           "border border-border-strong bg-transparent text-text-primary hover:bg-surface-muted active:bg-surface-muted",
-        ghost: "bg-transparent text-text-primary hover:bg-surface-muted active:bg-surface-muted",
+        ghost:
+          "bg-transparent text-text-primary hover:bg-surface-muted active:bg-surface-muted",
         link: "bg-transparent text-text-primary underline-offset-4 hover:underline active:underline",
       },
       size: {

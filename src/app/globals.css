@@ -1,54 +1,119 @@
 @import "tailwindcss";
 
 /**
- * Talachas design tokens — grayscale only (PRD §5).
- * Semantic tokens resolve to gray shades today. The future color decision is a
- * one-line change to these variables — never hardcode hex/rgb in components.
+ * Talachas design tokens — JALO foundation (DESIGN-SYSTEM.md Phase 1).
+ *
+ * Two layers, deliberately:
+ *   1. `--jalo-*` — the raw JALO palette. Named OUTSIDE Tailwind's `--color-*`
+ *      namespace so it generates no utilities: there is no `bg-jalo-bone`, and
+ *      nothing in this app can reach past a semantic token to a brand colour.
+ *   2. `--color-*` — the semantic tokens every component already consumes.
+ *      These are the only names allowed in markup.
+ *
+ * Rules that are load-bearing here (DESIGN-SYSTEM.md §1):
+ *   · Zero border radius. Every `--radius-*` is 0; only `rounded-full` (a real
+ *     circle, e.g. Avatar) survives, and it is not token-driven.
+ *   · Magenta is a FILL and carries INK labels, never white. Magenta-as-text is
+ *     `--jalo-magenta-ink`.
+ *   · Focus rings are magenta-ink, never brand magenta.
+ *   · Elevation is a hard offset shadow with no blur.
+ *   · Never fake muted text with opacity — use `--color-text-muted`.
  */
+
 @theme {
-  /* Grayscale ramp (source of truth) */
-  --color-gray-0: #ffffff;
-  --color-gray-50: #fafafa;
-  --color-gray-100: #f4f4f5;
-  --color-gray-200: #e4e4e7;
-  --color-gray-300: #d4d4d8;
-  --color-gray-400: #a1a1aa;
-  --color-gray-500: #71717a;
-  --color-gray-600: #52525b;
-  --color-gray-700: #3f3f46;
-  --color-gray-800: #27272a;
-  --color-gray-900: #18181b;
-  --color-gray-950: #09090b;
+  /* ─── JALO palette (source of truth — generates no utilities) ─────────── */
 
-  /* Semantic surface + text tokens */
-  --color-background: var(--color-gray-0);
-  --color-surface: var(--color-gray-50);
-  --color-surface-raised: var(--color-gray-0);
-  --color-surface-muted: var(--color-gray-100);
-  --color-text-primary: var(--color-gray-950);
-  --color-text-secondary: var(--color-gray-600);
-  --color-text-muted: var(--color-gray-500);
-  --color-text-inverse: var(--color-gray-0);
-  --color-border: var(--color-gray-200);
-  --color-border-strong: var(--color-gray-300);
-  --color-focus: var(--color-gray-900);
+  /* Grounds */
+  --jalo-bone: #e8dfd1; /* Piedra Cálida — the page */
+  --jalo-paper: #ffffff; /* raised cards */
 
-  /* State tokens — grayscale for MVP, will get color later */
-  --color-state-success: var(--color-gray-900);
-  --color-state-error: var(--color-gray-900);
-  --color-state-warning: var(--color-gray-700);
-  --color-state-info: var(--color-gray-700);
+  /* Type */
+  --jalo-ink: #241b1d; /* Carbón Madera — all primary text + hard shadows */
+  /*
+   * DERIVED, not sourced from the DS: `--jalo-ink-muted` is the one JALO value
+   * with no published hex and no stated ratio to reverse it from. Tuned on the
+   * ink hue to 4.63:1 on bone and 6.11:1 on paper (AA). Confirm against the DS
+   * and replace — it is a one-line swap.
+   */
+  --jalo-ink-muted: #6b5f61;
 
-  /* Interactive */
-  --color-action-primary: var(--color-gray-950);
-  --color-action-primary-hover: var(--color-gray-800);
-  --color-action-secondary: var(--color-gray-100);
-  --color-action-secondary-hover: var(--color-gray-200);
+  /* Accents */
+  --jalo-magenta: #ff427e; /* FILL ONLY. Carries ink labels, never white */
+  --jalo-magenta-ink: #b81e5e; /* magenta as TEXT, and every focus ring */
+  --jalo-magenta-lift: #ff5c90; /* hover on a magenta fill (lifts, per current behaviour) */
+  --jalo-highlight: #ffc211; /* Amarillo Relámpago — "today" / highlight badges */
+  --jalo-tag-blue: #4d89d1; /* Azul Havelock — tag chips (ink label) */
+  --jalo-brand-blue: #008ad5; /* WORDMARK ONLY. Never a UI role, never text (§1.5) */
 
-  /* Typography */
+  /*
+   * Warm neutral ramp, mixed from bone toward ink/paper. Every step is at or
+   * above bone in lightness: in this system separation comes from 1px borders
+   * and hard shadows, not from fill-lightness steps — and anything darker than
+   * bone drops `--color-text-muted` below AA.
+   */
+  --jalo-well: #f4efe8; /* recessed wells: inputs, search field */
+  --jalo-chip: #efe9de; /* soft filled chips: avatar, badge, callouts, hover */
+  --jalo-chip-strong: #e3dacb; /* chip hover */
+  --jalo-line: #83786f; /* 1px borders — 3.26:1 on bone, 4.30:1 on paper */
+  --jalo-line-strong: #4a403f; /* emphasised borders */
+
+  /* ─── Semantic tokens (the only names allowed in markup) ───────────────── */
+
+  /* Surfaces */
+  --color-background: var(--jalo-bone);
+  --color-surface: var(--jalo-well);
+  --color-surface-raised: var(--jalo-paper);
+  --color-surface-muted: var(--jalo-chip);
+
+  /* Text */
+  --color-text-primary: var(--jalo-ink);
+  --color-text-secondary: var(--jalo-ink-muted);
+  --color-text-muted: var(--jalo-ink-muted);
+
+  /*
+   * Labels sitting ON an accent fill. In this system that label is INK, not
+   * white: white on magenta is 3.32:1 and fails, ink is 5.07:1 and passes (§1.3).
+   * `--color-text-inverse` is a legacy alias — all 13 of its call sites sit on
+   * `bg-action-primary`. Phase 2 renames those call sites to `text-on-accent`
+   * and this alias goes away.
+   */
+  --color-text-on-accent: var(--jalo-ink);
+  --color-text-inverse: var(--color-text-on-accent);
+
+  /* Lines */
+  --color-border: var(--jalo-line);
+  --color-border-strong: var(--jalo-line-strong);
+
+  /* Focus — magenta-ink, never brand magenta (§1.4) */
+  --color-focus: var(--jalo-magenta-ink);
+
+  /*
+   * State tokens. Held non-chromatic on purpose (PRD §5) — the DS publishes no
+   * state palette, and every alternative here would be invented. Unused in
+   * markup today; re-point them when the DS gains state colours.
+   */
+  --color-state-success: var(--jalo-ink);
+  --color-state-error: var(--jalo-ink);
+  --color-state-warning: var(--jalo-ink-muted);
+  --color-state-info: var(--jalo-ink-muted);
+
+  /* Interactive — magenta FILL, ink label */
+  --color-action-primary: var(--jalo-magenta);
+  --color-action-primary-hover: var(--jalo-magenta-lift);
+  --color-action-secondary: var(--jalo-chip);
+  --color-action-secondary-hover: var(--jalo-chip-strong);
+
+  /* ─── Typography ──────────────────────────────────────────────────────── */
+  /*
+   * Jost is the shippable stand-in for Futura, which is licence-blocked
+   * (§4 decision 3). Barlow carries text. DS `fonts.css` is deliberately NOT
+   * imported here.
+   */
+  --font-display:
+    var(--font-jost), var(--font-barlow), ui-sans-serif, system-ui, sans-serif;
   --font-sans:
-    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial,
-    sans-serif;
+    var(--font-barlow), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
   /* Type scale (8pt grid friendly) */
@@ -63,12 +128,23 @@
   --text-5xl: 3rem; /* 48 */
   --text-6xl: 3.75rem; /* 60 */
 
-  /* Radii */
-  --radius-sm: 0.25rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 0.75rem;
-  --radius-xl: 1rem;
-  --radius-2xl: 1.5rem;
+  /* ─── Radii — everything is square (§1.1) ─────────────────────────────── */
+  /*
+   * `--radius-3xl` is declared even though this app's old theme never defined
+   * it: without it, `rounded-3xl` falls through to Tailwind's default and the
+   * two hero/profile panels stay round.
+   */
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+  --radius-xl: 0;
+  --radius-2xl: 0;
+  --radius-3xl: 0;
+
+  /* ─── Elevation — hard offset, zero blur (§1.8) ───────────────────────── */
+  --shadow-hard-sm: 3px 3px 0 var(--jalo-ink);
+  --shadow-hard-md: 4px 4px 0 var(--jalo-ink);
+  --shadow-hard-lg: 6px 6px 0 var(--jalo-ink);
 }
 
 @layer base {
@@ -79,6 +155,20 @@
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+  }
+
+  /* Body weight is 700, not 400 (§1.9) */
+  body {
+    font-weight: 700;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-display);
   }
 
   *:focus-visible {
