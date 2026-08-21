@@ -24,7 +24,7 @@ export function Rating({
         className
       )}
     >
-      <Star className={cn(dim, "fill-current")} aria-hidden />
+      <Star className={cn(dim, "text-rating-star fill-current")} aria-hidden />
       {showValue && <span className="font-semibold">{value.toFixed(1)}</span>}
       {typeof reviewsCount === "number" && (
         <span className="text-text-muted">({reviewsCount})</span>

@@ -30,12 +30,14 @@
   /* Type */
   --jalo-ink: #241b1d; /* Carbón Madera — all primary text + hard shadows */
   /*
-   * DERIVED, not sourced from the DS: `--jalo-ink-muted` is the one JALO value
-   * with no published hex and no stated ratio to reverse it from. Tuned on the
-   * ink hue to 4.63:1 on bone and 6.11:1 on paper (AA). Confirm against the DS
-   * and replace — it is a one-line swap.
+   * RECONCILED against the DS `src/tokens/source.json` (2026-08-20). The prior
+   * value #6b5f61 was derived blind, when the DS repo was believed to be off
+   * this machine. It is not merely a different tuning — it FAILED AA at 4.41:1
+   * on `--jalo-chip-strong` below. The DS value is DARKER and clears every
+   * surface this app invents:
+   *   bone 5.19 · paper 6.86 · well 5.99 · chip 5.67 · chip-strong 4.95
    */
-  --jalo-ink-muted: #6b5f61;
+  --jalo-ink-muted: #5f595a;
 
   /* Accents */
   --jalo-magenta: #ff427e; /* FILL ONLY. Carries ink labels, never white */
@@ -44,6 +46,41 @@
   --jalo-highlight: #ffc211; /* Amarillo Relámpago — "today" / highlight badges */
   --jalo-tag-blue: #4d89d1; /* Azul Havelock — tag chips (ink label) */
   --jalo-brand-blue: #008ad5; /* WORDMARK ONLY. Never a UI role, never text (§1.5) */
+
+  /*
+   * Rating glyphs. The DS asserts this token at the 3:1 GRAPHICAL floor, not
+   * the 4.5:1 text floor, and the exemption is conditional: `StarRating` always
+   * renders the numeric value beside the glyphs and marks the glyphs
+   * `aria-hidden`. This app's `Rating` does the same, and no call site passes
+   * `showValue={false}` — so the star never carries information alone.
+   * Measured here: bone 3.07 · paper 4.05 · well 3.54 · chip 3.35. All clear 3:1.
+   * If a bare star ever becomes the sole carrier of a rating, this token is no
+   * longer sufficient — re-verify before that ships.
+   */
+  --jalo-star: #ac7223;
+
+  /*
+   * AVATAR IDENTITY TINTS — deliberately absent. DECISION: Phase 2 carries them,
+   * not Phase 1. Reasons, in order of weight:
+   *
+   *   1. Tailwind v4 TREE-SHAKES `@theme` variables that nothing references.
+   *      Declaring `--jalo-identity-1..4` here without a consumer emits NOTHING
+   *      to the browser — verified against a clean `pnpm build`: the four names
+   *      do not appear in the output CSS at all. A declaration that silently
+   *      does not exist is worse than no declaration, so they are not left here
+   *      as a placeholder.
+   *   2. Tinting needs an API this app does not have. `ui/avatar.tsx` takes only
+   *      `initials`; there is no identity index on the talachero row, so a tint
+   *      requires inventing a stable index derivation across 8 call sites — a
+   *      product decision, not a token swap, and out of Phase 1's one-file scope.
+   *   3. The DS `Avatar` already owns the 4-colour cycle. Phase 2 replaces this
+   *      component with it and inherits the tints correctly, instead of building
+   *      a parallel derivation that then has to be reconciled.
+   *
+   * When Phase 2 wires them, the values are in the DS `src/tokens/source.json`
+   * under `identity`, and initials on them must be INK (4.65 / 4.55 / 6.91 /
+   * 4.52 — all AA) and never bone, which bottoms out at 1.84:1.
+   */
 
   /*
    * Warm neutral ramp, mixed from bone toward ink/paper. Every step is at or
@@ -86,6 +123,13 @@
 
   /* Focus — magenta-ink, never brand magenta (§1.4) */
   --color-focus: var(--jalo-magenta-ink);
+
+  /*
+   * Rating glyphs only — never the numeric value beside them, which stays
+   * `--color-text-primary` (12.73:1). Splitting these is the point: the star
+   * is exempt at 3:1 because it is a graphic, and the number is not.
+   */
+  --color-rating-star: var(--jalo-star);
 
   /*
    * State tokens. Held non-chromatic on purpose (PRD §5) — the DS publishes no

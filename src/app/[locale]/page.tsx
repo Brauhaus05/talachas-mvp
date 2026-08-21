@@ -90,7 +90,7 @@ export default async function HomePage({
                 </p>
               </div>
               <div className="border-border bg-background shadow-hard-sm col-span-2 flex items-center gap-3 border p-4">
-                <Star className="text-text-primary h-5 w-5 fill-current" aria-hidden />
+                <Star className="text-rating-star h-5 w-5 fill-current" aria-hidden />
                 <p className="text-text-primary text-sm font-semibold">
                   4.9 / 5.0 — {t("home.reviews_stat")}
                 </p>
