@@ -103,6 +103,16 @@
   --color-action-secondary: var(--jalo-chip);
   --color-action-secondary-hover: var(--jalo-chip-strong);
 
+  /*
+   * Destructive actions (ban, reject, refund). Magenta-ink, NOT magenta: the
+   * primary fill is magenta, so a solid destructive button is indistinguishable
+   * from a primary one — which is what turned the admin users table into 27
+   * identical hot-pink buttons. This is a border+text colour on a transparent
+   * ground, so destructive actions read as danger while staying visually
+   * recessive next to a real primary action.
+   */
+  --color-action-destructive: var(--jalo-magenta-ink);
+
   /* ─── Typography ──────────────────────────────────────────────────────── */
   /*
    * Jost is the shippable stand-in for Futura, which is licence-blocked

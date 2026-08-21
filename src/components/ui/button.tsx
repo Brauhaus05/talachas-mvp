@@ -17,6 +17,12 @@ const buttonVariants = cva(
           "bg-action-secondary text-text-primary hover:bg-action-secondary-hover active:bg-action-secondary-hover",
         outline:
           "border border-border-strong bg-transparent text-text-primary hover:bg-surface-muted active:bg-surface-muted",
+        // Deliberately NOT a solid fill and deliberately no shadow: a destructive
+        // action is usually a repeated row-level control, and giving it primary's
+        // weight is what made the admin tables unreadable. Its own border carries
+        // 4.70:1 on bone, so it is delineated without elevation.
+        destructive:
+          "border border-action-destructive bg-transparent text-action-destructive hover:bg-surface-muted active:bg-surface-muted",
         ghost:
           "bg-transparent text-text-primary hover:bg-surface-muted active:bg-surface-muted",
         link: "bg-transparent text-text-primary underline-offset-4 hover:underline active:underline",

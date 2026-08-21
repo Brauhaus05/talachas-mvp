@@ -72,7 +72,7 @@ export async function VerificationsTable({
                 <div className="flex flex-wrap items-start gap-2">
                   <form action={approveTalachero}>
                     <input type="hidden" name="talacheroId" value={v.talacheroId} />
-                    <ConfirmButton label={t("action_approve")} tone="danger" />
+                    <ConfirmButton label={t("action_approve")} tone="primary" />
                   </form>
                   <RejectForm talacheroId={v.talacheroId} />
                 </div>
