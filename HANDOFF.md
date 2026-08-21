@@ -61,8 +61,8 @@ on `main` (`958081c`) and live. Two things are now owed and neither is code:
    `Hecho` for exactly this reason — same convention the PR #24 fixes follow. The three tasks
    literally named `PR #26 ·` **were** moved to `Hecho`: they were decisions that blocked the merge,
    and the merge happened.
-2. ~~**The three surfaces the seed cannot reach.**~~ **RESOLVED 2026-08-21** on branch
-   `seed-three-unreachable-surfaces` — see the section below. All three are now reachable from seed
+2. ~~**The three surfaces the seed cannot reach.**~~ **RESOLVED and MERGED 2026-08-21**
+   (PR #27, `458af27`, deployed) — see the section below. All three are now reachable from seed
    data by clicking, and all three were rendered and measured. Resolving them **found a real bug**
    (the chat composer was unreachable on load), which is the argument for never leaving a surface
    unseen.
@@ -89,7 +89,7 @@ otherwise owes its own `contact-sheet` + `/design-sync` + `-NOTES.md` ritual.
 After that, the remaining board items are the deferred features listed at the bottom (tiered
 refunds, 24h reminder email, neighborhood picker, photo upload).
 
-### The three surfaces the seed couldn't reach — resolved (2026-08-21, branch `seed-three-unreachable-surfaces`)
+### The three surfaces the seed couldn't reach — resolved (PR #27, **merged** 2026-08-21 as `458af27`)
 
 Phase 1 shipped three surfaces **unseen** — not skipped, but unreachable: no seed row could render
 them, so their contrast was arithmetic and never observed. Fixed at the source, in `supabase/seed.sql`,
