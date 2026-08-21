@@ -1,4 +1,4 @@
-# Session Handoff — 2026-08-19
+# Session Handoff — 2026-08-20
 
 > Living session-to-session status: what's live, what's next, and the operational facts the code + git log don't capture. Read alongside [CLAUDE.md](./CLAUDE.md) (architecture), [prd.md](./prd.md), [plan.md](./plan.md).
 >
@@ -17,6 +17,11 @@
 - **Disputes ↔ bookings reconciliation shipped (2026-08-19, PR #25):** the two admin surfaces now
   agree about a booking's payment state, and a resolved dispute reaches the client with a terminal
   state. Migration live on cloud; app deployed. Browser QA still owner-run — see below.
+- **Design-system migration started (2026-08-20, PR #26 — OPEN, not merged):** Phase 1 of
+  `DESIGN-SYSTEM.md` swaps the grayscale foundation for the JALO palette (bone/ink/magenta, zero
+  radius, hard offset shadows, Jost + Barlow). Re-skin only — no payments, RPC, RLS or routing
+  touched. **Nothing is deployed from this**; `main` is untouched, so production still looks
+  grayscale until PR #26 merges.
 
 The core loop is real end-to-end: discover → book (concurrency-safe slot) → pay (Stripe escrow) → chat → accept → complete → capture + 15% split → tip → refund → review → dispute (admin-mediated), with an immutable `transactions` ledger.
 
@@ -37,8 +42,80 @@ The core loop is real end-to-end: discover → book (concurrency-safe slot) → 
 the three browser flows, which need a signed-in session plus a running `stripe listen`. They are
 the only unverified part of this change.
 
+**▶ Also open: review + merge PR #26 (JALO design foundation).** Verified as far as it can be
+without a reviewer's eyes — see the section below for what is proven and what is not.
+
 After that, the remaining board items are the deferred features listed at the bottom (tiered
 refunds, 24h reminder email, neighborhood picker, photo upload).
+
+### Phase 1 — JALO design foundation (2026-08-20 — PR #26, OPEN, **not merged, not deployed**)
+
+First phase of the `@jalo/design-system` migration described in `DESIGN-SYSTEM.md`. Six commits on
+`phase-1-jalo-foundation`. Deliberately a re-skin: `actions.ts`, the Stripe webhook, RPC calls and
+RLS behaviour are untouched.
+
+**The palette had to be recovered, and that is the load-bearing fact here.**
+`@jalo/design-system` is **not installed** and the DS repo (`.../JALO/Jalo Design System/`) **does
+not exist on this machine**; the companion docs `JALO-DS-Migration-Strategy.md` /
+`JALO-DS-Gap-Analysis.md` are also absent. `DESIGN-SYSTEM.md` publishes only 4 hexes. The rest came
+from the Notion page **"🧱 Design System v1 — componentes core y tokens"** (JALO → 005 UX/UI
+Project Management) and were confirmed by reproducing every contrast ratio the doc publishes:
+ink on magenta **5.067** (doc 5.07), magenta on bone **2.512** (2.51), ink on tag-blue **4.654**
+(4.65), white on magenta **3.317** (3.32). Four independent exact matches — treat the palette in
+`globals.css` as confirmed.
+
+- bone `#E8DFD1` · paper `#FFFFFF` · ink `#241B1D` · magenta `#FF427E` (fill, **ink** label — white
+  is 3.32:1 and fails) · magenta-ink `#B81E5E` (text + every focus ring) · highlight `#FFC211` ·
+  tag-blue `#4D89D1`.
+- **`--jalo-ink-muted` `#6B5F61` is DERIVED, not sourced** — the one value with no published hex and
+  no ratio to reverse it from. Marked as such in `globals.css`. The warm surface ramp is tuned
+  around its narrow **4.63:1** headroom on bone, so a *lighter* DS value fails AA and means
+  revisiting the ramp, not just swapping a line.
+- Raw `--jalo-*` names sit **outside** Tailwind's `--color-*` namespace on purpose: they generate no
+  utilities, so nothing in markup can reach past a semantic token to a brand colour.
+
+**Also in the PR:** all six `--radius-*` at `0` (incl. the `--radius-3xl` this app never declared —
+without it the two `rounded-3xl` panels stay round); a separate provably-inert commit removing 63
+now-dead `rounded-*` classes; and a **`destructive` button variant**, because making primary magenta
+had turned `/admin/users` into 27 identical hot-pink "Bloquear" buttons. `ConfirmButton`'s `tone` is
+now semantic (`danger | primary | neutral`) rather than the emphasis dial it used to be.
+
+`DESIGN-SYSTEM.md` is now tracked **and auto-loaded** via `@DESIGN-SYSTEM.md` in `CLAUDE.md`, so its
+rules are in context every session. Three self-contradictions were corrected against what shipped
+(§1.9 said Anton where §4 resolves to Jost; Phase 1's prompt said "five `--radius-*`" where six are
+required; and it said "do not modify any component file" directly above four bullets instructing
+component edits).
+
+**Verified:** 34 contrast pairings arithmetically (worst text 4.63:1, worst UI 3.26:1) · **21/21 UI
+routes rendered** at 1440px and 390px in both locales across client/talachero/admin · all six
+`DESIGN-SYSTEM.md` §6 non-regressions · typecheck + lint (2 pre-existing warnings) + build clean ·
+the class sweep is pixel-identical on all 10 sampled routes and verified token-by-token.
+
+**⚠ Not verified — needs a reviewer's eyes or better seed data:**
+1. **Chat own-message bubbles** (`bg-action-primary` + ink) — the seed has **no chat messages**, so
+   only the empty state renders. Contrast is 5.07:1 by arithmetic, never by eye.
+2. **Availability grid cell states** — Carlos has no open slots in week 1, so every cell renders
+   "closed"; open/booked/closed were never seen side by side.
+3. **`/dashboard/bookings/[id]/{dispute,review}`** are unreachable with current seed data — every
+   completed booking already has a review, and the only `captured` booking already has a dispute.
+   They were captured by temporarily deleting those two rows and restoring them (rows verified
+   byte-identical afterwards, and Carlos's `rating_avg/rating_count` rollup back at `4.75 / 4` —
+   `reviews` has an `AFTER INSERT/DELETE` trigger, so any repeat of this must re-check that).
+
+**Gotchas worth keeping (both cost real time):**
+- **Turbopack serves stale CSS after `@theme` edits.** Two full screenshot sweeps were captured
+  against old tokens and looked like the change had failed. `rm -rf .next` + restart, and *guard*
+  before believing a screenshot: fetch the linked stylesheet and grep it for a token you just added.
+- **Headless Chrome `--window-size` does not drive the layout viewport** — `md:` breakpoints still
+  applied at 390px, so "mobile" shots were desktop and the hamburger appeared missing. Use
+  `pnpm dlx playwright@1.49.1 screenshot --channel=chrome --viewport-size=390,844`; the cached
+  `ms-playwright` chromium is a version mismatch, so `--channel=chrome` is the part that works.
+
+**▶ Phase 2 is blocked externally, not by anything in this repo.** It replaces `src/components/ui/*`
+with DS equivalents, which needs (a) `pnpm add @jalo/design-system` against the private GitHub
+Packages registry — see `DESIGN-SYSTEM.md` §2 — plus (b) DS Phase 0.2 (`linkComponent`, or raw `<a>`
+drops the locale prefix) and (c) the missing `"use client"` directives on the eight client-only DS
+components. Check `node_modules/@jalo` exists before promising Phase 2 work.
 
 ### Disputes ↔ bookings reconciliation (2026-08-19 — merged PR #25, deployed, cloud migrated)
 
@@ -193,3 +270,14 @@ pnpm dev                           # :3000
   returns 0 rows for any function. `psql` isn't on the host PATH; go through
   `docker exec supabase_db_talachas-mvp psql -U postgres -d postgres`.
 - **Auth-aware nav made locale pages dynamic** — `TopNavBar` reads the session, so pages render on demand (all `ƒ`). Expected tradeoff.
+- **Turbopack serves stale CSS after `@theme` edits in `globals.css`.** `pnpm dev` keeps serving the
+  previous token values — same chunk URL, no rebuild — so screenshots look like nothing changed.
+  `pkill -f "next dev" && rm -rf .next`, restart, and **guard before believing a screenshot**: fetch
+  the linked stylesheet and grep it for a token you just added.
+  `C=$(curl -s localhost:3000/es | grep -oE '/_next/static/[^"]+\.css' | head -1); curl -s "localhost:3000$C" | grep -oE '\-\-radius-md: *[^;}]*'`
+- **Headless Chrome `--window-size` does not drive the layout viewport** — `md:` breakpoints still
+  apply at 390px, so "mobile" screenshots are really desktop (the hamburger appears missing). Use
+  `pnpm dlx playwright@1.49.1 screenshot --channel=chrome --viewport-size=390,844 --full-page`.
+  `--channel=chrome` matters: the cached `ms-playwright` chromium is a version mismatch. For
+  authenticated routes, `npm i playwright` **into the scratchpad** (not the project) and drive the
+  sign-in form; seed logins are in the QA section above, all `password123`.
