@@ -48,15 +48,81 @@ without a reviewer's eyes — see the section below for what is proven and what 
 After that, the remaining board items are the deferred features listed at the bottom (tiered
 refunds, 24h reminder email, neighborhood picker, photo upload).
 
+### Phase 1 reconcile against the real DS (2026-08-20 — PR #26, OPEN, **not merged**)
+
+**The DS repo IS on this machine.** The section below was written believing it was not, and that
+belief is the only reason the palette had to be reconstructed from Notion prose. It lives at
+`~/Documents/Claude/Projects/001 HQ Lobby/Jump After Us/02 Projects/JALO/Jalo Design System/`.
+Read these four, in order, before touching anything design-related:
+`src/tokens/source.json` (the ONLY authority on hexes) · `.design-sync/conventions.md` (the rules,
+including that borders are ink) · `src/tokens/contrast.test.ts` (the asserted pairings and why each
+exists) · `HANDOFF.md` §6 (working rules + the palette-model incident).
+
+The reconstruction got **8 of 9 published hexes exactly right**. Reconciled in two commits:
+
+- **`--jalo-ink-muted` `#6B5F61` → `#5F595A`.** The claim below — that a lighter DS value would fail
+  AA and mean revisiting the ramp — is **backwards**. `#5F595A` is _darker_ and improves every
+  ratio (bone 4.63→5.19, paper 6.11→6.86). More importantly the old value was **already failing**:
+  4.41:1 on `--jalo-chip-strong`, one of this app's own invented surfaces, which the DS's suite
+  could never have caught. One-line swap, as the code comment always said.
+- **`--jalo-star` `#AC7223` added.** Rating glyphs rendered in ink before. Wired via a
+  `--color-rating-star` semantic to the glyph _only_ — the numeric value beside it stays
+  `--color-text-primary`. The DS asserts stars at the **3:1 graphical** floor, and per
+  `contrast.test.ts` that exemption is **conditional** on the numeric value always rendering beside
+  an `aria-hidden` glyph. Verified that holds here before relying on it. Deliberately NOT applied to
+  the rating filter chips (star on the selected magenta fill is **1.22:1**), the profile-form
+  "set primary" star (means primary, not rating), or `rating-input` (the star IS the sole carrier
+  there, so the exemption does not hold).
+- **Borders `#83786F` → `--jalo-ink`.** Braulio's call, made against a rendered A/B of a real
+  `TalacheroCard`. The invented border passed 3:1, which is exactly why nothing caught it — the
+  failure mode the DS's own `HANDOFF.md` §6 records. Raised surfaces now carry a hard offset shadow;
+  `--shadow-hard-accent` (magenta 6px) is the DS's interactive-card hover.
+- **`--jalo-magenta-lift` `#FF5C90` dropped.** An invented brand hex. DS `Button.css` gives primary
+  **no** `:hover` at all and the DS contains zero colour-lighten; feedback is geometric. Replaced
+  `active:scale-[0.98]` with the real press model (shadow → `0 0 0`, translate by the offset, 60ms,
+  reduced-motion guarded). This also fixed hover and press rendering identically.
+- **Identity tints NOT added — Phase 2 carries them.** Reasoning in `globals.css`. Load-bearing
+  finding: **Tailwind v4 tree-shakes `@theme` variables nothing references**, so declaring
+  `--jalo-identity-1..4` without a consumer emits _nothing_ — verified against a clean build, the
+  names are absent from the output CSS. A placeholder that silently does not exist is worse than
+  none.
+
+**⚠ Owed to the DS repo — do NOT make these here.** A change there owes a `conventions.md` update
+and a `/design-sync` run in the same session:
+
+1. **`conventions.md` states the star's role but not its precondition.** The table says
+   "`--jalo-star` | star rating glyphs" with no caveat, while `contrast.test.ts` is explicit that
+   3:1 only holds because `StarRating` renders the numeric value beside an `aria-hidden` glyph.
+   `conventions.md` is inlined into the design agent's prompt and that agent never sees the test —
+   so it can emit a bare star at 3.07:1 carrying the rating alone. Add the precondition.
+2. **The DS has no interactive star input.** `ui/rating-input.tsx` is a 1–5 selector where the star
+   is the sole carrier with no numeric value, so the display exemption does not transfer. It stays
+   local and ink. The DS should either gain the component or document its position.
+3. **Consumer note: Tailwind v4 tree-shaking** (above). Any app mirroring the palette into `@theme`
+   will hit it. Worth a line in the DS's consumer docs.
+4. **No `ALLOWED_DEVIATIONS` entry is owed.** Soft borders were the alternative and were rejected,
+   so nothing diverges. Recorded so it is not re-proposed: `magenta-lift` was likewise considered
+   and dropped rather than pushed upstream.
+
+**Verified this session:** typecheck + lint + build clean; 15 route/locale/width combinations swept
+at 1280 and 390 including authenticated client and talachero dashboards; press and hover states read
+back off the live DOM rather than assumed. Horizontal overflow measured at 320/390/1280 on every
+route is **byte-for-byte identical to `0ad8cb5`** — this work introduces none, but the pre-existing
+overflow is real and belongs to the Phase 4 audit.
+
+---
+
 ### Phase 1 — JALO design foundation (2026-08-20 — PR #26, OPEN, **not merged, not deployed**)
+
+> ⚠ Superseded in part by the reconcile above. Kept for the reasoning, not the values.
 
 First phase of the `@jalo/design-system` migration described in `DESIGN-SYSTEM.md`. Six commits on
 `phase-1-jalo-foundation`. Deliberately a re-skin: `actions.ts`, the Stripe webhook, RPC calls and
 RLS behaviour are untouched.
 
 **The palette had to be recovered, and that is the load-bearing fact here.**
-`@jalo/design-system` is **not installed** and the DS repo (`.../JALO/Jalo Design System/`) **does
-not exist on this machine**; the companion docs `JALO-DS-Migration-Strategy.md` /
+`@jalo/design-system` is **not installed** and the DS repo was believed absent — **that was wrong,
+see the reconcile above**; the companion docs `JALO-DS-Migration-Strategy.md` /
 `JALO-DS-Gap-Analysis.md` are also absent. `DESIGN-SYSTEM.md` publishes only 4 hexes. The rest came
 from the Notion page **"🧱 Design System v1 — componentes core y tokens"** (JALO → 005 UX/UI
 Project Management) and were confirmed by reproducing every contrast ratio the doc publishes:
@@ -67,10 +133,9 @@ ink on magenta **5.067** (doc 5.07), magenta on bone **2.512** (2.51), ink on ta
 - bone `#E8DFD1` · paper `#FFFFFF` · ink `#241B1D` · magenta `#FF427E` (fill, **ink** label — white
   is 3.32:1 and fails) · magenta-ink `#B81E5E` (text + every focus ring) · highlight `#FFC211` ·
   tag-blue `#4D89D1`.
-- **`--jalo-ink-muted` `#6B5F61` is DERIVED, not sourced** — the one value with no published hex and
-  no ratio to reverse it from. Marked as such in `globals.css`. The warm surface ramp is tuned
-  around its narrow **4.63:1** headroom on bone, so a *lighter* DS value fails AA and means
-  revisiting the ramp, not just swapping a line.
+- ~~**`--jalo-ink-muted` `#6B5F61` is DERIVED**~~ — **RESOLVED and this reasoning was wrong.** The
+  DS value `#5F595A` is _darker_, not lighter; it improves every ratio and required no ramp rethink.
+  The derived value was failing AA at 4.41:1 on `--jalo-chip-strong`. See the reconcile above.
 - Raw `--jalo-*` names sit **outside** Tailwind's `--color-*` namespace on purpose: they generate no
   utilities, so nothing in markup can reach past a semantic token to a brand colour.
 
@@ -92,6 +157,7 @@ routes rendered** at 1440px and 390px in both locales across client/talachero/ad
 the class sweep is pixel-identical on all 10 sampled routes and verified token-by-token.
 
 **⚠ Not verified — needs a reviewer's eyes or better seed data:**
+
 1. **Chat own-message bubbles** (`bg-action-primary` + ink) — the seed has **no chat messages**, so
    only the empty state renders. Contrast is 5.07:1 by arithmetic, never by eye.
 2. **Availability grid cell states** — Carlos has no open slots in week 1, so every cell renders
@@ -103,8 +169,9 @@ the class sweep is pixel-identical on all 10 sampled routes and verified token-b
    `reviews` has an `AFTER INSERT/DELETE` trigger, so any repeat of this must re-check that).
 
 **Gotchas worth keeping (both cost real time):**
+
 - **Turbopack serves stale CSS after `@theme` edits.** Two full screenshot sweeps were captured
-  against old tokens and looked like the change had failed. `rm -rf .next` + restart, and *guard*
+  against old tokens and looked like the change had failed. `rm -rf .next` + restart, and _guard_
   before believing a screenshot: fetch the linked stylesheet and grep it for a token you just added.
 - **Headless Chrome `--window-size` does not drive the layout viewport** — `md:` breakpoints still
   applied at 390px, so "mobile" shots were desktop and the hamburger appeared missing. Use
@@ -127,7 +194,7 @@ reaches the client.
 - `refundBookingIfCaptured` returns a discriminated **`RefundOutcome`** instead of `boolean`.
   Splitting `already_refunded` out of the old `false` is the whole fix — that conflation is why
   the disputes-queue "Reembolsar" button silently did nothing.
-- `forceRefund` closes an open dispute after a successful refund (best-effort, sequenced *after*
+- `forceRefund` closes an open dispute after a successful refund (best-effort, sequenced _after_
   the refund so a dispute-write failure can never strand money). `resolveDispute` records
   `refunded` on both `refunded` and `already_refunded`.
 - Admin disputes table gains **payment-status + resolved-date** columns; both admin tables now use
@@ -141,7 +208,7 @@ reaches the client.
 **Corrections to the earlier framing in this file:** there was never a real double-refund risk —
 `admin_list_bookings` filters on `payment_status = 'captured'` and `refundBookingIfCaptured`
 re-reads before calling Stripe. The actual defect was that an out-of-band refund left the dispute
-with *no correct terminal state*. And the client side was worse than recorded: a **refunded**
+with _no correct terminal state_. And the client side was worse than recorded: a **refunded**
 dispute showed the client nothing at all, not merely a stale label.
 
 **Verified:** `pnpm typecheck` + `pnpm lint` (2 pre-existing warnings only) + `pnpm build` clean;
@@ -149,6 +216,7 @@ es/en keys 431/431; migration applied via `migration up --local`; backfill leave
 re-runs as `UPDATE 0` (idempotent).
 
 **⚠ Still owner-run — needs a browser + `stripe listen`:**
+
 1. Raise a dispute as `mariana.ruiz@demo.talachas.mx` → force-refund that booking from
    `/admin/bookings` → the dispute should self-close as `Reembolsada` with a resolved date, and
    Mariana's card should read "Reporte resuelto — reembolsado".
@@ -168,24 +236,27 @@ path exists for when it's needed; it simply had nothing to fix.
 **⚠ Deploy ordering matters if this pattern repeats.** The migration drops `has_dispute` from the
 RPC, so DB and app code are one atomic unit. Pushing the migration while the app still reads
 `has_dispute` shows a live "report a problem" button to clients who already have a dispute (submit
-then fails `already_disputed`). Deploying the app *first* is worse — `disputeStatus` reads
+then fails `already_disputed`). Deploying the app _first_ is worse — `disputeStatus` reads
 `undefined`, `undefined !== null` is true, and the dispute form 404s for **everyone**. The order
 used here was: push migration → merge immediately → Vercel redeploys (~40s window of the milder
 state). A zero-downtime version would ship both columns first, deploy, then drop the old one in a
 second migration.
 
 **Verification / QA:**
+
 - ✅ **Live "reservar y pagar" E2E** (2026-07-24) — re-verified on the deployed site (book → authorize → accept → capture → 15% split; both webhooks delivered). Cloud DB now has one extra test booking (24 jul, Mariana↔Carlos, CA$560 captured).
 - ✅ **Browser passes done** (2026-07-24): landing, catálogo, profile, reviews, booking flow, client dashboard, admin (all surfaces), disputes, talachero dashboard/earnings/availability/profile — desktop + mobile. Findings → Notion `✅ Tareas` board; UI fixes in PR #24 (merged). Sign-ins: `mariana.ruiz@demo.talachas.mx` (client), `carlos.mendoza@demo.talachas.mx` (talachero), `admin@talachas.mx` (admin) — all `password123`.
 - Still owner-run: the **self-service QA runbook** (`docs/qa/2026-07-22-self-service-provider-qa-runbook.md`) — new-talachero signup → onboarding checklist → submit-for-review → admin approve/reject, profile/availability/earnings. Carlos is left `in_review` on the **local** DB to prime the queue (cloud has no pending verifications).
 
 **Small follow-ups (non-blocking, logged from reviews):**
+
 - _**PR #24 merged 2026-08-19** (squashed as `9947303`; branch `qa/sprint3-quick-fixes` deleted; production deploy Ready on `talachas-mvp.vercel.app`). Shipped: landing review-count dup, review-card rating display, "Desde ⋯" filter labels, tip-hidden-on-refunded, and the mobile nav menu. Remaining open findings (incl. the two dispute items below) are tracked as rows on the Notion `✅ Tareas` board._
-- **`verified` no longer implies *payable*** (onboarding decoupled Stripe from verification) — an admin can approve a talachero before Stripe is done, so a listed talachero may return `talachero_not_payable` until they finish Stripe. Accepted "Stripe is parallel" decision; admin queue shows a `payments_ready/pending` badge. Optional tightening: also filter `list_talacheros` on `charges_enabled`.
+- **`verified` no longer implies _payable_** (onboarding decoupled Stripe from verification) — an admin can approve a talachero before Stripe is done, so a listed talachero may return `talachero_not_payable` until they finish Stripe. Accepted "Stripe is parallel" decision; admin queue shows a `payments_ready/pending` badge. Optional tightening: also filter `list_talacheros` on `charges_enabled`.
 - Panel task optional extras (owner to close-vs-split): consolidated message inbox, availability date-blocks.
 - Dead code cleanup: `PlaceholderPanel` + `dashboard.coming_soon` key (last consumer removed).
 
 **Deferred features:**
+
 - **Cancellation-policy tiers** — partial/tiered refunds so `refundBookingIfCaptured`/`refundCapturedBooking` take an amount (today all refunds are **full**). ~1 day.
 - **24h reminder email** — needs a scheduler/cron. Optional dispute acknowledge/dismiss + admin new-dispute-alert emails.
 - **Neighborhood picker + `ST_DWithin` search** — directory RPCs (`list_talacheros`) are the seam; lands when a location input appears in search.
@@ -205,7 +276,9 @@ second migration.
 - **Vercel prod env vars (Production scope):** `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `STRIPE_SECRET_KEY` (test), `STRIPE_WEBHOOK_SECRET`, `NEXT_PUBLIC_APP_URL`, `PLATFORM_FEE_PCT=0.15`, `STRIPE_CONNECT_COUNTRY=CA`, `NEXT_PUBLIC_CURRENCY=CAD`, `RESEND_API_KEY`. (Add Preview/Development if you want branch previews to work.)
 
 ### ▶ Simulate a payment on the live site (owner runbook)
+
 Seed talacheros aren't Stripe-onboarded, and `confirmBooking` returns `talachero_not_payable` until `charges_enabled`. So:
+
 1. Sign in as `carlos.mendoza@demo.talachas.mx` → talachero dashboard → **Configurar pagos** → complete Stripe Express **test** onboarding. Panel flips to **Activos** on return.
 2. Incognito: sign up a new client (or sign in `mariana.ruiz@demo.talachas.mx`) → open Carlos's profile → pick a slot → **Confirmar reserva** → pay with test card **`4242 4242 4242 4242`** (any future expiry + CVC).
 3. Booking shows **Pago autorizado**. Sign in as Carlos → **Aceptar** → **Marcar completada** (captures). Ledger rows land via the webhook.
@@ -249,7 +322,7 @@ pnpm dev                           # :3000
 ## Gotchas (cumulative)
 
 - **`redirect()` + typed routes** — use `redirect` from `next/navigation` (reliably `never`) with `` `/${locale}/…` as Route ``; external URLs (Stripe) also cast `as Route`.
-- **Supabase session + next-intl in one proxy pass** — `proxy.ts` runs next-intl to get a `NextResponse`, then attaches Supabase auth cookies to *that same response*. Don't create a second response.
+- **Supabase session + next-intl in one proxy pass** — `proxy.ts` runs next-intl to get a `NextResponse`, then attaches Supabase auth cookies to _that same response_. Don't create a second response.
 - **RLS recursion** — a policy on `users` querying `users` recurses; use `SECURITY DEFINER` helpers with a pinned `search_path`. All cross-table state transitions go through `SECURITY DEFINER` RPCs validating `auth.uid()` internally.
 - **Public projections behind RLS** — display data (talachero name, review author, booking counterparty) sits behind own-row RLS, exposed via `SECURITY DEFINER` functions returning only safe columns.
 - **Server-only money writes** — Stripe/verification/money columns are `REVOKE UPDATE … FROM authenticated`; the webhook + onboarding actions write them via the service-role client. `bookings` UPDATE is fully revoked (all mutations go through RPCs). Changing an RPC's OUT columns needs `DROP` then `CREATE` (not `CREATE OR REPLACE`).
