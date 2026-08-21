@@ -1,4 +1,4 @@
-# Session Handoff — 2026-08-20
+# Session Handoff — 2026-08-21
 
 > Living session-to-session status: what's live, what's next, and the operational facts the code + git log don't capture. Read alongside [CLAUDE.md](./CLAUDE.md) (architecture), [prd.md](./prd.md), [plan.md](./plan.md).
 >
@@ -17,17 +17,22 @@
 - **Disputes ↔ bookings reconciliation shipped (2026-08-19, PR #25):** the two admin surfaces now
   agree about a booking's payment state, and a resolved dispute reaches the client with a terminal
   state. Migration live on cloud; app deployed. Browser QA still owner-run — see below.
-- **Design-system migration started (2026-08-20, PR #26 — OPEN, not merged):** Phase 1 of
-  `DESIGN-SYSTEM.md` swaps the grayscale foundation for the JALO palette (bone/ink/magenta, zero
-  radius, hard offset shadows, Jost + Barlow). Re-skin only — no payments, RPC, RLS or routing
-  touched. **Nothing is deployed from this**; `main` is untouched (`be88a4b`), so production still
-  looks grayscale until PR #26 merges.
-- **PR #26 reconciled against the real DS (2026-08-20, 3 more commits):** the DS repo **is** on this
-  machine; Phase 1 had reconstructed the palette from Notion prose believing otherwise. All ten
-  DS-sourced tokens now match `src/tokens/source.json` exactly. Braulio decided the two open
-  questions against rendered evidence: **borders are ink** with hard offset shadows, and
-  **`--jalo-magenta-lift` is dropped** for the DS press model. PR #26 now carries **10 commits** and
-  is the thing to review and merge. See the section below.
+- **Design-system Phase 1 is MERGED and LIVE (2026-08-21, PR #26 → `958081c`):** the grayscale
+  foundation is gone; production now renders the JALO palette (bone/ink/magenta, zero radius, hard
+  offset shadows, Jost + Barlow). Re-skin only — no payments, RPC, RLS or routing touched, confirmed
+  by file list. Squash-merged (matching every prior PR on `main`), CI + Vercel green, deployed.
+- **PR #26 was reconciled against the real DS before merging (2026-08-20):** the DS repo **is** on
+  this machine; Phase 1 had reconstructed the palette from Notion prose believing otherwise. All ten
+  DS-sourced tokens match `src/tokens/source.json` exactly. Braulio decided the two open questions
+  against rendered evidence: **borders are ink** with hard offset shadows, and
+  **`--jalo-magenta-lift` is dropped** for the DS press model. See the section below.
+- **Merge verified against production, not just against a green deploy** (the §7 rule, and the
+  Turbopack stale-CSS gotcha, both say a passing build is not evidence): the stylesheet served from
+  `talachas-mvp.vercel.app` was fetched and grepped — all ten DS hexes present and exact
+  (`ink-muted #5f595a`, `star #ac7223` included), every emitted `--radius-*` at `0`, the only
+  non-zero `border-radius` being Avatar's legitimate circle, and `--jalo-magenta-lift` /
+  `--color-action-primary-hover` / `--jalo-identity-*` absent as intended. The `<html>` tag carries
+  both the Jost and Barlow font variables.
 
 The core loop is real end-to-end: discover → book (concurrency-safe slot) → pay (Stripe escrow) → chat → accept → complete → capture + 15% split → tip → refund → review → dispute (admin-mediated), with an immutable `transactions` ledger.
 
@@ -48,10 +53,24 @@ The core loop is real end-to-end: discover → book (concurrency-safe slot) → 
 the three browser flows, which need a signed-in session plus a running `stripe listen`. They are
 the only unverified part of this change.
 
-**▶ Also open: review + merge PR #26 (JALO design foundation + reconcile).** Both blocking
-decisions are now made and implemented, so nothing in the branch is waiting on an answer. Verified
-as far as it can be without a reviewer's eyes — see the section below for what is proven and what is
-not. `main` must stay at `be88a4b` until it merges.
+**▶ PR #26 is merged — what it leaves behind is a production visual audit, not a merge.** Phase 1 is
+on `main` (`958081c`) and live. Two things are now owed and neither is code:
+
+1. **Look at production.** The Notion task _"Auditoría visual completa del MVP en producción"_ is the
+   one that closes this. The seven Phase-1 board tasks were left in `En revisión` rather than
+   `Hecho` for exactly this reason — same convention the PR #24 fixes follow. The three tasks
+   literally named `PR #26 ·` **were** moved to `Hecho`: they were decisions that blocked the merge,
+   and the merge happened.
+2. **The three surfaces the seed cannot reach** — chat own-message bubbles, availability grid cell
+   states, and `/dashboard/bookings/[id]/{dispute,review}`. Tracked as _"Fase 2 · Verificar las 3
+   superficies que el seed no alcanza"_. These shipped **unseen**; contrast is arithmetic there, not
+   observed.
+
+**▶ Board drift worth a minute, found while syncing.** Three tasks the PR #25 section below
+describes as closed are still `Por hacer` on the board: _"Reconciliar disputas ↔ reservas"_,
+_"Estado de pago 'captured' sin traducir en admin"_ and _"Disputa descartada muestra 'Reporte en
+revisión' para siempre"_. Left untouched rather than moved unilaterally — confirm they are in fact
+closed, then move them.
 
 **▶ Owed to the DS repo, and deliberately NOT done from here.** Three follow-ups came out of the
 reconcile and are tracked on the Notion board as their own `DS ·` tasks. Do them in **one** DS
@@ -69,7 +88,7 @@ otherwise owes its own `contact-sheet` + `/design-sync` + `-NOTES.md` ritual.
 After that, the remaining board items are the deferred features listed at the bottom (tiered
 refunds, 24h reminder email, neighborhood picker, photo upload).
 
-### Phase 1 reconcile against the real DS (2026-08-20 — PR #26, OPEN, **not merged**)
+### Phase 1 reconcile against the real DS (2026-08-20 — PR #26, since **merged** as `958081c`)
 
 **The DS repo IS on this machine.** The section below was written believing it was not, and that
 belief is the only reason the palette had to be reconstructed from Notion prose. It lives at
@@ -137,8 +156,12 @@ state is the answer to "what is left", not this file. As of close of session:
 - **Moved to `En revisión`** (the board's convention for _shipped in a PR, not yet verified_ — the
   PR #24 fixes sit there too): the three tasks literally named **`PR #26 ·`** (reconcile, the border
   decision, `magenta-lift`), plus **`Fase 1 · Cambio de fundación`**, **`Fase 1b · Radios y
-sombras`**, **`App · Botones primarios texto ink`** and **`Tipografía · Futura/Jost`**. None are
-  `Hecho` — PR #26 is not merged.
+sombras`**, **`App · Botones primarios texto ink`** and **`Tipografía · Futura/Jost`**.
+  **Updated on merge (2026-08-21):** the three `PR #26 ·` tasks are now **`Hecho`** — each was a
+  decision gating the merge, and the merge happened. The other four stay **`En revisión`**: they are
+  visual outcomes, and the board's bar for `Hecho` is a look at production, which the standing
+  _"Auditoría visual completa"_ task still owns. Every one of the seven notes said "pendiente de
+  merge"; all seven were rewritten to say what actually shipped and where it was verified.
 - **Two errors corrected inside the `Fase 1` task note itself**, since wrong notes are what caused
   this detour: it said _"Inter por Anton + Barlow"_ (the live decision is **Jost**) and _"los 5
   `--radius-`"_ (there are **six**; `--radius-3xl` was the straggler). That task now also warns that
@@ -158,7 +181,7 @@ sombras`**, **`App · Botones primarios texto ink`** and **`Tipografía · Futur
 
 ---
 
-### Phase 1 — JALO design foundation (2026-08-20 — PR #26, OPEN, **not merged, not deployed**)
+### Phase 1 — JALO design foundation (PR #26 — MERGED 2026-08-21 as `958081c`, deployed)
 
 > ⚠ Superseded in part by the reconcile above. Kept for the reasoning, not the values.
 
