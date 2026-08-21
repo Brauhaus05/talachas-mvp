@@ -113,7 +113,7 @@ function RoleOption({
   return (
     <label
       className={cn(
-        "flex cursor-pointer flex-col gap-2 rounded-lg border p-4 transition-colors",
+        "flex cursor-pointer flex-col gap-2 border p-4 transition-colors",
         checked
           ? "border-border-strong bg-surface-muted"
           : "border-border hover:bg-surface-muted/50"

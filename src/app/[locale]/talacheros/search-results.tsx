@@ -41,7 +41,7 @@ export function SearchResults({ talacheros }: { talacheros: Talachero[] }) {
 
   return (
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-[280px_1fr]">
-      <aside className="border-border bg-surface-raised h-fit rounded-2xl border p-6">
+      <aside className="border-border bg-surface-raised h-fit border p-6">
         <h2 className="text-text-primary mb-4 text-sm font-semibold tracking-wider uppercase">
           {t("search.filters_title")}
         </h2>
@@ -85,7 +85,7 @@ export function SearchResults({ talacheros }: { talacheros: Talachero[] }) {
                 type="button"
                 onClick={() => setMinRating(v)}
                 className={cn(
-                  "flex-1 rounded-md border px-2 py-1.5 text-xs font-medium transition-colors",
+                  "flex-1 border px-2 py-1.5 text-xs font-medium transition-colors",
                   minRating === v
                     ? "border-border-strong bg-action-primary text-text-inverse"
                     : "border-border bg-background text-text-secondary hover:bg-surface-muted"
@@ -127,7 +127,7 @@ export function SearchResults({ talacheros }: { talacheros: Talachero[] }) {
             <select
               value={sort}
               onChange={(e) => setSort(e.target.value as Sort)}
-              className="border-border bg-background text-text-primary rounded-md border px-2 py-1 text-sm"
+              className="border-border bg-background text-text-primary border px-2 py-1 text-sm"
             >
               <option value="recommended">{t("search.sort_recommended")}</option>
               <option value="price_asc">{t("search.sort_price_asc")}</option>
@@ -137,7 +137,7 @@ export function SearchResults({ talacheros }: { talacheros: Talachero[] }) {
         </header>
 
         {filtered.length === 0 ? (
-          <div className="border-border bg-surface-raised text-text-secondary rounded-2xl border p-12 text-center text-sm">
+          <div className="border-border bg-surface-raised text-text-secondary border p-12 text-center text-sm">
             {t("search.empty_state")}
           </div>
         ) : (
@@ -177,7 +177,7 @@ function FilterOption({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex items-center rounded-md px-3 py-1.5 text-left text-sm transition-colors",
+        "flex items-center px-3 py-1.5 text-left text-sm transition-colors",
         active
           ? "bg-action-primary text-text-inverse"
           : "text-text-secondary hover:bg-surface-muted"

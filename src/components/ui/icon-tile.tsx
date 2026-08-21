@@ -15,7 +15,7 @@ export function IconTile({
   return (
     <span
       className={cn(
-        "bg-surface-muted text-text-primary inline-flex items-center justify-center rounded-lg",
+        "bg-surface-muted text-text-primary inline-flex items-center justify-center",
         dim,
         className
       )}

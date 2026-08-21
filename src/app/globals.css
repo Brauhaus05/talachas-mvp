@@ -1,54 +1,203 @@
 @import "tailwindcss";
 
 /**
- * Talachas design tokens — grayscale only (PRD §5).
- * Semantic tokens resolve to gray shades today. The future color decision is a
- * one-line change to these variables — never hardcode hex/rgb in components.
+ * Talachas design tokens — JALO foundation (DESIGN-SYSTEM.md Phase 1).
+ *
+ * Two layers, deliberately:
+ *   1. `--jalo-*` — the raw JALO palette. Named OUTSIDE Tailwind's `--color-*`
+ *      namespace so it generates no utilities: there is no `bg-jalo-bone`, and
+ *      nothing in this app can reach past a semantic token to a brand colour.
+ *   2. `--color-*` — the semantic tokens every component already consumes.
+ *      These are the only names allowed in markup.
+ *
+ * Rules that are load-bearing here (DESIGN-SYSTEM.md §1):
+ *   · Zero border radius. Every `--radius-*` is 0; only `rounded-full` (a real
+ *     circle, e.g. Avatar) survives, and it is not token-driven.
+ *   · Magenta is a FILL and carries INK labels, never white. Magenta-as-text is
+ *     `--jalo-magenta-ink`.
+ *   · Focus rings are magenta-ink, never brand magenta.
+ *   · Elevation is a hard offset shadow with no blur.
+ *   · Never fake muted text with opacity — use `--color-text-muted`.
  */
+
 @theme {
-  /* Grayscale ramp (source of truth) */
-  --color-gray-0: #ffffff;
-  --color-gray-50: #fafafa;
-  --color-gray-100: #f4f4f5;
-  --color-gray-200: #e4e4e7;
-  --color-gray-300: #d4d4d8;
-  --color-gray-400: #a1a1aa;
-  --color-gray-500: #71717a;
-  --color-gray-600: #52525b;
-  --color-gray-700: #3f3f46;
-  --color-gray-800: #27272a;
-  --color-gray-900: #18181b;
-  --color-gray-950: #09090b;
+  /* ─── JALO palette (source of truth — generates no utilities) ─────────── */
 
-  /* Semantic surface + text tokens */
-  --color-background: var(--color-gray-0);
-  --color-surface: var(--color-gray-50);
-  --color-surface-raised: var(--color-gray-0);
-  --color-surface-muted: var(--color-gray-100);
-  --color-text-primary: var(--color-gray-950);
-  --color-text-secondary: var(--color-gray-600);
-  --color-text-muted: var(--color-gray-500);
-  --color-text-inverse: var(--color-gray-0);
-  --color-border: var(--color-gray-200);
-  --color-border-strong: var(--color-gray-300);
-  --color-focus: var(--color-gray-900);
+  /* Grounds */
+  --jalo-bone: #e8dfd1; /* Piedra Cálida — the page */
+  --jalo-paper: #ffffff; /* raised cards */
 
-  /* State tokens — grayscale for MVP, will get color later */
-  --color-state-success: var(--color-gray-900);
-  --color-state-error: var(--color-gray-900);
-  --color-state-warning: var(--color-gray-700);
-  --color-state-info: var(--color-gray-700);
+  /* Type */
+  --jalo-ink: #241b1d; /* Carbón Madera — all primary text + hard shadows */
+  /*
+   * RECONCILED against the DS `src/tokens/source.json` (2026-08-20). The prior
+   * value #6b5f61 was derived blind, when the DS repo was believed to be off
+   * this machine. It is not merely a different tuning — it FAILED AA at 4.41:1
+   * on `--jalo-chip-strong` below. The DS value is DARKER and clears every
+   * surface this app invents:
+   *   bone 5.19 · paper 6.86 · well 5.99 · chip 5.67 · chip-strong 4.95
+   */
+  --jalo-ink-muted: #5f595a;
 
-  /* Interactive */
-  --color-action-primary: var(--color-gray-950);
-  --color-action-primary-hover: var(--color-gray-800);
-  --color-action-secondary: var(--color-gray-100);
-  --color-action-secondary-hover: var(--color-gray-200);
+  /* Accents */
+  --jalo-magenta: #ff427e; /* FILL ONLY. Carries ink labels, never white */
+  --jalo-magenta-ink: #b81e5e; /* magenta as TEXT, and every focus ring */
+  --jalo-highlight: #ffc211; /* Amarillo Relámpago — "today" / highlight badges */
+  --jalo-tag-blue: #4d89d1; /* Azul Havelock — tag chips (ink label) */
+  --jalo-brand-blue: #008ad5; /* WORDMARK ONLY. Never a UI role, never text (§1.5) */
 
-  /* Typography */
+  /*
+   * Rating glyphs. The DS asserts this token at the 3:1 GRAPHICAL floor, not
+   * the 4.5:1 text floor, and the exemption is conditional: `StarRating` always
+   * renders the numeric value beside the glyphs and marks the glyphs
+   * `aria-hidden`. This app's `Rating` does the same, and no call site passes
+   * `showValue={false}` — so the star never carries information alone.
+   * Measured here: bone 3.07 · paper 4.05 · well 3.54 · chip 3.35. All clear 3:1.
+   * If a bare star ever becomes the sole carrier of a rating, this token is no
+   * longer sufficient — re-verify before that ships.
+   */
+  --jalo-star: #ac7223;
+
+  /*
+   * AVATAR IDENTITY TINTS — deliberately absent. DECISION: Phase 2 carries them,
+   * not Phase 1. Reasons, in order of weight:
+   *
+   *   1. Tailwind v4 TREE-SHAKES `@theme` variables that nothing references.
+   *      Declaring `--jalo-identity-1..4` here without a consumer emits NOTHING
+   *      to the browser — verified against a clean `pnpm build`: the four names
+   *      do not appear in the output CSS at all. A declaration that silently
+   *      does not exist is worse than no declaration, so they are not left here
+   *      as a placeholder.
+   *   2. Tinting needs an API this app does not have. `ui/avatar.tsx` takes only
+   *      `initials`; there is no identity index on the talachero row, so a tint
+   *      requires inventing a stable index derivation across 8 call sites — a
+   *      product decision, not a token swap, and out of Phase 1's one-file scope.
+   *   3. The DS `Avatar` already owns the 4-colour cycle. Phase 2 replaces this
+   *      component with it and inherits the tints correctly, instead of building
+   *      a parallel derivation that then has to be reconciled.
+   *
+   * When Phase 2 wires them, the values are in the DS `src/tokens/source.json`
+   * under `identity`, and initials on them must be INK (4.65 / 4.55 / 6.91 /
+   * 4.52 — all AA) and never bone, which bottoms out at 1.84:1.
+   */
+
+  /*
+   * Warm neutral FILL ramp, mixed from bone toward paper. These are fills only.
+   * Separation in this system comes from 1px ink borders and hard offset
+   * shadows, NOT from fill-lightness steps — so the ramp deliberately stops at
+   * fills and defines no border colours.
+   *
+   * It previously did define two (`--jalo-line` #83786F / `--jalo-line-strong`
+   * #4A403F), which is how the file came to argue against itself: this comment
+   * said separation comes from borders and shadows while the code below softened
+   * the borders. Both are gone — borders are ink, per the DS. See --color-border.
+   *
+   * Every step stays at or above bone in lightness; anything darker drops
+   * `--color-text-muted` below AA.
+   */
+  --jalo-well: #f4efe8; /* recessed wells: inputs, search field */
+  --jalo-chip: #efe9de; /* soft filled chips: avatar, badge, callouts, hover */
+  --jalo-chip-strong: #e3dacb; /* chip hover */
+
+  /* ─── Semantic tokens (the only names allowed in markup) ───────────────── */
+
+  /* Surfaces */
+  --color-background: var(--jalo-bone);
+  --color-surface: var(--jalo-well);
+  --color-surface-raised: var(--jalo-paper);
+  --color-surface-muted: var(--jalo-chip);
+
+  /* Text */
+  --color-text-primary: var(--jalo-ink);
+  --color-text-secondary: var(--jalo-ink-muted);
+  --color-text-muted: var(--jalo-ink-muted);
+
+  /*
+   * Labels sitting ON an accent fill. In this system that label is INK, not
+   * white: white on magenta is 3.32:1 and fails, ink is 5.07:1 and passes (§1.3).
+   * `--color-text-inverse` is a legacy alias — all 13 of its call sites sit on
+   * `bg-action-primary`. Phase 2 renames those call sites to `text-on-accent`
+   * and this alias goes away.
+   */
+  --color-text-on-accent: var(--jalo-ink);
+  --color-text-inverse: var(--color-text-on-accent);
+
+  /*
+   * Lines. The DS has exactly ONE border colour: conventions.md, "--jalo-ink
+   * #241B1D | all text and all borders", and "Every raised surface is 1px solid
+   * var(--jalo-ink) with a hard offset shadow and no blur."
+   *
+   * Phase 1 shipped an invented #83786F here (3.26:1) — it passed the 3:1
+   * graphical floor, which is exactly why nothing caught it. Passing contrast is
+   * not the same as being this design system; a soft border is not neo-brutalist,
+   * and the result was a light border carrying a solid ink shadow on the same
+   * element (the landing stat tiles). Decided by Braulio 2026-08-20 against a
+   * rendered A/B of a real TalacheroCard.
+   *
+   * `--color-border-strong` collapses onto the same value on purpose: there is
+   * no second border colour to escalate to. Emphasis is carried by elevation
+   * (--shadow-hard-accent) and by fill, not by a darker line.
+   */
+  --color-border: var(--jalo-ink);
+  --color-border-strong: var(--jalo-ink);
+
+  /* Focus — magenta-ink, never brand magenta (§1.4) */
+  --color-focus: var(--jalo-magenta-ink);
+
+  /*
+   * Rating glyphs only — never the numeric value beside them, which stays
+   * `--color-text-primary` (12.73:1). Splitting these is the point: the star
+   * is exempt at 3:1 because it is a graphic, and the number is not.
+   */
+  --color-rating-star: var(--jalo-star);
+
+  /*
+   * State tokens. Held non-chromatic on purpose (PRD §5) — the DS publishes no
+   * state palette, and every alternative here would be invented. Unused in
+   * markup today; re-point them when the DS gains state colours.
+   */
+  --color-state-success: var(--jalo-ink);
+  --color-state-error: var(--jalo-ink);
+  --color-state-warning: var(--jalo-ink-muted);
+  --color-state-info: var(--jalo-ink-muted);
+
+  /*
+   * Interactive — magenta FILL, ink label.
+   *
+   * There is deliberately NO `--color-action-primary-hover`. Phase 1 invented
+   * `--jalo-magenta-lift` #FF5C90 to lighten the fill on hover; the DS has no
+   * such token and no colour-lighten anywhere, and DS `Button.css` gives the
+   * primary variant no hover state at all — the only :hover on a button is
+   * ghost moving to magenta-ink. Feedback in this system is geometric: the
+   * shadow collapses to 0 0 0 and the element translates into it. Keeping a
+   * parallel colour idiom would make lighten-on-hover a second answer to a
+   * question the press model already answers. Dropped 2026-08-20.
+   */
+  --color-action-primary: var(--jalo-magenta);
+  --color-action-secondary: var(--jalo-chip);
+  --color-action-secondary-hover: var(--jalo-chip-strong);
+
+  /*
+   * Destructive actions (ban, reject, refund). Magenta-ink, NOT magenta: the
+   * primary fill is magenta, so a solid destructive button is indistinguishable
+   * from a primary one — which is what turned the admin users table into 27
+   * identical hot-pink buttons. This is a border+text colour on a transparent
+   * ground, so destructive actions read as danger while staying visually
+   * recessive next to a real primary action.
+   */
+  --color-action-destructive: var(--jalo-magenta-ink);
+
+  /* ─── Typography ──────────────────────────────────────────────────────── */
+  /*
+   * Jost is the shippable stand-in for Futura, which is licence-blocked
+   * (§4 decision 3). Barlow carries text. DS `fonts.css` is deliberately NOT
+   * imported here.
+   */
+  --font-display:
+    var(--font-jost), var(--font-barlow), ui-sans-serif, system-ui, sans-serif;
   --font-sans:
-    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial,
-    sans-serif;
+    var(--font-barlow), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
   /* Type scale (8pt grid friendly) */
@@ -63,12 +212,30 @@
   --text-5xl: 3rem; /* 48 */
   --text-6xl: 3.75rem; /* 60 */
 
-  /* Radii */
-  --radius-sm: 0.25rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 0.75rem;
-  --radius-xl: 1rem;
-  --radius-2xl: 1.5rem;
+  /* ─── Radii — everything is square (§1.1) ─────────────────────────────── */
+  /*
+   * `--radius-3xl` is declared even though this app's old theme never defined
+   * it: without it, `rounded-3xl` falls through to Tailwind's default and the
+   * two hero/profile panels stay round.
+   */
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+  --radius-xl: 0;
+  --radius-2xl: 0;
+  --radius-3xl: 0;
+
+  /* ─── Elevation — hard offset, zero blur (§1.8) ───────────────────────── */
+  --shadow-hard-sm: 3px 3px 0 var(--jalo-ink);
+  --shadow-hard-md: 4px 4px 0 var(--jalo-ink);
+  --shadow-hard-lg: 6px 6px 0 var(--jalo-ink);
+  /*
+   * Interactive cards switch their shadow to magenta on hover — DS Card.css,
+   * `.jalo-card--interactive:hover { box-shadow: var(--jalo-shadow-accent) }`.
+   * Magenta is only 2.51:1 on bone, but this is decoration, not delineation:
+   * the card's own 1px ink border carries the boundary at 12.73:1.
+   */
+  --shadow-hard-accent: 6px 6px 0 var(--jalo-magenta);
 }
 
 @layer base {
@@ -79,6 +246,20 @@
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+  }
+
+  /* Body weight is 700, not 400 (§1.9) */
+  body {
+    font-weight: 700;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-display);
   }
 
   *:focus-visible {

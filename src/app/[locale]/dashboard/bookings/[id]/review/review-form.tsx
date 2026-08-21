@@ -18,16 +18,17 @@ export function ReviewForm({ bookingId }: { bookingId: string }) {
     {}
   );
 
-  const errorMsg = state.error
-    ? t(ERROR_KEYS[state.error] ?? "error_generic")
-    : null;
+  const errorMsg = state.error ? t(ERROR_KEYS[state.error] ?? "error_generic") : null;
 
   return (
     <form action={formAction} className="flex flex-col gap-5">
       <input type="hidden" name="bookingId" value={bookingId} />
 
       <div className="flex flex-col gap-2">
-        <span id="review-rating-label" className="text-text-secondary text-sm font-medium">
+        <span
+          id="review-rating-label"
+          className="text-text-secondary text-sm font-medium"
+        >
           {t("rating_label")}
         </span>
         <RatingInput
@@ -45,7 +46,7 @@ export function ReviewForm({ bookingId }: { bookingId: string }) {
           name="comment"
           rows={4}
           placeholder={t("comment_placeholder")}
-          className="border-border-strong bg-surface text-text-primary rounded-md border px-3 py-2 text-sm"
+          className="border-border-strong bg-surface text-text-primary border px-3 py-2 text-sm"
         />
       </label>
 

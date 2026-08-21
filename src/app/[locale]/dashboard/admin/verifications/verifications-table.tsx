@@ -18,7 +18,7 @@ export async function VerificationsTable({
   const locale = await getLocale();
   const ts = await getTranslations("services");
   return (
-    <div className="border-border overflow-x-auto rounded-lg border">
+    <div className="border-border overflow-x-auto border">
       <table className="w-full text-left text-sm">
         <thead className="text-text-secondary border-border border-b">
           <tr>
@@ -72,7 +72,7 @@ export async function VerificationsTable({
                 <div className="flex flex-wrap items-start gap-2">
                   <form action={approveTalachero}>
                     <input type="hidden" name="talacheroId" value={v.talacheroId} />
-                    <ConfirmButton label={t("action_approve")} tone="danger" />
+                    <ConfirmButton label={t("action_approve")} tone="primary" />
                   </form>
                   <RejectForm talacheroId={v.talacheroId} />
                 </div>

@@ -2,15 +2,23 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
-import { Inter } from "next/font/google";
+import { Barlow, Jost } from "next/font/google";
 import { routing } from "@/i18n/routing";
 import { TopNavBar } from "@/components/layout/top-nav-bar";
 import { Footer } from "@/components/layout/footer";
 import "../globals.css";
 
-const inter = Inter({
+// Barlow carries text; Jost is the shippable stand-in for Futura, which is
+// licence-blocked (DESIGN-SYSTEM.md §4 decision 3).
+const barlow = Barlow({
   subsets: ["latin"],
-  variable: "--font-sans-body",
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-barlow",
+});
+
+const jost = Jost({
+  subsets: ["latin"],
+  variable: "--font-jost",
 });
 
 export const metadata: Metadata = {
@@ -36,7 +44,10 @@ export default async function LocaleLayout({
   setRequestLocale(locale);
 
   return (
-    <html lang={locale} className={`${inter.variable} h-full antialiased`}>
+    <html
+      lang={locale}
+      className={`${barlow.variable} ${jost.variable} h-full antialiased`}
+    >
       <body className="bg-background text-text-primary flex min-h-full flex-col">
         <NextIntlClientProvider>
           <TopNavBar />

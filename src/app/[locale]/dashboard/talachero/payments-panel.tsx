@@ -17,7 +17,7 @@ export async function PaymentsPanel() {
   const started = Boolean(profile?.stripeAccountId);
 
   return (
-    <section className="border-border bg-surface-raised flex flex-col gap-4 rounded-2xl border p-6">
+    <section className="border-border bg-surface-raised flex flex-col gap-4 border p-6">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <CreditCard className="text-text-primary h-5 w-5" aria-hidden />

@@ -13,7 +13,7 @@ export async function EarningsSummary({ summary }: { summary: EarningsView["summ
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
       {tiles.map((tile) => (
-        <div key={tile.label} className="border-border rounded-lg border p-5">
+        <div key={tile.label} className="border-border border p-5">
           <p className="text-text-secondary text-xs font-medium tracking-wider uppercase">
             {tile.label}
           </p>

@@ -10,14 +10,12 @@ export function StatTile({ value, label, className }: StatTileProps) {
   return (
     <div
       className={cn(
-        "border-border bg-surface-raised flex flex-col gap-1 rounded-xl border p-4",
+        "border-border bg-surface-raised shadow-hard-sm flex flex-col gap-1 border p-4",
         className
       )}
     >
       <span className="text-text-primary text-2xl font-semibold">{value}</span>
-      <span className="text-text-muted text-xs uppercase tracking-wider">
-        {label}
-      </span>
+      <span className="text-text-muted text-xs tracking-wider uppercase">{label}</span>
     </div>
   );
 }

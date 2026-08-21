@@ -42,7 +42,7 @@ export default async function TalacheroProfilePage({
       </nav>
 
       {/* Hero */}
-      <section className="border-border bg-surface-raised mb-8 rounded-3xl border p-8">
+      <section className="border-border bg-surface-raised mb-8 border p-8">
         <div className="flex flex-col gap-8 md:flex-row md:items-start md:justify-between">
           <div className="flex items-start gap-6">
             <Avatar initials={talachero.initials} size="xl" />
@@ -110,7 +110,7 @@ export default async function TalacheroProfilePage({
             <h2 className="text-text-primary mb-4 text-xl font-semibold">
               {t("profile.section_services")}
             </h2>
-            <div className="border-border bg-surface-raised divide-border divide-y overflow-hidden rounded-2xl border">
+            <div className="border-border bg-surface-raised divide-border divide-y overflow-hidden border">
               {talachero.services.map((slug) => {
                 const svc = getService(slug);
                 if (!svc) return null;
@@ -142,7 +142,7 @@ export default async function TalacheroProfilePage({
             <h2 className="text-text-primary mb-4 text-xl font-semibold">
               {t("profile.section_about")}
             </h2>
-            <div className="border-border bg-surface-raised rounded-2xl border p-6">
+            <div className="border-border bg-surface-raised border p-6">
               <p className="text-text-secondary text-sm leading-relaxed">{bio}</p>
             </div>
           </section>
@@ -167,7 +167,7 @@ export default async function TalacheroProfilePage({
 
         {/* Sticky booking rail */}
         <aside className="hidden lg:block">
-          <div className="border-border bg-surface-raised sticky top-28 flex flex-col gap-4 rounded-2xl border p-6">
+          <div className="border-border bg-surface-raised sticky top-28 flex flex-col gap-4 border p-6">
             <p className="text-text-muted text-xs tracking-widest uppercase">
               {t("common.starting_at")}
             </p>

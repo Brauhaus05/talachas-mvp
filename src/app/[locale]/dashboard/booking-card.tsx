@@ -49,7 +49,7 @@ export async function BookingCard({
     : t("dashboard.booking_no_slot");
 
   return (
-    <div className="border-border bg-surface-raised flex flex-col gap-3 rounded-2xl border p-5">
+    <div className="border-border bg-surface-raised flex flex-col gap-3 border p-5">
       <div className="flex items-center justify-between gap-3">
         <p className="text-text-primary text-sm font-semibold">
           {t(`services.${serviceSlug}.short`)}
@@ -75,7 +75,7 @@ export async function BookingCard({
       <div className="flex flex-wrap items-center gap-2 pt-1">
         <Link
           href={`/dashboard/bookings/${bookingId}/chat` as Route}
-          className="border-border-strong text-text-primary hover:bg-surface-muted rounded-md border px-3 py-1.5 text-xs font-medium transition-colors"
+          className="border-border-strong text-text-primary hover:bg-surface-muted border px-3 py-1.5 text-xs font-medium transition-colors"
         >
           {t("dashboard.action_messages")}
           {unread > 0 ? ` (${unread})` : ""}

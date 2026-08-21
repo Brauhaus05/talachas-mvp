@@ -8,7 +8,9 @@ export const Card = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "border-border bg-surface-raised text-text-primary rounded-xl border",
+      // conventions.md: "Every raised surface is 1px solid var(--jalo-ink) with
+      // a hard offset shadow and no blur."
+      "border-border bg-surface-raised text-text-primary shadow-hard-sm border",
       className
     )}
     {...props}

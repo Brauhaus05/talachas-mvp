@@ -24,9 +24,7 @@ export function ProfileForm({ initial }: { initial: MyTalacheroProfileEdit }) {
 
   function toggleService(slug: ServiceSlug) {
     const selected = services.includes(slug);
-    setServices((prev) =>
-      selected ? prev.filter((s) => s !== slug) : [...prev, slug]
-    );
+    setServices((prev) => (selected ? prev.filter((s) => s !== slug) : [...prev, slug]));
     setPrimary((p) => {
       if (!selected) return p ?? slug;
       return p === slug ? (services.filter((s) => s !== slug)[0] ?? null) : p;
@@ -34,7 +32,7 @@ export function ProfileForm({ initial }: { initial: MyTalacheroProfileEdit }) {
   }
 
   const banner =
-    "flex items-start gap-3 rounded-md border border-border-strong bg-surface-muted px-4 py-3 text-sm text-text-primary";
+    "flex items-start gap-3 border border-border-strong bg-surface-muted px-4 py-3 text-sm text-text-primary";
 
   const errorMsg =
     state.status === "error"
@@ -66,7 +64,7 @@ export function ProfileForm({ initial }: { initial: MyTalacheroProfileEdit }) {
           maxLength={600}
           defaultValue={initial.bio}
           placeholder={t("profileEditor.bio_placeholder")}
-          className="border-border bg-surface text-text-primary rounded-md border px-3 py-2 text-sm"
+          className="border-border bg-surface text-text-primary border px-3 py-2 text-sm"
         />
       </label>
 
@@ -114,8 +112,7 @@ export function ProfileForm({ initial }: { initial: MyTalacheroProfileEdit }) {
                   onClick={() => toggleService(s.slug)}
                   aria-pressed={selected}
                   className={cn(
-                    "rounded-l-md border px-3 py-1.5 text-sm font-medium transition-colors",
-                    !selected && "rounded-r-md",
+                    "border px-3 py-1.5 text-sm font-medium transition-colors",
                     selected
                       ? "border-border-strong bg-action-primary text-text-inverse"
                       : "border-border bg-background text-text-secondary hover:bg-surface-muted"
@@ -130,7 +127,7 @@ export function ProfileForm({ initial }: { initial: MyTalacheroProfileEdit }) {
                     aria-pressed={isPrimary}
                     aria-label={t("profileEditor.set_primary")}
                     title={t("profileEditor.set_primary")}
-                    className="border-border-strong text-text-inverse bg-action-primary rounded-r-md border border-l-0 px-2 py-1.5"
+                    className="border-border-strong text-text-inverse bg-action-primary border border-l-0 px-2 py-1.5"
                   >
                     <Star
                       className="h-4 w-4"

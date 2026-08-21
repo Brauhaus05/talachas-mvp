@@ -33,7 +33,7 @@ export function DisputeForm({ bookingId }: { bookingId: string }) {
           rows={5}
           required
           placeholder={t("reason_placeholder")}
-          className="border-border-strong bg-surface text-text-primary rounded-md border px-3 py-2 text-sm"
+          className="border-border-strong bg-surface text-text-primary border px-3 py-2 text-sm"
         />
       </label>
 

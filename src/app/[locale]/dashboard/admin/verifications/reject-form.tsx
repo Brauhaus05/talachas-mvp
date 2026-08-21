@@ -10,7 +10,7 @@ function RejectSubmit() {
   const t = useTranslations("admin");
   const { pending } = useFormStatus();
   return (
-    <Button type="submit" size="sm" loading={pending}>
+    <Button type="submit" size="sm" variant="destructive" loading={pending}>
       {t("action_reject")}
     </Button>
   );
@@ -24,7 +24,7 @@ export function RejectForm({ talacheroId }: { talacheroId: string }) {
 
   if (!open) {
     return (
-      <Button type="button" size="sm" variant="outline" onClick={() => setOpen(true)}>
+      <Button type="button" size="sm" variant="destructive" onClick={() => setOpen(true)}>
         {t("action_reject")}
       </Button>
     );
@@ -42,7 +42,7 @@ export function RejectForm({ talacheroId }: { talacheroId: string }) {
           required
           rows={2}
           placeholder={t("reject_reason_placeholder")}
-          className="border-border bg-surface text-text-primary min-w-[220px] rounded-md border px-2 py-1 text-sm"
+          className="border-border bg-surface text-text-primary min-w-[220px] border px-2 py-1 text-sm"
         />
       </label>
       <div className="flex items-center gap-2">

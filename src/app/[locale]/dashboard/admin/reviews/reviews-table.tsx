@@ -9,7 +9,7 @@ export async function ReviewsTable({ reviews }: { reviews: AdminReview[] }) {
     return <p className="text-text-secondary text-sm">{t("empty")}</p>;
   }
   return (
-    <div className="border-border overflow-x-auto rounded-lg border">
+    <div className="border-border overflow-x-auto border">
       <table className="w-full text-left text-sm">
         <thead className="text-text-secondary border-border border-b">
           <tr>
@@ -36,7 +36,9 @@ export async function ReviewsTable({ reviews }: { reviews: AdminReview[] }) {
               <td className="text-text-primary px-4 py-3">{r.authorName}</td>
               <td className="text-text-primary px-4 py-3">{r.targetName}</td>
               <td className="text-text-primary px-4 py-3">{r.rating} / 5</td>
-              <td className="text-text-secondary max-w-xs px-4 py-3">{r.comment ?? ""}</td>
+              <td className="text-text-secondary max-w-xs px-4 py-3">
+                {r.comment ?? ""}
+              </td>
               <td className="px-4 py-3">
                 <form action={deleteReview}>
                   <input type="hidden" name="reviewId" value={r.id} />
