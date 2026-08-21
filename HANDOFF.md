@@ -20,8 +20,14 @@
 - **Design-system migration started (2026-08-20, PR #26 — OPEN, not merged):** Phase 1 of
   `DESIGN-SYSTEM.md` swaps the grayscale foundation for the JALO palette (bone/ink/magenta, zero
   radius, hard offset shadows, Jost + Barlow). Re-skin only — no payments, RPC, RLS or routing
-  touched. **Nothing is deployed from this**; `main` is untouched, so production still looks
-  grayscale until PR #26 merges.
+  touched. **Nothing is deployed from this**; `main` is untouched (`be88a4b`), so production still
+  looks grayscale until PR #26 merges.
+- **PR #26 reconciled against the real DS (2026-08-20, 3 more commits):** the DS repo **is** on this
+  machine; Phase 1 had reconstructed the palette from Notion prose believing otherwise. All ten
+  DS-sourced tokens now match `src/tokens/source.json` exactly. Braulio decided the two open
+  questions against rendered evidence: **borders are ink** with hard offset shadows, and
+  **`--jalo-magenta-lift` is dropped** for the DS press model. PR #26 now carries **10 commits** and
+  is the thing to review and merge. See the section below.
 
 The core loop is real end-to-end: discover → book (concurrency-safe slot) → pay (Stripe escrow) → chat → accept → complete → capture + 15% split → tip → refund → review → dispute (admin-mediated), with an immutable `transactions` ledger.
 
@@ -42,8 +48,23 @@ The core loop is real end-to-end: discover → book (concurrency-safe slot) → 
 the three browser flows, which need a signed-in session plus a running `stripe listen`. They are
 the only unverified part of this change.
 
-**▶ Also open: review + merge PR #26 (JALO design foundation).** Verified as far as it can be
-without a reviewer's eyes — see the section below for what is proven and what is not.
+**▶ Also open: review + merge PR #26 (JALO design foundation + reconcile).** Both blocking
+decisions are now made and implemented, so nothing in the branch is waiting on an answer. Verified
+as far as it can be without a reviewer's eyes — see the section below for what is proven and what is
+not. `main` must stay at `be88a4b` until it merges.
+
+**▶ Owed to the DS repo, and deliberately NOT done from here.** Three follow-ups came out of the
+reconcile and are tracked on the Notion board as their own `DS ·` tasks. Do them in **one** DS
+session, not three: all three end up touching `conventions.md` or its consumer docs, and each
+otherwise owes its own `contact-sheet` + `/design-sync` + `-NOTES.md` ritual.
+
+1. **`conventions.md` doesn't state the star exemption's precondition** (P1, XS). The colour table
+   lists `--jalo-star` with no caveat, while `contrast.test.ts` is explicit that 3:1 only holds
+   because the numeric value renders beside an `aria-hidden` glyph. That file is inlined into the
+   design agent's prompt and the agent never sees the test, so it can emit a bare star at 3.07:1
+   carrying the rating alone.
+2. **No interactive star input exists in the DS** (P2, M) — `rating-input.tsx` stays local and ink.
+3. **Consumer note: Tailwind v4 tree-shakes `@theme` vars with no consumer** (P2, XS).
 
 After that, the remaining board items are the deferred features listed at the bottom (tiered
 refunds, 24h reminder email, neighborhood picker, photo upload).
@@ -109,6 +130,31 @@ at 1280 and 390 including authenticated client and talachero dashboards; press a
 back off the live DOM rather than assumed. Horizontal overflow measured at 320/390/1280 on every
 route is **byte-for-byte identical to `0ad8cb5`** — this work introduces none, but the pre-existing
 overflow is real and belongs to the Phase 4 audit.
+
+**Notion board (`✅ Tareas`) reconciled the same day.** The board is the tracker of record, so its
+state is the answer to "what is left", not this file. As of close of session:
+
+- **Moved to `En revisión`** (the board's convention for _shipped in a PR, not yet verified_ — the
+  PR #24 fixes sit there too): the three tasks literally named **`PR #26 ·`** (reconcile, the border
+  decision, `magenta-lift`), plus **`Fase 1 · Cambio de fundación`**, **`Fase 1b · Radios y
+sombras`**, **`App · Botones primarios texto ink`** and **`Tipografía · Futura/Jost`**. None are
+  `Hecho` — PR #26 is not merged.
+- **Two errors corrected inside the `Fase 1` task note itself**, since wrong notes are what caused
+  this detour: it said _"Inter por Anton + Barlow"_ (the live decision is **Jost**) and _"los 5
+  `--radius-`"_ (there are **six**; `--radius-3xl` was the straggler). That task now also warns that
+  its palette values are not the source of truth — `source.json` is.
+- **Three new `DS ·` tasks created** for the follow-ups above, so a DS session can pick them up
+  independently. The `DS · Correr contact-sheet y design-sync` task points at them by name instead
+  of restating them.
+- **Deliberately not a task:** _no `ALLOWED_DEVIATIONS` entry is owed._ Soft borders and
+  `magenta-lift` were the two candidate deviations and **both were rejected**, so nothing diverges.
+  Recorded as an explicit "nothing to do" note so it isn't re-litigated next session.
+- **Pre-existing horizontal overflow logged** to `Auditoría visual completa del MVP en producción`
+  with per-route numbers (`/talacheros/[id]` is worst at 459px against a 390px viewport) and the
+  evidence that it predates this branch. Same task carries the one real half-state this work left:
+  the talachero dashboard's section panels are loose `div`s rather than `Card`, so they took the ink
+  border but not the elevation. That's inside the 13 out-of-scope routes (`DESIGN-SYSTEM.md` §8),
+  which is why it was logged rather than expanded into.
 
 ---
 
