@@ -19,6 +19,8 @@ declare
   svc_id   uuid;
   rate     numeric;
   b_id     uuid;
+  slot_v   uuid;
+  thr_id   uuid;
   cdmx_id  uuid := (select id from public.cities where slug = 'cdmx');
 begin
   -- -------------------------------------------------------------------------
@@ -212,6 +214,119 @@ begin
     insert into public.disputes (booking_id, raised_by, reason)
     select b_id, b.client_id, 'El trabajo quedó incompleto y no respondió mis mensajes.'
       from public.bookings b where b.id = b_id;
+  end if;
+
+  -- -------------------------------------------------------------------------
+  -- The three surfaces the seed could not reach.
+  --
+  -- Phase 1 of the JALO re-skin (PR #26) shipped these UNSEEN: no seed row
+  -- could render them, so their contrast was arithmetic only, never observed.
+  -- Each block below makes exactly one of them reachable, and all of them hang
+  -- off the two documented demo accounts so a reviewer can reach them by
+  -- clicking rather than by writing SQL:
+  --   client    mariana.ruiz@demo.talachas.mx
+  --   talachero carlos.mendoza@demo.talachas.mx   (both password123)
+  --
+  -- Deliberately ADDITIVE. Nothing above is mutated, so the AFTER INSERT/DELETE
+  -- trigger on `reviews` never fires and Carlos's rating rollup stays at its
+  -- seeded value. That trigger is exactly what made the previous approach —
+  -- deleting a review, screenshotting, restoring it — risky enough to warrant
+  -- a warning in HANDOFF.md.
+  -- -------------------------------------------------------------------------
+  select id into au_id from public.users where email = 'mariana.ruiz@demo.talachas.mx';
+
+  select tp.id, tp.user_id, tp.hourly_rate
+    into tp_id, tu_id, rate
+    from public.talachero_profiles tp
+    join public.users us on us.id = tp.user_id
+    where us.email = 'carlos.mendoza@demo.talachas.mx';
+
+  select service_category_id into svc_id
+    from public.talachero_services
+    where talachero_id = tp_id and is_primary
+    limit 1;
+
+  if au_id is not null and tp_id is not null and svc_id is not null then
+
+    -- (1) Completed but NOT reviewed, so /dashboard/bookings/[id]/review is
+    -- reachable. Every other completed booking in this seed is created
+    -- together with its review, which is why that route had no way in.
+    insert into public.bookings (
+      client_id, talachero_id, service_category_id, status, price, currency,
+      address, notes, created_at, updated_at
+    )
+    values (
+      au_id, tp_id, svc_id, 'completed', rate, 'CAD',
+      'Av. Ámsterdam 240, Condesa',
+      'Armado de un librero y una mesa de centro.',
+      now() - interval '4 days', now() - interval '4 days'
+    );
+
+    -- (2) Completed AND captured AND not disputed, so .../dispute is reachable.
+    -- The only captured booking in this seed is the one the dispute block above
+    -- already disputes, which is why that route had no way in either. This row
+    -- also renders the tip offer, which is gated on payment_status='captured'.
+    insert into public.bookings (
+      client_id, talachero_id, service_category_id, status, payment_status,
+      price, currency, address, notes, created_at, updated_at
+    )
+    values (
+      au_id, tp_id, svc_id, 'completed', 'captured', rate, 'CAD',
+      'Calle Tamaulipas 55, Hipódromo',
+      'Reparación de una fuga en el baño principal.',
+      now() - interval '6 days', now() - interval '6 days'
+    );
+
+    -- (3) An upcoming CONFIRMED booking wired to a real slot. Flipping that
+    -- slot to 'booked' is what finally lets the talachero availability grid
+    -- render open / booked / closed side by side; the seed opened every slot,
+    -- so the 'booked' cell state had never been drawn.
+    select id into slot_v
+      from public.availability_slots
+      where talachero_id = tp_id
+        and status = 'open'
+        and start_time > now() + interval '36 hours'
+      order by start_time
+      limit 1;
+
+    if slot_v is not null then
+      update public.availability_slots set status = 'booked' where id = slot_v;
+
+      insert into public.bookings (
+        client_id, talachero_id, service_category_id, slot_id, status,
+        payment_status, price, currency, address, notes, created_at, updated_at
+      )
+      values (
+        au_id, tp_id, svc_id, slot_v, 'confirmed', 'authorized', rate, 'CAD',
+        'Av. Ámsterdam 240, Condesa',
+        'Montar una TV de 55 pulgadas y ocultar los cables.',
+        now() - interval '1 day', now() - interval '1 day'
+      )
+      returning id into b_id;
+
+      -- (4) Chat with traffic in BOTH directions on that booking. The seed had
+      -- no chat_messages at all, so only the empty state ever rendered and the
+      -- own-message bubble (magenta fill carrying an ink label, 5.07:1) was
+      -- never seen. Alternating senders is the point: the two bubble styles
+      -- have to be legible next to each other, not just individually.
+      insert into public.chat_threads (booking_id) values (b_id)
+      returning id into thr_id;
+
+      insert into public.chat_messages (thread_id, sender_id, body, created_at)
+      values
+        (thr_id, au_id, 'Hola Carlos, ¿sigue en pie la cita del jueves a la una?',
+         now() - interval '22 hours'),
+        (thr_id, tu_id, '¡Hola Mariana! Sí, ahí estaré. ¿La TV ya está fuera de la caja?',
+         now() - interval '21 hours'),
+        (thr_id, au_id, 'Todavía no, la desempaco hoy en la noche.',
+         now() - interval '20 hours'),
+        (thr_id, tu_id, 'Perfecto. Llevo taquete para muro de tabique; si es tablaroca avísame y cambio el herraje.',
+         now() - interval '19 hours'),
+        (thr_id, au_id, 'Es tabique. Y una pregunta: ¿el precio incluye ocultar los cables?',
+         now() - interval '18 hours'),
+        (thr_id, tu_id, 'Sí, va incluido en el mismo servicio. Nos vemos el jueves.',
+         now() - interval '17 hours');
+    end if;
   end if;
 
   -- -------------------------------------------------------------------------

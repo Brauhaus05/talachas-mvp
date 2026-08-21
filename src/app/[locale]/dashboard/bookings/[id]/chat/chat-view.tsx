@@ -23,7 +23,7 @@ export function ChatView({
   const [input, setInput] = useState("");
   const [error, setError] = useState(false);
   const [pending, setPending] = useState(false);
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
   const sendingRef = useRef(false);
 
   // Mark this thread read (own row, RLS-guarded upsert).
@@ -84,9 +84,16 @@ export function ChatView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [threadId, currentUserId]);
 
-  // Keep the view pinned to the latest message.
+  // Keep the view pinned to the latest message by scrolling the message list
+  // ITSELF, never the page. scrollIntoView() walks every scrollable ancestor,
+  // including the document, so with a non-empty thread it dragged the whole
+  // page down and parked the composer behind the sticky nav — unreachable on
+  // load at narrow widths. Latent since chat shipped: the seed had no messages,
+  // so the effect only ever ran against an empty list with nothing to scroll to.
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    const el = listRef.current;
+    if (!el) return;
+    el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
   }, [messages]);
 
   async function handleSend(e: React.FormEvent) {
@@ -128,7 +135,7 @@ export function ChatView({
 
   return (
     <div className="border-border bg-surface-raised flex h-[70vh] flex-col border">
-      <div className="flex-1 space-y-3 overflow-y-auto p-5">
+      <div ref={listRef} className="flex-1 space-y-3 overflow-y-auto p-5">
         {messages.length === 0 ? (
           <p className="text-text-muted text-sm">{t("empty")}</p>
         ) : (
@@ -153,7 +160,6 @@ export function ChatView({
             );
           })
         )}
-        <div ref={bottomRef} />
       </div>
 
       {sendable ? (
