@@ -61,10 +61,11 @@ on `main` (`958081c`) and live. Two things are now owed and neither is code:
    `Hecho` for exactly this reason — same convention the PR #24 fixes follow. The three tasks
    literally named `PR #26 ·` **were** moved to `Hecho`: they were decisions that blocked the merge,
    and the merge happened.
-2. **The three surfaces the seed cannot reach** — chat own-message bubbles, availability grid cell
-   states, and `/dashboard/bookings/[id]/{dispute,review}`. Tracked as _"Fase 2 · Verificar las 3
-   superficies que el seed no alcanza"_. These shipped **unseen**; contrast is arithmetic there, not
-   observed.
+2. ~~**The three surfaces the seed cannot reach.**~~ **RESOLVED 2026-08-21** on branch
+   `seed-three-unreachable-surfaces` — see the section below. All three are now reachable from seed
+   data by clicking, and all three were rendered and measured. Resolving them **found a real bug**
+   (the chat composer was unreachable on load), which is the argument for never leaving a surface
+   unseen.
 
 **▶ Board drift worth a minute, found while syncing.** Three tasks the PR #25 section below
 describes as closed are still `Por hacer` on the board: _"Reconciliar disputas ↔ reservas"_,
@@ -87,6 +88,65 @@ otherwise owes its own `contact-sheet` + `/design-sync` + `-NOTES.md` ritual.
 
 After that, the remaining board items are the deferred features listed at the bottom (tiered
 refunds, 24h reminder email, neighborhood picker, photo upload).
+
+### The three surfaces the seed couldn't reach — resolved (2026-08-21, branch `seed-three-unreachable-surfaces`)
+
+Phase 1 shipped three surfaces **unseen** — not skipped, but unreachable: no seed row could render
+them, so their contrast was arithmetic and never observed. Fixed at the source, in `supabase/seed.sql`,
+rather than by the delete/screenshot/restore ritual the previous session used. That ritual is now
+retired: it mutated `reviews`, which carries an `AFTER INSERT/DELETE` rating-rollup trigger, and the
+seed change is **purely additive**, so the trigger never fires.
+
+Four bookings on the two documented demo accounts (`mariana.ruiz@` client, `carlos.mendoza@`
+talachero) make each surface reachable **by clicking**, not by writing SQL:
+
+| Surface | What was missing | What the seed now carries |
+|---|---|---|
+| Chat bubbles | zero `chat_messages` — only the empty state ever rendered | a `confirmed` booking with **6 alternating** messages |
+| Availability `booked` | every seeded slot was `open` | that booking holds a real slot, flipping it to `booked` |
+| `/review` | every completed booking is created **with** its review | a `completed`, unreviewed booking |
+| `/dispute` | the one `captured` booking already had a dispute | a `completed` + `captured`, undisputed booking |
+
+**A real bug fell out of it, which is the whole argument for not shipping surfaces unseen.**
+`chat-view.tsx` pinned to the newest message with `bottomRef.scrollIntoView()`. That walks *every*
+scrollable ancestor including the document — so with a real thread it scrolled the **page** on mount
+and parked the composer behind the sticky nav. Measured at 390×844: chat box at `top: -507`, Send
+button at `y: 33`, and `elementFromPoint` over its centre returned a **nav button**, not the Send
+button. Not below the fold — covered and unclickable on load. Now scrolls the list element itself.
+**Not caused by the re-skin:** `git diff -w be88a4b` shows the effect byte-identical before and
+after Phase 1; it has been latent since chat shipped in Phase 5.
+
+**Verified by rendering and measuring, not by exit codes.** 16 combinations — 4 surfaces × `{es,en}`
+× `{1280,390}` — all 200, **zero** horizontal overflow, **zero** non-zero `border-radius`, **zero**
+blurred shadows. Contrast read off the live DOM:
+
+- chat own bubble `#FF427E` on `#241B1D` = **5.07:1**, exactly the predicted figure, now observed;
+  counterparty 13.91:1
+- availability, four states finally side by side: open **5.07**, booked **5.67**, closed **5.19**,
+  past **12.73**
+- review stars measure **5.19:1** in ink-muted — confirming the reconcile's call that `rating-input`
+  stays ink rather than `--jalo-star`, since there the star is the sole carrier
+
+**Two corrections to this file, both found by measuring:**
+
+1. It records Carlos's rating rollup as **4.75 / 4**. That describes a local DB mutated by live
+   testing. From a clean seed he is **4.67 / 3** (reviews 5, 5, 4). Anyone repeating the rollup check
+   should expect 4.67/3.
+2. It says the availability grid showed "every cell closed" because Carlos had no week-1 slots. The
+   seed does open slots from day 0/1; what was actually missing was the **`booked`** state, since the
+   seed set every slot `open`.
+
+**Gotchas worth keeping:**
+
+- **`resize_window` on a real browser tab does not drive the layout viewport.** Same trap as the
+  headless `--window-size` note below, different tool: the call reports success while `innerWidth`
+  stays at the desktop value, so a "mobile" sweep silently renders desktop. Playwright
+  `newContext({viewport})` is what actually works.
+- **Sample a smooth scroll over time, not on one frame.** The first read of the fixed list showed
+  `1340/1350` and looked like an off-by-8 bug; it was mid-animation and settles exactly within
+  ~300ms.
+- **Applying this seed needs `supabase db reset`,** which wipes local Stripe onboarding (see
+  CLAUDE.md). Local only — cloud untouched.
 
 ### Phase 1 reconcile against the real DS (2026-08-20 — PR #26, since **merged** as `958081c`)
 
