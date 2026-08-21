@@ -20,7 +20,7 @@ export async function ServiceTile({
   return (
     <Link
       href="/talacheros"
-      className="group border-border bg-surface-raised hover:border-border-strong relative flex h-full flex-col justify-between overflow-hidden border transition-colors"
+      className="group border-border bg-surface-raised shadow-hard-sm hover:shadow-hard-accent relative flex h-full flex-col justify-between overflow-hidden border transition-[box-shadow] duration-[60ms] ease-linear motion-reduce:transition-none"
     >
       <div className={isLarge ? "p-8" : "p-6"}>
         <div className="flex items-start justify-between">

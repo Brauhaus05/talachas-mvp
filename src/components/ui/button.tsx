@@ -4,15 +4,24 @@ import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 font-medium transition-[background-color,transform] active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none",
+  // The press model is the DS's: elevation collapses and the element translates
+  // into where its shadow was (DS utilities.css, `.jalo-pressable`). It replaces
+  // the old `active:scale-[0.98]`. 60ms linear matches the DS exactly, and the
+  // transition is disabled — not the transform — under reduced motion.
+  "inline-flex items-center justify-center gap-2 font-medium transition-[background-color,box-shadow,transform] duration-[60ms] ease-linear motion-reduce:transition-none disabled:pointer-events-none disabled:opacity-50 focus-visible:outline-none",
   {
     variants: {
       variant: {
         // The hard offset shadow is what delineates a magenta fill from the bone
         // page — magenta on bone is only 2.51:1, below the 3:1 graphical floor,
         // while the ink shadow reads at 12.73:1.
+        // No hover tint: DS `Button.css` gives primary no :hover at all. Pressing
+        // collapses the shadow to `0 0 0` — NOT `shadow-none` — because a
+        // box-shadow only animates between two interpolable values, and `none`
+        // is not one. Translating by the 3px shadow offset moves the button into
+        // the space the shadow occupied.
         primary:
-          "bg-action-primary text-text-on-accent shadow-hard-sm hover:bg-action-primary-hover active:bg-action-primary-hover",
+          "bg-action-primary text-text-on-accent shadow-hard-sm active:shadow-[0_0_0_var(--color-text-primary)] active:translate-x-[3px] active:translate-y-[3px]",
         secondary:
           "bg-action-secondary text-text-primary hover:bg-action-secondary-hover active:bg-action-secondary-hover",
         outline:

@@ -10,7 +10,7 @@ export function StatTile({ value, label, className }: StatTileProps) {
   return (
     <div
       className={cn(
-        "border-border bg-surface-raised flex flex-col gap-1 border p-4",
+        "border-border bg-surface-raised shadow-hard-sm flex flex-col gap-1 border p-4",
         className
       )}
     >

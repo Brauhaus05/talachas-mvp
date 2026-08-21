@@ -42,7 +42,6 @@
   /* Accents */
   --jalo-magenta: #ff427e; /* FILL ONLY. Carries ink labels, never white */
   --jalo-magenta-ink: #b81e5e; /* magenta as TEXT, and every focus ring */
-  --jalo-magenta-lift: #ff5c90; /* hover on a magenta fill (lifts, per current behaviour) */
   --jalo-highlight: #ffc211; /* Amarillo Relámpago — "today" / highlight badges */
   --jalo-tag-blue: #4d89d1; /* Azul Havelock — tag chips (ink label) */
   --jalo-brand-blue: #008ad5; /* WORDMARK ONLY. Never a UI role, never text (§1.5) */
@@ -83,16 +82,22 @@
    */
 
   /*
-   * Warm neutral ramp, mixed from bone toward ink/paper. Every step is at or
-   * above bone in lightness: in this system separation comes from 1px borders
-   * and hard shadows, not from fill-lightness steps — and anything darker than
-   * bone drops `--color-text-muted` below AA.
+   * Warm neutral FILL ramp, mixed from bone toward paper. These are fills only.
+   * Separation in this system comes from 1px ink borders and hard offset
+   * shadows, NOT from fill-lightness steps — so the ramp deliberately stops at
+   * fills and defines no border colours.
+   *
+   * It previously did define two (`--jalo-line` #83786F / `--jalo-line-strong`
+   * #4A403F), which is how the file came to argue against itself: this comment
+   * said separation comes from borders and shadows while the code below softened
+   * the borders. Both are gone — borders are ink, per the DS. See --color-border.
+   *
+   * Every step stays at or above bone in lightness; anything darker drops
+   * `--color-text-muted` below AA.
    */
   --jalo-well: #f4efe8; /* recessed wells: inputs, search field */
   --jalo-chip: #efe9de; /* soft filled chips: avatar, badge, callouts, hover */
   --jalo-chip-strong: #e3dacb; /* chip hover */
-  --jalo-line: #83786f; /* 1px borders — 3.26:1 on bone, 4.30:1 on paper */
-  --jalo-line-strong: #4a403f; /* emphasised borders */
 
   /* ─── Semantic tokens (the only names allowed in markup) ───────────────── */
 
@@ -117,9 +122,24 @@
   --color-text-on-accent: var(--jalo-ink);
   --color-text-inverse: var(--color-text-on-accent);
 
-  /* Lines */
-  --color-border: var(--jalo-line);
-  --color-border-strong: var(--jalo-line-strong);
+  /*
+   * Lines. The DS has exactly ONE border colour: conventions.md, "--jalo-ink
+   * #241B1D | all text and all borders", and "Every raised surface is 1px solid
+   * var(--jalo-ink) with a hard offset shadow and no blur."
+   *
+   * Phase 1 shipped an invented #83786F here (3.26:1) — it passed the 3:1
+   * graphical floor, which is exactly why nothing caught it. Passing contrast is
+   * not the same as being this design system; a soft border is not neo-brutalist,
+   * and the result was a light border carrying a solid ink shadow on the same
+   * element (the landing stat tiles). Decided by Braulio 2026-08-20 against a
+   * rendered A/B of a real TalacheroCard.
+   *
+   * `--color-border-strong` collapses onto the same value on purpose: there is
+   * no second border colour to escalate to. Emphasis is carried by elevation
+   * (--shadow-hard-accent) and by fill, not by a darker line.
+   */
+  --color-border: var(--jalo-ink);
+  --color-border-strong: var(--jalo-ink);
 
   /* Focus — magenta-ink, never brand magenta (§1.4) */
   --color-focus: var(--jalo-magenta-ink);
@@ -141,9 +161,19 @@
   --color-state-warning: var(--jalo-ink-muted);
   --color-state-info: var(--jalo-ink-muted);
 
-  /* Interactive — magenta FILL, ink label */
+  /*
+   * Interactive — magenta FILL, ink label.
+   *
+   * There is deliberately NO `--color-action-primary-hover`. Phase 1 invented
+   * `--jalo-magenta-lift` #FF5C90 to lighten the fill on hover; the DS has no
+   * such token and no colour-lighten anywhere, and DS `Button.css` gives the
+   * primary variant no hover state at all — the only :hover on a button is
+   * ghost moving to magenta-ink. Feedback in this system is geometric: the
+   * shadow collapses to 0 0 0 and the element translates into it. Keeping a
+   * parallel colour idiom would make lighten-on-hover a second answer to a
+   * question the press model already answers. Dropped 2026-08-20.
+   */
   --color-action-primary: var(--jalo-magenta);
-  --color-action-primary-hover: var(--jalo-magenta-lift);
   --color-action-secondary: var(--jalo-chip);
   --color-action-secondary-hover: var(--jalo-chip-strong);
 
@@ -199,6 +229,13 @@
   --shadow-hard-sm: 3px 3px 0 var(--jalo-ink);
   --shadow-hard-md: 4px 4px 0 var(--jalo-ink);
   --shadow-hard-lg: 6px 6px 0 var(--jalo-ink);
+  /*
+   * Interactive cards switch their shadow to magenta on hover — DS Card.css,
+   * `.jalo-card--interactive:hover { box-shadow: var(--jalo-shadow-accent) }`.
+   * Magenta is only 2.51:1 on bone, but this is decoration, not delineation:
+   * the card's own 1px ink border carries the boundary at 12.73:1.
+   */
+  --shadow-hard-accent: 6px 6px 0 var(--jalo-magenta);
 }
 
 @layer base {

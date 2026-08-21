@@ -17,7 +17,10 @@ export function TalacheroCard({ talachero }: { talachero: Talachero }) {
   );
 
   return (
-    <article className="border-border bg-surface-raised hover:border-border-strong flex flex-col gap-4 border p-6 transition-colors">
+    // hover:border-border-strong is gone: with both border tokens on ink there
+    // is no darker line to escalate to. The DS escalates elevation instead —
+    // Card.css switches an interactive card's shadow to magenta on hover.
+    <article className="border-border bg-surface-raised shadow-hard-sm hover:shadow-hard-accent flex flex-col gap-4 border p-6 transition-[box-shadow] duration-[60ms] ease-linear motion-reduce:transition-none">
       <header className="flex items-start gap-4">
         <Avatar initials={talachero.initials} size="lg" />
         <div className="flex flex-1 flex-col gap-1">
