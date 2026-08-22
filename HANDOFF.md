@@ -33,6 +33,15 @@
   non-zero `border-radius` being Avatar's legitimate circle, and `--jalo-magenta-lift` /
   `--color-action-primary-hover` / `--jalo-identity-*` absent as intended. The `<html>` tag carries
   both the Jost and Barlow font variables.
+- **The three surfaces the seed couldn't reach are RESOLVED (2026-08-21, PR #27 → `458af27`, live).**
+  Phase 1's only real debt. Chat bubbles, the availability `booked` cell, and
+  `/dashboard/bookings/[id]/{review,dispute}` had shipped **unseen** — unreachable from seed data, so
+  their contrast was arithmetic and never observed. Fixed in `supabase/seed.sql` (additive, so the
+  `reviews` rollup trigger never fires), then all three were rendered and **measured**: 16
+  combinations at `{es,en}` × `{1280,390}`, all 200, zero overflow, zero radii, zero blurred shadows.
+  Rendering them **found a real, pre-existing bug** — `scrollIntoView()` was dragging the whole page
+  and hiding the chat composer behind the sticky nav. Only that fix reaches production; the seed runs
+  on local `db reset` only.
 
 The core loop is real end-to-end: discover → book (concurrency-safe slot) → pay (Stripe escrow) → chat → accept → complete → capture + 15% split → tip → refund → review → dispute (admin-mediated), with an immutable `transactions` ledger.
 
@@ -48,35 +57,25 @@ The core loop is real end-to-end: discover → book (concurrency-safe slot) → 
 
 ## What's next
 
-**▶ Next session: owner-run browser QA of the disputes reconciliation.** The work is **merged
-(PR #25, `6fcfa6e`), deployed, and the migration is live on cloud** — see below. What remains is
-the three browser flows, which need a signed-in session plus a running `stripe listen`. They are
-the only unverified part of this change.
+**▶ THE one thing worth doing next: a production visual audit.** It is now the single highest-leverage
+item on the board — it gates **14 of the 17** tasks sitting in `En revisión`, because the board's bar
+for `Hecho` is a look at production and nothing else is blocking them. One session moves nearly all
+of them. The Notion task is _"Auditoría visual completa del MVP en producción"_, and its note now
+lists exactly what it unblocks, grouped by PR.
 
-**▶ PR #26 is merged — what it leaves behind is a production visual audit, not a merge.** Phase 1 is
-on `main` (`958081c`) and live. Two things are now owed and neither is code:
+What to look at first, since these are the states the re-skin changed and a fast sweep can miss:
+magenta fill **always** carrying an ink label (never white), focus rings in magenta-ink rather than
+brand magenta, hard shadows with no blur, and zero radii except the circular avatar. Also re-check
+`DESIGN-SYSTEM.md` §6 — the six non-regressions PR #24 closed.
 
-1. **Look at production.** The Notion task _"Auditoría visual completa del MVP en producción"_ is the
-   one that closes this. The seven Phase-1 board tasks were left in `En revisión` rather than
-   `Hecho` for exactly this reason — same convention the PR #24 fixes follow. The three tasks
-   literally named `PR #26 ·` **were** moved to `Hecho`: they were decisions that blocked the merge,
-   and the merge happened.
-2. ~~**The three surfaces the seed cannot reach.**~~ **RESOLVED and MERGED 2026-08-21**
-   (PR #27, `458af27`, deployed) — see the section below. All three are now reachable from seed
-   data by clicking, and all three were rendered and measured. Resolving them **found a real bug**
-   (the chat composer was unreachable on load), which is the argument for never leaving a surface
-   unseen.
+**▶ Owner-run browser QA of the disputes flow** (PR #25, `6fcfa6e` — merged, deployed, cloud
+migrated). Three flows, needing a signed-in session plus a running `stripe listen`. This is the only
+unverified part of that change, and it is what holds its two board tasks in `En revisión`.
 
-**▶ Board drift worth a minute, found while syncing.** Three tasks the PR #25 section below
-describes as closed are still `Por hacer` on the board: _"Reconciliar disputas ↔ reservas"_,
-_"Estado de pago 'captured' sin traducir en admin"_ and _"Disputa descartada muestra 'Reporte en
-revisión' para siempre"_. Left untouched rather than moved unilaterally — confirm they are in fact
-closed, then move them.
-
-**▶ Owed to the DS repo, and deliberately NOT done from here.** Three follow-ups came out of the
-reconcile and are tracked on the Notion board as their own `DS ·` tasks. Do them in **one** DS
-session, not three: all three end up touching `conventions.md` or its consumer docs, and each
-otherwise owes its own `contact-sheet` + `/design-sync` + `-NOTES.md` ritual.
+**▶ Owed to the DS repo, and deliberately NOT done from here.** Three follow-ups from the reconcile,
+tracked on the board as their own `DS ·` tasks. Do them in **one** DS session, not three: all three
+touch `conventions.md` or its consumer docs, and each otherwise owes its own `contact-sheet` +
+`/design-sync` + `-NOTES.md` ritual.
 
 1. **`conventions.md` doesn't state the star exemption's precondition** (P1, XS). The colour table
    lists `--jalo-star` with no caveat, while `contrast.test.ts` is explicit that 3:1 only holds
@@ -84,10 +83,23 @@ otherwise owes its own `contact-sheet` + `/design-sync` + `-NOTES.md` ritual.
    design agent's prompt and the agent never sees the test, so it can emit a bare star at 3.07:1
    carrying the rating alone.
 2. **No interactive star input exists in the DS** (P2, M) — `rating-input.tsx` stays local and ink.
+   PR #27 measured it at **5.19:1**, which clears even the 4.5:1 text floor, so the local component
+   is defensible as-is and this is a DS-completeness item rather than a defect.
 3. **Consumer note: Tailwind v4 tree-shakes `@theme` vars with no consumer** (P2, XS).
+
+**▶ Phase 2 of the DS migration is still blocked externally** — needs `pnpm add @jalo/design-system`
+against the private registry, plus DS Phase 0.2 (`linkComponent`) and the missing `"use client"`
+directives. Check `node_modules/@jalo` exists before promising Phase 2 work.
 
 After that, the remaining board items are the deferred features listed at the bottom (tiered
 refunds, 24h reminder email, neighborhood picker, photo upload).
+
+**✅ Board drift from the previous session is resolved.** Three tasks the PR #25 section described as
+closed were still `Por hacer`. Each was verified **against the code, not against this file**, and
+moved to `En revisión`: the shared translated `PaymentBadge` (`admin/payment-badge.tsx`, consumed by
+both admin tables), the `RefundOutcome` discriminated union splitting `already_refunded` out of the
+old `false`, and `dashboard/page.tsx:152-162` branching on all three terminal dispute states. They
+are `En revisión` rather than `Hecho` because the browser flows above are still unrun.
 
 ### The three surfaces the seed couldn't reach — resolved (PR #27, **merged** 2026-08-21 as `458af27`)
 
@@ -285,17 +297,26 @@ routes rendered** at 1440px and 390px in both locales across client/talachero/ad
 `DESIGN-SYSTEM.md` §6 non-regressions · typecheck + lint (2 pre-existing warnings) + build clean ·
 the class sweep is pixel-identical on all 10 sampled routes and verified token-by-token.
 
-**⚠ Not verified — needs a reviewer's eyes or better seed data:**
+**⚠ ~~Not verified — needs a reviewer's eyes or better seed data~~ → ALL THREE RESOLVED in PR #27
+(`458af27`).** Kept for the reasoning, not the status. See the "three surfaces" section above for
+what shipped and what it measured; two claims below turned out to be wrong and are struck here so
+this block cannot mislead a future session.
 
-1. **Chat own-message bubbles** (`bg-action-primary` + ink) — the seed has **no chat messages**, so
-   only the empty state renders. Contrast is 5.07:1 by arithmetic, never by eye.
-2. **Availability grid cell states** — Carlos has no open slots in week 1, so every cell renders
-   "closed"; open/booked/closed were never seen side by side.
-3. **`/dashboard/bookings/[id]/{dispute,review}`** are unreachable with current seed data — every
-   completed booking already has a review, and the only `captured` booking already has a dispute.
-   They were captured by temporarily deleting those two rows and restoring them (rows verified
-   byte-identical afterwards, and Carlos's `rating_avg/rating_count` rollup back at `4.75 / 4` —
-   `reviews` has an `AFTER INSERT/DELETE` trigger, so any repeat of this must re-check that).
+1. **Chat own-message bubbles** (`bg-action-primary` + ink) — the seed had **no chat messages**, so
+   only the empty state rendered. Contrast was 5.07:1 by arithmetic, never by eye. **Now seeded and
+   measured off the live DOM at exactly 5.07:1.** Rendering it also exposed a real bug: the composer
+   was covered by the sticky nav on load.
+2. **Availability grid cell states** — ~~Carlos has no open slots in week 1, so every cell renders
+   "closed"~~. **Wrong diagnosis.** The seed does open slots from day 0/1; what was missing was the
+   **`booked`** state, since the seed set every slot `open`. All four states now render side by side
+   (open 5.07, booked 5.67, closed 5.19, past 12.73).
+3. **`/dashboard/bookings/[id]/{dispute,review}`** were unreachable — every completed booking is
+   created with its review, and the only `captured` booking already had a dispute. They were
+   originally captured by temporarily **deleting** those two rows and restoring them. **That ritual
+   is retired**: PR #27 adds an unreviewed and an undisputed booking to the seed, so nothing has to
+   be mutated. ~~rollup back at `4.75 / 4`~~ — **from a clean seed Carlos is `4.67 / 3`** (reviews 5,
+   5, 4); the 4.75/4 figure described a DB already mutated by live testing. `reviews` still has an
+   `AFTER INSERT/DELETE` trigger, which is precisely why the seed fix is purely additive.
 
 **Gotchas worth keeping (both cost real time):**
 
@@ -460,6 +481,11 @@ pnpm dev                           # :3000
 - **Lazy env config** — `src/lib/{supabase,stripe}/config.ts` expose getter functions, not module constants, so importing has no side effects and `next build` works with no env (CI). Verify builds with `.env.local` moved aside.
 - **Only `charges_enabled` talacheros are bookable-with-payment** — seed talacheros must onboard first; `confirmBooking` returns `talachero_not_payable` otherwise. Directory gates on `verification_status='verified'` (now admin-set), independent of payability.
 - **Seed runner batching** — `supabase db reset` doesn't preserve session temp tables across statement batches; write seeds as one `DO` block. Seed auth users via `auth.users` insert (fires the signup trigger) + matching `auth.identities` row.
+- **A surface the seed can't reach is a surface that ships unverified — fix the SEED, not the moment.** Three surfaces went out in Phase 1 with arithmetic-only contrast because no seed row could render them. Seeding them (PR #27) immediately exposed a real bug the arithmetic could never have caught. If a state has no seed row, that is a seed defect, not an acceptable gap. Prefer **additive** seed rows over mutating existing ones: `reviews` carries an `AFTER INSERT/DELETE` rating-rollup trigger, so the old delete-screenshot-restore ritual moved a talachero's rating as a side effect.
+- **From a clean seed Carlos is `4.67 / 3`** (reviews 5, 5, 4), not the `4.75 / 4` this file recorded for a while — that figure described a local DB already mutated by live testing. Check against a fresh `db reset` before treating a rollup mismatch as a bug.
+- **`resize_window` on a real browser tab does not drive the layout viewport** — same trap as headless `--window-size`, different tool. The call reports success while `innerWidth` stays at the desktop value, so a "mobile" sweep silently renders desktop and `md:` breakpoints still apply. Playwright `newContext({ viewport })` is what actually works; there is no local playwright, so install it in a scratch dir rather than adding a dependency.
+- **Sample a smooth scroll over time, not on one frame.** A `behavior: "smooth"` scroll read immediately after load showed `1340/1350` and looked like an off-by-8 bug; it settles exactly within ~300ms. Poll before concluding.
+- **`scrollIntoView()` scrolls every scrollable ancestor, the document included.** That is how the chat composer ended up behind the sticky nav. To pin a list to its newest item, scroll the list element itself (`el.scrollTo({ top: el.scrollHeight })`). Verify "is it covered?" with `elementFromPoint` over the control's centre — "in the DOM" and "below the fold" and "covered" are three different things.
 - **Supabase Realtime (chat)** — a table must be in the `supabase_realtime` publication AND the subscriber must pass its RLS `SELECT`. The channel takes ~1s to reach `SUBSCRIBED`; `ChatView` optimistically appends the sent row (deduped by id) so a message sent in that window isn't lost.
 - **Email is best-effort and off-by-default (5B)** — `notify*` swallow all errors (never throw into a form action or the webhook); `sendEmail` no-ops when `RESEND_API_KEY` is unset. Payment "processed" = **capture** (completion), not authorize. `EMAIL_DEV_REDIRECT` is hard-ignored in production. Refund email currently shows the full booking price (correct while all refunds are full — thread `charge.amount_refunded` when partial refunds land).
 - **`supabase gen types` lies about nullability for function OUT columns** — a `RETURNS TABLE`
